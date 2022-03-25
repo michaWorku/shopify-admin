@@ -12,14 +12,15 @@ import {
 import storage from 'redux-persist/lib/storage'
 
 import authReducer from '../features/auth/authSlice'
+import productReducer from '../features/product/productSlice'
 
 const persistConfig = {
     key: 'root',
     version: 1,
     storage,
   }
-// const rootReducer = combineReducers({auth: authReducer})
-const persistedReducer = persistReducer(persistConfig, authReducer)
+const rootReducer = combineReducers({auth: authReducer, product: productReducer})
+const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 export const store = configureStore({
     reducer:{

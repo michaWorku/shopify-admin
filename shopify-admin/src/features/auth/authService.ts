@@ -1,5 +1,4 @@
 import {publicRequest} from '../../requestMethod'
-import axios from 'axios'
 const API_URL = '/auth'
 
 export interface userData  {
