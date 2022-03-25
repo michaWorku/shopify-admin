@@ -1,12 +1,27 @@
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import './featured.scss'
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutlined";
+import { privateRequest } from '../../requestMethod';
 
 const Featured : FC = () => {
+  const [income, setIncome] = useState([] as any);
+  const [perc, setPerc] = useState(0);
+
+  useEffect(() => {
+    const getIncome = async () => {
+      try {
+        const res = await privateRequest.get("orders/income");
+        setIncome(res.data);
+        setPerc((res.data[1].total * 100) / res.data[0].total - 100);
+      } catch {}
+    };
+    getIncome();
+  }, []);
+
   return (
     <div className='featured'>
       <div className="top">
@@ -18,7 +33,7 @@ const Featured : FC = () => {
           <CircularProgressbar value={70} text={'70%'} strokeWidth={5}/>
         </div>
         <p className="title">Total made today</p>
-        <p className="amount">$420</p>
+        <p className="amount">${income[1]?.total}</p>
         <p className="desc">
           Previous transactions processing. Last payments may not be included.
         </p>

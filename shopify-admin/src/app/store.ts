@@ -19,7 +19,12 @@ const persistConfig = {
     version: 1,
     storage,
   }
-const rootReducer = combineReducers({auth: authReducer, product: productReducer})
+
+const rootReducer = combineReducers({
+  auth: authReducer, 
+  product: productReducer
+})
+
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 export const store = configureStore({
