@@ -7,6 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import TimeAgo from 'javascript-time-ago'
 import { privateRequest } from '../../requestMethod';
 
 const rows = [
@@ -63,6 +64,8 @@ const rows = [
 ];
 
 const ListTable : FC = () => {
+  // Create formatter (English).
+  const timeAgo = new TimeAgo('en-US')
   const [orders, setOrders] = useState([] as any);
 
   useEffect(() => {
@@ -96,11 +99,11 @@ const ListTable : FC = () => {
             <TableCell className="tableCell">
               <div className="cellWrapper">
                 <img src={order.photo} alt="" className="image" />
-                {order.product}
+                {order.products[0]}
               </div>
             </TableCell>
             <TableCell className="tableCell">{order.customer}</TableCell>
-            <TableCell className="tableCell">{order.date}</TableCell>
+            <TableCell className="tableCell">{timeAgo.format(order.createdAt)}</TableCell>
             <TableCell className="tableCell">{order.amount}</TableCell>
             <TableCell className="tableCell">{order.method}</TableCell>
             <TableCell className="tableCell">

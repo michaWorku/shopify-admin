@@ -1,23 +1,39 @@
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import './widget.scss'
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
+import { privateRequest } from '../../requestMethod';
 
 interface widgetProps {
   widgetType: string
 }
 
 const Widget : FC<widgetProps> = ({widgetType}) => {
+  const [income, setIncome] = useState([] as any);
+  const [perc, setPerc] = useState(0);
 
-  let data;
+  useEffect(() => {
+    const getIncome = async () => {
+      try {
+        const res = await privateRequest.get("orders/income");
+        setIncome(res.data);
+        setPerc((res.data[1].total * 100) / res.data[0].total - 100);
+      } catch {}
+    };
+    getIncome();
+  }, []);
 
-  //temporary
+
+
+
+  //temporary 
   const amount = 100;
   const diff = 20;
-
+  let data;
   switch (widgetType) {
     case "user":
       data = {
@@ -89,14 +105,20 @@ const Widget : FC<widgetProps> = ({widgetType}) => {
       <div className="left">
         <span className="title">{data?.title}</span>
         <div className="counter">
-          {data?.isMoney && "$" } {amount}
+          {data?.isMoney && "$" } {income[1]?.total}
         </div>
         <div className="link">{data?.link}</div>
       </div>
       <div className="right">
-        <div className="percentage positive">
-        <KeyboardArrowUpIcon /> {diff} %
-        </div>
+        {
+          perc < 0 ? 
+            <div className="percentage negative">
+              <KeyboardArrowDownIcon /> {Math.floor(perc)} %
+            </div> : 
+            <div className="percentage positive">
+              <KeyboardArrowUpIcon /> {Math.floor(perc)} %
+            </div>
+        }
         {data?.icon}
       </div>
     </div>

@@ -56,7 +56,7 @@ const Featured : FC = () => {
             <div className="itemTitle">Last Month</div>
             <div className="itemResult negative">
               <KeyboardArrowUpOutlinedIcon fontSize='small'/>
-              <div className="resultAmount">$12.4k</div>
+              <div className="resultAmount">${income[1]?.total}</div>
             </div>
           </div>
         </div>
