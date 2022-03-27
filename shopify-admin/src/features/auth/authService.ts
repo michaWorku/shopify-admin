@@ -8,11 +8,11 @@ export interface userData  {
 
 // Register user
 const register = async (userData:userData) =>{
-    const response = await publicRequest.post(API_URL + '/register', userData)
+    const response = await publicRequest.post(API_URL + '/signup', userData)
 
-    if(response.data){
-        localStorage.setItem('user', JSON.stringify(response.data))
-    }
+    // if(response.data){
+    //     localStorage.setItem('user', JSON.stringify(response.data))
+    // }
 
     return response.data
 }
@@ -22,9 +22,9 @@ const register = async (userData:userData) =>{
 const login = async (userData:userData) =>{
     const response = await publicRequest.post(API_URL + '/login', userData)
 
-    if(response.data){
-        localStorage.setItem('user', JSON.stringify(response.data))
-    }
+    // if(response.data){
+    //     localStorage.setItem('user', JSON.stringify(response.data))
+    // }
     console.log({data: response.data})
     return response.data
 }
