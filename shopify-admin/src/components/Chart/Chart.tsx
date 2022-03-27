@@ -13,10 +13,12 @@ const data = [
 
 interface chartProps{
   title: string
-  aspect: number
+  aspect: number,
+  data : any[],
+  dataKey: string
 }
 
-const Chart : FC<chartProps> = ({title, aspect}) => {
+const Chart : FC<chartProps> = ({title, aspect, data, dataKey}) => {
 
   return (
     <div className="chart">
@@ -39,7 +41,7 @@ const Chart : FC<chartProps> = ({title, aspect}) => {
           <Tooltip />
           <Area
             type="monotone"
-            dataKey="Total"
+            dataKey={dataKey}
             stroke="#8884d8"
             fillOpacity={1}
             fill="url(#total)"

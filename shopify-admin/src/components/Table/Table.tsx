@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import './table.scss'
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -7,6 +7,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { privateRequest } from '../../requestMethod';
 
 const rows = [
   {
@@ -62,6 +63,18 @@ const rows = [
 ];
 
 const ListTable : FC = () => {
+  const [orders, setOrders] = useState([] as any);
+
+  useEffect(() => {
+    const getOrders = async () => {
+      try {
+        const res = await privateRequest.get("orders");
+        setOrders(res.data);
+      } catch {}
+    };
+    getOrders();
+  }, []);
+
   return (
     <TableContainer component={Paper} className="table">
     <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -77,21 +90,21 @@ const ListTable : FC = () => {
         </TableRow>
       </TableHead>
       <TableBody>
-        {rows.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell className="tableCell">{row.id}</TableCell>
+        {orders.map((order : any) => (
+          <TableRow key={order._id}>
+            <TableCell className="tableCell">{order._id}</TableCell>
             <TableCell className="tableCell">
               <div className="cellWrapper">
-                <img src={row.img} alt="" className="image" />
-                {row.product}
+                <img src={order.photo} alt="" className="image" />
+                {order.product}
               </div>
             </TableCell>
-            <TableCell className="tableCell">{row.customer}</TableCell>
-            <TableCell className="tableCell">{row.date}</TableCell>
-            <TableCell className="tableCell">{row.amount}</TableCell>
-            <TableCell className="tableCell">{row.method}</TableCell>
+            <TableCell className="tableCell">{order.customer}</TableCell>
+            <TableCell className="tableCell">{order.date}</TableCell>
+            <TableCell className="tableCell">{order.amount}</TableCell>
+            <TableCell className="tableCell">{order.method}</TableCell>
             <TableCell className="tableCell">
-              <span className={`status ${row.status}`}>{row.status}</span>
+              <span className={`status ${order.status}`}>{order.status}</span>
             </TableCell>
           </TableRow>
         ))}
