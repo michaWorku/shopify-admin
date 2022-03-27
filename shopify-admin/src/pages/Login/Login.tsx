@@ -1,104 +1,102 @@
-import { FC } from 'react'
-import './login.scss'
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import { login, reset } from '../../features/auth/authSlice'
-import {Spinner} from '../../components'
-import { useAppDispatch, useAppSelector } from '../../app/hooks'
+import { FC } from "react";
+import "./login.scss";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { login, reset } from "../../features/auth/authSlice";
+import { Spinner } from "../../components";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 
-const Login : FC = () => {
+const Login: FC = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  })
+    email: "",
+    password: "",
+  });
 
-  const { email, password } = formData
+  const { email, password } = formData;
 
-  const navigate = useNavigate()
-  const dispatch = useAppDispatch()
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const { user, isLoading, isError, isSuccess, message } = useAppSelector(
-    (state) => state.auth
-  )
+    (state) => state.auth.auth
+  );
 
   useEffect(() => {
     if (isError) {
-      toast.error(message)
+      toast.error(message);
     }
 
     if (isSuccess || user) {
-      navigate('/')
+      navigate("/");
     }
 
     dispatch(reset())
-  }, [user, isError, isSuccess, message, navigate, dispatch])
+  }, [user, isError, isSuccess, message, navigate, dispatch]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,
-    }))
-  }
+    }));
+  };
 
-  const onSubmit = (e:React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
     const userData = {
       email,
       password,
-    }
+    };
     //@ts-ignore
-    dispatch(login(userData))
-  }
+    dispatch(login(userData));
+  };
 
   if (isLoading) {
-    return <Spinner />
+    return <Spinner />;
   }
 
   return (
-    <section className='login'>
-      <section className='heading'>
-        <h1>
-          Login
-        </h1>
+    <section className="login">
+      <section className="heading">
+        <h1>Login</h1>
         <p>Login and control shopify admin pannel</p>
       </section>
 
-      <section className='form'>
+      <section className="form">
         <form onSubmit={onSubmit}>
-          <div className='form-group'>
+          <div className="form-group">
             <input
-              type='email'
-              className='form-control'
-              id='email'
-              name='email'
+              type="email"
+              className="form-control"
+              id="email"
+              name="email"
               value={email}
-              placeholder='Enter your email'
+              placeholder="Enter your email"
               onChange={onChange}
             />
           </div>
-          <div className='form-group'>
+          <div className="form-group">
             <input
-              type='password'
-              className='form-control'
-              id='password'
-              name='password'
+              type="password"
+              className="form-control"
+              id="password"
+              name="password"
               value={password}
-              placeholder='Enter password'
+              placeholder="Enter password"
               onChange={onChange}
             />
           </div>
 
-          <div className='form-group'>
-            <button type='submit' className='btn btn-block'>
+          <div className="form-group">
+            <button type="submit" className="btn btn-block">
               Submit
             </button>
           </div>
         </form>
       </section>
     </section>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
