@@ -1,5 +1,5 @@
-import { FC, useEffect, useState } from 'react'
-import './table.scss'
+import { FC, useEffect, useState } from "react";
+import "./table.scss";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,8 +7,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+<<<<<<< HEAD
 import TimeAgo from 'javascript-time-ago'
 import { privateRequest } from '../../requestMethod';
+=======
+import TimeAgo from "javascript-time-ago";
+import { privateRequest } from "../../requestMethod";
+>>>>>>> 3b8437c79b0a5c5045eb1781f8bae24f2765532d
 
 const rows = [
   {
@@ -62,6 +67,8 @@ const rows = [
     status: "Pending",
   },
 ];
+// English.
+import en from 'javascript-time-ago/locale/en.json'
 
 const ListTable : FC = () => {
   // Create formatter (English).
@@ -110,11 +117,32 @@ const ListTable : FC = () => {
               <span className={`status ${order.status}`}>{order.status}</span>
             </TableCell>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  </TableContainer>
-  )
-}
+        </TableHead>
+        <TableBody>
+          {orders.map((order: any) => (
+            <TableRow key={order._id}>
+              <TableCell className="tableCell">{order._id}</TableCell>
+              <TableCell className="tableCell">
+                <div className="cellWrapper">
+                  <img src={order.photo} alt="" className="image" />
+                  {order.products[0]}
+                </div>
+              </TableCell>
+              <TableCell className="tableCell">{order.customer}</TableCell>
+              <TableCell className="tableCell">
+                {timeAgo.format(order.createdAt)}
+              </TableCell>
+              <TableCell className="tableCell">{order.amount}</TableCell>
+              <TableCell className="tableCell">{order.method}</TableCell>
+              <TableCell className="tableCell">
+                <span className={`status ${order.status}`}>{order.status}</span>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
 
-export default ListTable
+export default ListTable;

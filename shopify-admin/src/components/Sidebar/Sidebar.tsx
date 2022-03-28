@@ -1,5 +1,5 @@
-import { FC } from 'react'
-import './sidebar.scss'
+import { FC } from "react";
+import "./sidebar.scss";
 
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
@@ -13,19 +13,17 @@ import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import SettingsSystemDaydreamOutlinedIcon from "@mui/icons-material/SettingsSystemDaydreamOutlined";
 import PsychologyOutlinedIcon from "@mui/icons-material/PsychologyOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import { Link } from 'react-router-dom';
-import { useGlobalContext } from '../../context/darkModeContext';
+import { Link } from "react-router-dom";
+import { useGlobalContext } from "../../context/darkModeContext";
 
-
-const Sidebar : FC = () => {
-
-  const {dispatch} = useGlobalContext()
+const Sidebar: FC = () => {
+  const { dispatch } = useGlobalContext();
 
   return (
     <div className="sidebar">
       <div className="top">
         <Link to="/" style={{ textDecoration: "none" }}>
-          <span className="logo">React-Admin</span>
+          <span className="logo">Shopify-Admin</span>
         </Link>
       </div>
       <hr />
@@ -104,6 +102,6 @@ const Sidebar : FC = () => {
       </div>
     </div>
   );
-}
+};
 
-export default Sidebar
+export default Sidebar;

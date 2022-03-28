@@ -1,27 +1,55 @@
-import { FC, useState } from 'react'
-import { Link } from 'react-router-dom'
-import './dataTable.scss'
+import { FC, useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import "./dataTable.scss";
 import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
 import { userColumns, userRows } from "../../data/dataTableSource";
+import { privateRequest } from "../../requestMethod";
 
 interface dataRow {
-  id: number,
-  username: string,
-  img: string,
-  status: string,
-  email: string,
-  age: number,
+  id: number;
+  username: string;
+  img: string;
+  status: string;
+  email: string;
+  age: number;
 }
 
-interface dataState{
-  data : dataRow[]
+interface dataState {
+  data: dataRow[];
 }
 
-const DataTable : FC = () => {
+
+
+const DataTable: FC = () => {
   const [data, setData] = useState(userRows);
+  const [listType, setlistType] = useState("");
 
-  const handleDelete = (id:number) => {
-    setData(data?.filter((item:dataRow) => item?.id !== id));
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    setlistType(pathname);
+  }, [pathname]);
+
+  //const dispatch = useAppDispatch()
+
+  useEffect(() => {
+      const getData = async () =>{
+        try {
+          const res= await privateRequest.get(listType)
+
+          console.log({res : res.data})
+
+          setData(res.data)
+        } catch (err) {
+          console.log(err)
+        }
+      }
+    
+      getData()
+  }, [listType])
+  
+  const handleDelete = (id: number) => {
+    setData(data?.filter((item: dataRow) => item?.id !== id));
   };
 
   const actionColumn = [
@@ -29,7 +57,7 @@ const DataTable : FC = () => {
       field: "action",
       headerName: "Action",
       width: 200,
-      renderCell: (params : GridRenderCellParams) => {
+      renderCell: (params: GridRenderCellParams) => {
         return (
           <div className="cellAction">
             <Link to="/users/test" style={{ textDecoration: "none" }}>
@@ -48,10 +76,10 @@ const DataTable : FC = () => {
   ];
 
   return (
-    <div className='dataTable'>
+    <div className="dataTable">
       <div className="dataTableTitle">
-        Add New User
-        <Link to='/users/new' className='link'>
+        Add New { listType === '/users'? 'User' : 'Product'}
+        <Link to={listType +"/new"} className="link">
           Add New
         </Link>
       </div>
@@ -65,7 +93,7 @@ const DataTable : FC = () => {
         checkboxSelection
       />
     </div>
-  )
-}
+  );
+};
 
-export default DataTable
+export default DataTable;

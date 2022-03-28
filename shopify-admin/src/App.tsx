@@ -1,23 +1,18 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useAppSelector } from "./app/hooks";
 import { useGlobalContext } from "./context/darkModeContext";
 import { productInputs, userInputs } from "./data/formSource";
 import { Home, List, Login, New, Single } from "./pages";
-import './style/dark.scss'
+import "./style/dark.scss";
 
 const App = () => {
-  const admin = useAppSelector((state) => state.auth.auth.user.role);
-  const {state} = useGlobalContext()
+  const admin = useAppSelector((state) => state.auth.auth);
+  const { state } = useGlobalContext();
 
   return (
-    <div className={state.darkMode? 'app dark' : 'app`'}>
+    <div className={state.darkMode ? "app dark" : "app`"}>
       <Router>
         <Routes>
-          
           <Route path="/">
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
@@ -42,6 +37,6 @@ const App = () => {
       </Router>
     </div>
   );
-}
+};
 
-export default App
+export default App;
