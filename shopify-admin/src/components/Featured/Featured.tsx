@@ -55,12 +55,6 @@ const Featured: FC = () => {
           </div>
           <div className="item">
             <div className="itemTitle">Last Month</div>
-<<<<<<< HEAD
-            <div className="itemResult negative">
-              <KeyboardArrowUpOutlinedIcon fontSize='small'/>
-              <div className="resultAmount">${income[1]?.total}</div>
-            </div>
-=======
             {perc < 0 ? (
               <div className="itemResult negative">
                 <KeyboardArrowDownOutlinedIcon fontSize="small" />
@@ -72,7 +66,6 @@ const Featured: FC = () => {
                 <div className="resultAmount">${income[1]?.total}</div>
               </div>
             )}
->>>>>>> 3b8437c79b0a5c5045eb1781f8bae24f2765532d
           </div>
         </div>
       </div>

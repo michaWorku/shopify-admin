@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from 'react'
 import './widget.scss'
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
@@ -16,20 +15,6 @@ interface widgetProps {
 const Widget : FC<widgetProps> = ({widgetType}) => {
   const [income, setIncome] = useState([] as any);
   const [perc, setPerc] = useState(0);
-<<<<<<< HEAD
-=======
-
-  useEffect(() => {
-    const getIncome = async () => {
-      try {
-        const res = await privateRequest.get("orders/income");
-        setIncome(res.data);
-        setPerc((res.data[1].total * 100) / res.data[0].total - 100);
-      } catch {}
-    };
-    getIncome();
-  }, []);
->>>>>>> 3b8437c79b0a5c5045eb1781f8bae24f2765532d
 
   useEffect(() => {
     const getIncome = async () => {
@@ -42,20 +27,12 @@ const Widget : FC<widgetProps> = ({widgetType}) => {
     getIncome();
   }, []);
 
-<<<<<<< HEAD
-
-
-
-  //temporary 
-  const amount = 100;
-  const diff = 20;
   let data;
-=======
+
   //temporary
   // const amount = 100;
   // const diff = 20;
 
->>>>>>> 3b8437c79b0a5c5045eb1781f8bae24f2765532d
   switch (widgetType) {
     case "user":
       data = {
@@ -127,26 +104,11 @@ const Widget : FC<widgetProps> = ({widgetType}) => {
       <div className="left">
         <span className="title">{data?.title}</span>
         <div className="counter">
-<<<<<<< HEAD
-          {data?.isMoney && "$" } {income[1]?.total}
-=======
           {data?.isMoney && "$"} {income[1]?.total}
->>>>>>> 3b8437c79b0a5c5045eb1781f8bae24f2765532d
         </div>
         <div className="link">{data?.link}</div>
       </div>
       <div className="right">
-<<<<<<< HEAD
-        {
-          perc < 0 ? 
-            <div className="percentage negative">
-              <KeyboardArrowDownIcon /> {Math.floor(perc)} %
-            </div> : 
-            <div className="percentage positive">
-              <KeyboardArrowUpIcon /> {Math.floor(perc)} %
-            </div>
-        }
-=======
         {perc < 0 ? (
           <div className="percentage negative">
             <KeyboardArrowDownIcon /> {Math.floor(perc)} %
@@ -156,7 +118,6 @@ const Widget : FC<widgetProps> = ({widgetType}) => {
             <KeyboardArrowUpIcon /> {Math.floor(perc)} %
           </div>
         )}
->>>>>>> 3b8437c79b0a5c5045eb1781f8bae24f2765532d
         {data?.icon}
       </div>
     </div>
