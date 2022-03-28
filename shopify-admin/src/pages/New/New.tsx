@@ -70,7 +70,7 @@ const New: FC<newProps> = ({ inputs, title }) => {
         // Handle successful uploads on complete
         // For instance, get the download URL: https://firebasestorage.googleapis.com/...
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          const data = { ...inputData, img: downloadURL };
+          const data = { ...inputData, photo: downloadURL };
 
           if (title.includes("Product")) dispatch(addProduct(data));
           if (title.includes("User")) dispatch(addUser(data));

@@ -2,6 +2,15 @@ import { FC } from 'react'
 import { Chart, Navbar, Sidebar, Table } from '../../components'
 import './single.scss'
 
+const data = [
+  { name: "January", Total: 1200 },
+  { name: "February", Total: 2100 },
+  { name: "March", Total: 800 },
+  { name: "April", Total: 1600 },
+  { name: "May", Total: 900 },
+  { name: "June", Total: 1700 },
+];
+
 const Single : FC = () => {
   return (
     <div className='single'>
@@ -42,12 +51,12 @@ const Single : FC = () => {
             </div>
           </div>
           <div className="right">
-          <Chart aspect={3 / 1} title="User Spending ( Last 6 Months)" />
+          <Chart data={data} dataKey="Active User" aspect={3 / 1} title="User Spending ( Last 6 Months)" />
           </div>
         </div>
         <div className="bottom">
           <h1 className="title"> Last Transactions </h1>
-          <Table />
+          {/* <Table /> */}
         </div>
       </div>
     </div>

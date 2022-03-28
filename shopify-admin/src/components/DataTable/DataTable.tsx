@@ -4,7 +4,9 @@ import "./dataTable.scss";
 import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
 import { userColumns, userRows } from "../../data/dataTableSource";
 import { privateRequest } from "../../requestMethod";
-
+import {useAppDispatch, useAppSelector} from '../../app/hooks'
+import { getProducts } from "../../features/product/productSlice";
+import { getUsers } from "../../features/user/userSlice";
 interface dataRow {
   id: number;
   username: string;
@@ -21,8 +23,12 @@ interface dataState {
 
 
 const DataTable: FC = () => {
-  const [data, setData] = useState(userRows);
+  const [data, setData] = useState([]);
   const [listType, setlistType] = useState("");
+  const dispatch = useAppDispatch();
+
+  const users = useAppSelector((state) => state.auth.user.users.data);
+  const products = useAppSelector((state) => state.auth.product.products.data);
 
   const { pathname } = useLocation();
 
@@ -30,22 +36,17 @@ const DataTable: FC = () => {
     setlistType(pathname);
   }, [pathname]);
 
-  //const dispatch = useAppDispatch()
-
   useEffect(() => {
-      const getData = async () =>{
-        try {
-          const res= await privateRequest.get(listType)
 
-          console.log({res : res.data})
-
-          setData(res.data)
-        } catch (err) {
-          console.log(err)
-        }
-      }
-    
-      getData()
+    if(listType === '/users'){
+      dispatch(getUsers())
+      setData(users.doc)
+    }
+    if(listType === '/products'){
+      dispatch(getProducts())
+      setData(products.doc)
+    }
+      
   }, [listType])
   
   const handleDelete = (id: number) => {
@@ -60,7 +61,7 @@ const DataTable: FC = () => {
       renderCell: (params: GridRenderCellParams) => {
         return (
           <div className="cellAction">
-            <Link to="/users/test" style={{ textDecoration: "none" }}>
+            <Link to={`/users/${params.row._id}`} style={{ textDecoration: "none" }}>
               <div className="viewButton">View</div>
             </Link>
             <div

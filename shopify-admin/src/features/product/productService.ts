@@ -18,8 +18,8 @@ export interface productWithId{
 }
 // Add Product
 const addProduct = async (productData:productData) =>{
-    const response = await privateRequest.post(API_URL , productData)
-
+    const response = await privateRequest.post(API_URL , productData) 
+    
     return response.data
 }
 

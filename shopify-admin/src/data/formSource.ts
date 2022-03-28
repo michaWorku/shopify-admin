@@ -44,8 +44,15 @@ export const userInputs : inputType[] = [
     },
     {
       id: 6,
-      name: 'address',
-      label: "Address",
+      name: 'address1',
+      label: "Address 1",
+      type: "text",
+      placeholder: "Elton St. 216 NewYork",
+    },
+    {
+      id: 7,
+      name: 'address2',
+      label: "Address 2",
       type: "text",
       placeholder: "Elton St. 216 NewYork",
     }
@@ -79,21 +86,21 @@ export const userInputs : inputType[] = [
       name: 'size',
       label: "Size",
       type: "text",
-      placeholder: "100",
+      placeholder: "size",
     },
     {
       id: 5,
       name: 'color',
       label: "Color",
       type: "text",
-      placeholder: "100",
+      placeholder: "color",
     },
     {
       id: 6,
       name: 'price',
       label: "Price",
       type: "text",
-      placeholder: "100",
+      placeholder: "price",
     },
     {
       id: 7,

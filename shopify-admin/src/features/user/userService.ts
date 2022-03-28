@@ -23,14 +23,14 @@ const addUser = async (userData:userData) =>{
 
 // Get All users
 const getUsers = async () =>{
-    const response = await publicRequest.get(API_URL)
+    const response = await privateRequest.get(API_URL)
 
     return response.data
 }
 
 // Get user
 const getUser = async (userId : string) =>{
-    const response = await publicRequest.get(API_URL + userId)
+    const response = await privateRequest.get(API_URL + userId)
 
     return response.data
 }
