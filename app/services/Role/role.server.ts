@@ -6,15 +6,22 @@ import getParams from '~/utils/params/getParams.server'
 import { searchCombinedColumn } from '~/utils/params/search.server'
 import { filterFunction } from '~/utils/params/filter.server'
 import canUser from '~/utils/casl/ability'
-import { checkUserPermissions, getAllPermissions } from './Permissions/permission.server'
+import { checkUserPermissions, getAllEntityPermissions, getAllPermissions, getAllSystemPermissions } from './Permissions/permission.server'
+import { getEntities } from '../Entities/entity.server'
 
 export interface EntityPermission {
     [key: string]: {
         [key: string]: any;
+        hasSelected?: Boolean
         permissions: Permission[];
     }[];
 }
 
+const propertyNames: { [key: string]: string } = {
+    clients: 'client'
+};
+
+const entityTypes = ['client']
 /**
  * Creates a new role for a user
  *
@@ -461,6 +468,7 @@ export const allUserPermissions = async (userId: string): Promise<Permission[]> 
 /**
  * Removes permissions from selected permission list based on the specified entity and its values.
  *
+ * @function removePermissions
  * @param state - The entity permission state.
  * @param selectedPermission - The list of selected permissions to remove from.
  * @param value - The entity values to use to determine which permissions to remove.
@@ -499,3 +507,288 @@ export const removePermissions = (
     return { newPermission, state };
 };
 
+/**
+ * Get permissions allowed for a user based on their role, entity, and action.
+ * @async function allowedPermissions
+ * @param userId The ID of the user.
+ * @param entity The entity for which permissions are being checked.
+ * @param entityId The ID of the entity.
+ * @param roleId The ID of the role.
+ * @param action The action being performed.
+ * @param subject The subject of the action being performed.
+ * @returns An object containing the role and role permissions allowed for the user.
+ */
+export const allowedPermissions = async (
+    userId: string,
+    entity: string,
+    entityId: string,
+    roleId: string,
+    action: string,
+    subject: string
+): Promise<{ role: Role; rolePermissions: Permission[] }> => {
+    try {
+        let rolePermissions: Permission[] = [];
+        const role = await getRoleById(roleId);
+
+        // Check if user is allowed to manage all entities
+        const allPermitted = await canUser(userId, 'manage', 'all', {});
+        if (allPermitted?.status === 200) {
+            if (entity === '' || entity === null || entity === 'system') {
+                const response = await getAllSystemPermissions();
+                rolePermissions = response?.data;
+            } else {
+                const response = await getAllEntityPermissions(entity, entityId);
+                rolePermissions = response?.data;
+            }
+        } else {
+            const userAllPermissions = await allUserPermissions(userId);
+            if (entity === '' || entity === null || entity === 'system') {
+                for (let permission of userAllPermissions) {
+                    if (
+                        permission.conditions === null ||
+                        Object.keys(permission.conditions).length === 0
+                    ) {
+                        rolePermissions.push(permission);
+                    }
+                }
+            } else {
+                const allowed = await canUser(userId, action, subject, {
+                    [entity]: entityId,
+                });
+
+                if (allowed?.status === 200) {
+                    for (let permission of userAllPermissions) {
+                        for (const [key, value] of Object.entries(
+                            permission?.conditions ? permission.conditions : {}
+                        )) {
+                            if (entity === key && entityId === value) {
+                                if (
+                                    !rolePermissions.some((e) => e.id === permission.id)
+                                ) {
+                                    rolePermissions.push(permission);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Set selected flag for each permission
+        rolePermissions.map((elt: any) => {
+            for (let per of role.data.permissions) {
+                if (elt.id === per.permission.id) {
+                    elt.selected = true
+                }
+            }
+        })
+
+        return { role: role.data, rolePermissions: rolePermissions };
+    } catch (err) {
+        return errorHandler(err);
+    }
+};
+
+/**
+ * Returns an array of selected permissions for the given entities.
+ * @function actionSelectedPermission
+ * @param entities The permission state for different entities.
+ * @param selectedPermissions The currently selected permissions.
+ * @returns An array of selected permissions.
+ */
+export const actionSelectedPermission = (
+    entities: EntityPermission,
+    selectedPermissions: Permission[]
+) => {
+    let newPermissions: any[] = selectedPermissions;
+    Object.values(entities).forEach((entityArray) => {
+        entityArray.forEach((entity) => {
+            entity.permissions.forEach((permission: any) => {
+                if (!newPermissions.some((e) => e.id === permission.id) && permission.selected) {
+                    newPermissions.push(permission);
+                }
+            });
+        });
+    });
+    return newPermissions;
+};
+
+/**
+ * Maps the new entity permissions with the old entity permissions and returns the updated EntityPermission object.
+ * function permissionAllocator
+ * @param newEntityPermissions - The new entity permissions object to map.
+ * @param oldEntityPermissions - The old entity permissions object to update.
+ * @param entity - The name of the entity.
+ * @returns The updated EntityPermission object.
+ */
+export const permissionAllocator = (
+    newEntityPermissions: any,
+    oldEntityPermissions: any,
+    entity: string
+): EntityPermission => {
+    const entities: {
+        [key: string]: string
+    } = {
+        clients: 'client'
+    }
+
+    if (!entities[entity]) {
+        throw new Error('Invalid entity provided');
+    }
+
+    oldEntityPermissions[entity].map((item: any, index: number) => {
+        newEntityPermissions[entity].map((e: any) => {
+            if (e?.[entities[entity]].id === item?.[entities[entity]].id) {
+                oldEntityPermissions[entity][index] = e;
+            } else {
+                oldEntityPermissions[entity][index] = {
+                    [entities[entity]]: item?.[entities[entity]],
+                    permissions: [],
+                };
+            }
+        });
+    });
+
+    return oldEntityPermissions;
+};
+
+/**
+ * Returns entity permissions for a specific user, role, and entity type.
+ * @function getEntityPermissions
+ * @param userId The ID of the user.
+ * @param entities The entities for which to retrieve permissions.
+ * @param entityType The type of entity for which to retrieve permissions.
+ * @param roleId The ID of the role.
+ * @param idName The name of the ID property.
+ * @param idValue The value of the ID property.
+ * @returns The entity permissions for the user, role, and entity type.
+ */
+export const getEntityPermissions = async (
+    userId: string,
+    entities: any[],
+    entityType: string,
+    roleId: string,
+    idName: string,
+    idValue: string,
+): Promise<EntityPermission[]> => {
+    try {
+        const entityPermissions: EntityPermission = {
+            associations: [],
+            departments: [],
+            clients: [],
+            registrantCompanies: [],
+        };
+
+        for (const entity of entities) {
+            const permissions = await allowedPermissions(
+                userId,
+                idName,
+                entity[idValue],
+                roleId,
+                'update',
+                'Role',
+            );
+
+            entityPermissions[entityType].push({
+                [propertyNames[entityType]]: entity,
+                hasSelected: true,
+                permissions: permissions?.rolePermissions.filter(
+                    (permission: any) => permission.selected,
+                ),
+            });
+        }
+
+        return entityPermissions[entityType];
+    } catch (error) {
+        throw errorHandler(error);
+    }
+};
+
+/**
+ * Fetches the permissions for a user on multiple entities of a given type
+ * @funciton searchEntityPermissions
+ * @param {string} userId - The ID of the user whose permissions are being fetched
+ * @param {Array<any>} entities - The entities for which permissions are being fetched
+ * @param {string} entityType - The type of entities being fetched (e.g.  'client')
+ * @param {string} roleId - The ID of the role for which permissions are being fetched
+ * @param {string} idName - The name of the ID field for the entity (e.g. 'clientId')
+ * @param {string} idValue - The value of the ID field for the entity
+ *
+ * @returns {Promise<Array<{entity: any, entityPermissions: Array<any>}>} - An array of objects containing the entity and its associated permissions
+ */
+export const searchEntityPermissions = async (
+    userId: string,
+    entities: any[],
+    entityType: string,
+    roleId: string,
+    idName: string,
+    idValue: string
+): Promise<Array<{ entity: any, entityPermissions: Array<any> }>> => {
+    if (!entityTypes.includes(entityType)) {
+        throw new customErr('Custom_Error', `Invalid entityType: ${entityType}`, 400);
+    }
+    const fetchedPermissions = [];
+
+    for (const value of entities) {
+        const entity = value[entityType];
+        const permissions = value.permissions.length
+            ? value.permissions
+            : (await allowedPermissions(
+                userId,
+                idName,
+                idValue,
+                roleId,
+                'update',
+                'Role'
+            )).rolePermissions;
+
+        fetchedPermissions.push({
+            entity,
+            entityPermissions: permissions ?? [],
+        });
+    }
+
+    return fetchedPermissions;
+};
+
+/**
+ * Formats entity permissions based on the entity name.
+ * @function formatEntityPermissions
+ * @param permissions The permissions to format.
+ * @param entityType The type of the entity.
+ * @returns The formatted entity permissions.
+ */
+export const formatEntityPermissions = (permissions: any, entityType: string): EntityPermission => {
+    const formatted: EntityPermission = {
+        clients: []
+    }
+
+    const entityProperty = propertyNames[entityType];
+
+    permissions.map((item: any) => {
+        formatted[entityType].push({
+            [entityProperty]: item.entity,
+            permissions: item.entityPermissions,
+        })
+    })
+
+    return formatted
+}
+
+/**
+ * Categorizes an array of permissions by their category.
+ * @function categorizePermissions
+ * @param rawPermissions - The array of permissions to categorize.
+ * @returns An object containing the permissions categorized by their category.
+ */
+ export const categorizePermissions = (rawPermissions: any[]): Record<string, any[]> => {
+    return rawPermissions.reduce((permissions: Record<string, any[]>, permission) => {
+      if (permission.category in permissions) {
+        permissions[permission.category].push(permission);
+      } else {
+        permissions[permission.category] = [permission];
+      }
+      return permissions;
+    }, {});
+  };
+  
