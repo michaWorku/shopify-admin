@@ -1,6 +1,7 @@
 import { Response, errorHandler } from "~/utils/handler.server";
 import { db } from "../db.server";
 import canUser from "~/utils/casl/ability";
+import { getAllEntityPermissions, getUserEntityPermissions } from "../Role/Permissions/permission.server";
 
 /**
  * Get all entities for the specified model.
@@ -95,3 +96,87 @@ export const getEntities = async (userId: string, entity: string): Promise<objec
         return errorHandler(e);
     }
 }
+
+/**
+ * Retrieves entity permissions for a user based on their ID, entity key and list of entities
+ * @async function getEntityPermissions
+ * @param {string} userId - ID of the user for whom the permissions are being retrieved
+ * @param {string} entityKey - Key of the entity for which permissions are being retrieved
+ * @param {Array} entities - List of entities for which permissions are being retrieved
+ * @returns {Promise<any>} - A promise that resolves to an object containing the retrieved permissions or rejects with an error
+ */
+ export const getEntityPermissions = async (
+    userId: string,
+    entityKey: string,
+    entities: any[]
+  ): Promise<any> => {
+    try {
+      const iCanViewAll = await canUser(userId, 'read', 'Permission', {});
+      let permissions: any = {};
+      if (iCanViewAll?.status === 200) {
+        await Promise.all(
+          entities?.map(async (item: any) => {
+            const permission: any = await getAllEntityPermissions(
+              entityKey,
+              item?.id
+            );
+            if (permission?.data && permission?.data?.length) {
+              permissions[item.name] = permission;
+            } else {
+              permissions[item.name] = {};
+            }
+          })
+        );
+      } else if (iCanViewAll?.status === 403) {
+        await Promise.all(
+          entities?.map(async (item: any) => {
+            const permission: any = await getUserEntityPermissions(
+              userId,
+              entityKey,
+              item?.id
+            );
+            if (permission?.data && permission?.data?.length) {
+              permissions[item.name] = permission;
+            } else {
+              permissions[item.name] = {};
+            }
+          })
+        );
+      } else {
+        return iCanViewAll;
+      }
+  
+      const pro = Object.keys(permissions).map(async (entity: any) => {
+        if (permissions[entity]?.data) {
+          await Promise.all(
+            permissions[entity]?.data?.map(
+              async (permission: any, index: number) => {
+                const canCreateRoleWithPermission = await canUser(
+                  userId,
+                  'create',
+                  'Role',
+                  permission.conditions
+                );
+                if (canCreateRoleWithPermission?.status === 200) {
+                  permissions[entity].data[index] = {
+                    ...permissions[entity].data[index],
+                    canCreate: true,
+                  };
+                } else {
+                  permissions[entity].data[index] = {
+                    ...permissions[entity].data[index],
+                    canCreate: false,
+                  };
+                }
+              }
+            )
+          );
+        }
+      });
+      await Promise.all(pro);
+      return permissions;
+    } catch (error) {
+      throw errorHandler(error);
+    }
+  };
+  
