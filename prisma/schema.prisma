@@ -1,0 +1,228 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String                  @id @default(uuid())
+  firstName   String
+  middleName  String
+  lastName    String
+  phone       String                  @unique
+  email       String?
+  gender      Gender?
+  password    String?
+  birthDate   DateTime?
+  isVerified  Boolean?
+  status      Status @default(ACTIVE)
+  roles       RoleUser[]
+  clients     Client[]
+  submissions DynamicFormSubmission[]
+  rewards     UserReward[]
+  blulkTasks  BulkTask[]
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  deletedAt   DateTime?
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  createdBy   String
+  users       RoleUser[]
+  permissions RolePermission[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  status      Status           @default(ACTIVE)
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  category    String?
+  subject     String
+  action      String
+  conditions  Json?
+  fields      String[]         @default([])
+  roles       RolePermission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status    Status   @default(ACTIVE)
+}
+
+model RoleUser {
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId String
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  role         Role       @relation(fields: [roleId], references: [id])
+  roleId       String
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId String
+
+  @@id([roleId, permissionId])
+}
+
+model Client {
+  id            String        @id @default(uuid())
+  name          String
+  promotionText String
+  url           String?
+  phone         String        @unique
+  email         String?
+  status        Status        @default(ACTIVE)
+  dynamicForms  DynamicForm[]
+  rewards       Reward[]
+  users         User[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+}
+
+model UserReward {
+  userId   String
+  users    User   @relation(fields: [userId], references: [id])
+  rewardId String
+  rewards  Reward @relation(fields: [rewardId], references: [id])
+
+  @@id([userId, rewardId])
+}
+
+model Reward {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  rewardTaken Int?
+  rewardGiven Int
+  plan        PLAN         @default(DAY)
+  clientId    String
+  client      Client       @relation(fields: [clientId], references: [id])
+  users       UserReward[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+}
+
+model DynamicForm {
+  id          String                  @id @default(uuid())
+  name        String
+  description String?
+  fields      DynamicFormField[]
+  submissions DynamicFormSubmission[]
+  client      Client                  @relation(fields: [clientId], references: [id])
+  clientId    String
+  createdBy   String?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  deletedAt   DateTime?
+}
+
+model DynamicFormField {
+  id           String               @id @default(uuid())
+  name         String
+  label        String
+  description  String?
+  type         DynamicFormFieldType
+  required     Boolean
+  options      Json?
+  placeholder  String?
+  defaultValue Json?
+  order        Int
+  dynamicFroms DynamicForm          @relation(fields: [formId], references: [id])
+  formId       String
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  deletedAt    DateTime?
+}
+
+model DynamicFormSubmission {
+  id            String      @id @default(uuid())
+  data          Json
+  form          DynamicForm @relation(fields: [formId], references: [id])
+  formId        String
+  submittedBy   User        @relation(fields: [submittedById], references: [id])
+  submittedById String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+}
+
+model BulkTask {
+  id           String     @id @default(uuid())
+  discription  String
+  status       BulkStatus
+  taskCount    Int
+  faildCount   Int
+  successCount Int
+  tasks        Task[]
+  createdById  String
+  createdBy    User       @relation(fields: [createdById], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+}
+
+model Task {
+  id        String     @id @default(uuid())
+  data      Json
+  status    BulkStatus
+  message   String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  bulk      BulkTask?  @relation(fields: [bulkId], references: [id])
+  bulkId    String?
+}
+
+enum DynamicFormFieldType {
+  TEXT
+  NUMBER
+  EMAIL
+  PHONE
+  SELECT
+  CHECKBOX
+  RADIO
+  TEXTAREA
+  DATE
+}
+
+enum PLAN {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
+
+enum Status {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum BulkStatus {
+  InProgress
+  Complete
+  Failed
+  Canceled
+  Canceling
+}
