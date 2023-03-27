@@ -22,9 +22,10 @@ CREATE TABLE "User" (
     "phone" STRING NOT NULL,
     "email" STRING,
     "gender" "Gender",
+    "password" STRING,
     "birthDate" TIMESTAMP(3),
     "isVerified" BOOL,
-    "status" "Status" NOT NULL,
+    "status" "Status" NOT NULL DEFAULT 'ACTIVE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -206,9 +207,6 @@ CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Permission_name_key" ON "Permission"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Client_phone_key" ON "Client"("phone");

@@ -6,10 +6,16 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "cockroachdb"
   url      = env("DATABASE_URL")
 }
 
+generator jsonSchema {
+  provider                 = "prisma-json-schema-generator"
+  keepRelationScalarFields = "true"
+  includeRequiredFields    = "true"
+  persistOriginalType      = "true"
+}
 model User {
   id          String                  @id @default(uuid())
   firstName   String
@@ -226,3 +232,4 @@ enum BulkStatus {
   Canceled
   Canceling
 }
+
