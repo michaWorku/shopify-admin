@@ -391,3 +391,32 @@ export const getSystemPermissions = async (userId: string) => {
         return errorHandler(error)
     }
 }
+
+/**
+ * Checks if a user has permission to create a role with the specified permissions
+ *
+ * @async
+ * @function checkUserPermissions
+ * @param {string} userId - The user ID
+ * @param {string[]} permissionIds - An array of permission IDs
+ * @returns {boolean} - True if the user has permission, false otherwise
+ */
+export const checkUserPermissions = async (userId: string, permissionIds: string[]) => {
+    for (const permissionId of permissionIds) {
+        const permission = await db.permission.findUnique({
+            where: { id: permissionId },
+        })
+        if (permission) {
+            const can = await canUser(
+                userId,
+                'create',
+                'Role',
+                permission.conditions
+            )
+            if (can?.status !== 200) {
+                return false
+            }
+        }
+    }
+    return true
+}
