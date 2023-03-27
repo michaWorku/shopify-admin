@@ -2,7 +2,7 @@ import { Permission } from "@prisma/client"
 import { db } from "~/services/db.server"
 import customErr, { Response, ResponseType, errorHandler } from "../../../utils/handler.server"
 import { json } from "@remix-run/node"
-
+import canUser from "~/utils/casl/ability"
 
 /**
  * Get user permissions for which the role is active
@@ -192,7 +192,7 @@ export const getUserEntityPermissions = async (userId: string, entityKey: string
  * @function getAllSystemPermission
  * @returns {Promise<Array>} A Promise that resolves to an array of Permission objects.
  */
-export const getAllSystemPermission = async () => {
+export const getAllSystemPermissions = async () => {
     try {
         const permissions = await db.permission.findMany({
             where: {
@@ -270,4 +270,124 @@ export const isValidEntityKey = (entityKey: string): boolean => {
     // Check if the entity key only contains alphanumeric characters and underscores
     const regex = /^[a-zA-Z0-9_]+$/;
     return regex.test(entityKey);
+}
+
+/**
+ * Get entity permissions for a user.
+ *
+ * @async
+ * @function getEntityPermissions
+ * @param {string} userId - The user ID.
+ * @param {string} entityKey - The entity key.
+ * @param {any[]} entities - An array of entities to get permissions for.
+ * @returns {Promise<Object>} An object with the entity permissions.
+ * @throws {Error} Throws an error if the operation fails.
+ */
+ export const getEntityPermissions = async (
+    userId: string,
+    entityKey: string,
+    entities: any
+  ) => {
+    try {
+      const iCanViewAll = await canUser(userId, 'read', 'Permission', {})
+      let permissions: any = {}
+  
+      const getPermissionByEntity = async (item: any) => {
+        const permission = iCanViewAll?.status === 200 ?
+          await getAllEntityPermissions(entityKey, item.id) :
+          await getUserEntityPermissions(userId, entityKey, item.id)
+  
+        return permission?.data?.length ?
+          { [item.name]: permission } :
+          { [item.name]: {} }
+      }
+  
+      const promises = entities?.map(getPermissionByEntity)
+      permissions = Object.assign({}, ...(await Promise.all(promises)))
+  
+      const canCreateRoleWithPermission = async (permission: any) => {
+        const canCreateRole = await canUser(
+          userId,
+          'create',
+          'Role',
+          permission.conditions
+        )
+        return canCreateRole?.status === 200
+      }
+  
+      const setCanCreateFlag = async (permission: any) => {
+        permission.canCreate = await canCreateRoleWithPermission(permission)
+        return permission
+      }
+  
+      const pro = Object.keys(permissions).map(async (entity: any) => {
+        if (permissions[entity]?.data) {
+          permissions[entity].data = await Promise.all(
+            permissions[entity].data.map(setCanCreateFlag)
+          )
+        }
+      })
+  
+      await Promise.all(pro)
+      return Response({data:permissions})
+    } catch (e) {
+      return errorHandler(e)
+    }
+  }
+  
+  /**
+ * Fetches system permissions for a given user, including information on whether the user
+ * can create roles with each permission.
+ * @async
+ * @function getSystemPermissions
+ * @param {string} userId - The ID of the user to fetch permissions for.
+ * @returns {Promise<object>} - An object containing an array of permission objects and a boolean
+ * indicating whether the user can create roles with each permission.
+ */
+export const getSystemPermissions = async (userId: string) => {
+    try {
+        // Check if the user can view all permissions or only their own
+        const iCanViewAll = await canUser(userId, 'read', 'Permission', {})
+        let permissionsData: any
+
+        if (iCanViewAll?.status === 200) {
+            // Fetch all permissions if the user can view all
+            permissionsData = await getAllSystemPermissions()
+        } else if (iCanViewAll?.status === 403) {
+            // Otherwise, fetch the user's permissions
+            permissionsData = await getUserSystemPermissions(userId)
+        } else {
+            return iCanViewAll
+        }
+
+        // Check whether the user can create roles with each permission
+        const permissionPromises = permissionsData?.data?.map(
+            async (permission:any, index:number) => {
+                const canCreateRoleWithPermission = await canUser(
+                    userId,
+                    'create',
+                    'Role',
+                    permission.conditions
+                )
+
+                // Set the "canCreate" property for each permission based on whether the user can create a role
+                if (canCreateRoleWithPermission?.status === 200) {
+                    permissionsData.data[index] = {
+                        ...permissionsData.data[index],
+                        canCreate: true,
+                    }
+                } else {
+                    permissionsData.data[index] = {
+                        ...permissionsData.data[index],
+                        canCreate: false,
+                    }
+                }
+            }
+        )
+        await Promise.all(permissionPromises)
+
+        return Response({ data: permissionsData })
+    } catch (error) {
+        return errorHandler(error)
+    }
 }
