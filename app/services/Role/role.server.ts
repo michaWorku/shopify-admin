@@ -9,7 +9,7 @@ import { filterFunction } from '~/utils/params/filter.server'
 /**
  * Creates a new role in the database.
  * @async
- * @function
+ * @function createRole
  * @param {string} userId - The ID of the user creating the role.
  * @param {object} roleData - The role data with an array of permission IDs associated with the role.
  * @returns {Promise<object>} The created role object.
@@ -51,23 +51,54 @@ export const createRole = async (userId: string, roleData: any) => {
 }
 
 /**
- * Retrieves a role from the database based on a scalar field.
+ * Get a role by role ID.
  * @async
- * @function
+ * @function getRoleById
+ * @param {string} roleId - The ID of the role to get.
+ *
+ * @returns {Promise<object>} The role object.
+ * @throws {Error} If no role is found with the given ID.
+ */
+ export const getRoleById = async (roleId: string) => {
+    if (!roleId) {
+        throw new customErr('Custom_Error', 'Role ID is required', 404)
+    }
+    try {
+        const role = await db.role.findUnique({
+            where: {
+                id: roleId,
+            },
+        })
+
+        if (!role) {
+            throw new customErr('Custom_Error',`Role not found with ID: ${roleId}`, 404)
+        }
+
+        return role
+    } catch (err) {
+        return errorHandler(err)
+    }
+}
+
+
+/**
+ * Retrieves all role from the database based on a scalar field.
+ * @async
+ * @function getRolesByScalarField
  * @param {string} fieldName - The name of the scalar field to search for (e.g. "name").
  * @param {any} fieldValue - The value of the scalar field to search for (e.g. "admin").
  * @returns {Promise<object>} The retrieved role object.
  * @throws {Error} Throws an error if there's an issue retrieving the role.
  */
-export const getRoleByScalarField = async (fieldName: string, fieldValue: string) => {
-    const validScalarFields = ['id', 'name', 'description', 'createdBy', 'status'];
+export const getRolesByScalarField = async (fieldName: string, fieldValue: string) => {
+    const validScalarFields = ['name', 'description', 'createdBy', 'status'];
 
     try {
         if (!validScalarFields.includes(fieldName)) {
             throw new customErr('Custom_Error', `Invalid field name provided`, 400);
         }
 
-        const role = await db.role.findUnique({
+        const role = await db.role.findMany({
             where: {
                 [fieldName]: fieldValue,
             },
@@ -97,7 +128,8 @@ export const getRoleByScalarField = async (fieldName: string, fieldValue: string
 
 /**
  * Retrieve roles of a user.
- * 
+ * @async
+ * @function getUserRoles
  * @param {string} userId - The ID of the user.
  * @returns {Promise<obj>} The retrieved user roles.
  * @throws {Error} Throws an error if the provided user id is invalid.
@@ -132,6 +164,8 @@ export const getUserRoles = async (userId: string) => {
 
 /**
  * Retrieve all roles
+ * @async
+ * @function getAllRoles
  * @throws {Error} Throws an error if it fails to retrieve roles.
  */
 export const getAllRoless = async () => {
@@ -208,6 +242,8 @@ export const getAllRoles = async (request: Request, userId: string) => {
 
 /**
  * Updates a role by ID
+ * @async
+ * @function updatedRoleById
  * @param {string} roleId - ID of the role to update
  * @param {object} data - Updated role data
  * @returns {Promise<object>} Updated role object
@@ -231,6 +267,8 @@ export const updateRoleById = async (roleId: string, data: any): Promise<any> =>
 
 /**
  * Updates the permissions of a role by ID
+ * @async
+ * @function updateRolePermissions
  * @param {string} roleId - The ID of the role to update
  * @param {string} name - The new name of the role
  * @param {Array<string>} connect - An array of permission IDs to connect to the role
