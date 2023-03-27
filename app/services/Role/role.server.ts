@@ -447,14 +447,14 @@ export const allUserPermissions = async (userId: string): Promise<Permission[]> 
 
         for (const role of userRoles) {
             for (const permission of role.permissions) {
-                const permissionId = permission.permission.id
-                if (permission.permission.action === 'manage' && permission.permission.subject === 'all') {
+                const permissionId = permission.id
+                if (permission.action === 'manage' && permission.subject === 'all') {
                     const { data } = await getAllPermissions()
                     permissions.push(...data)
                     break
                 } else if (!rolePermissions.has(permissionId)) {
                     rolePermissions.add(permissionId)
-                    permissions.push(permission.permission)
+                    permissions.push(permission)
                 }
             }
         }
@@ -464,6 +464,31 @@ export const allUserPermissions = async (userId: string): Promise<Permission[]> 
         throw errorHandler(err)
     }
 }
+
+/**
+ * Retrieves the roles created by a user along with the unique permissions assigned to them.
+ * @function getUserCreatedRole
+ * @param userId The id of the user who created the roles.
+ * @returns An object containing the roles created by the user and their unique permissions.
+ */
+ export const getUserCreatedRole = async (userId: string): Promise<{ roles: Role[], permissions: Permission[] }> => {
+    try {
+        const roles = await getRolesByScalarField('createdBy', userId);
+        const permissions: Permission[] = [];
+
+        roles.forEach((role:any) => {
+            role.permissions.forEach((permission:Permission) => {
+                if (!permissions.some((p) => p.id === permission.id)) {
+                    permissions.push(permission);
+                }
+            });
+        });
+
+        return { roles, permissions };
+    } catch (error) {
+        throw errorHandler(error);
+    }
+};
 
 /**
  * Removes permissions from selected permission list based on the specified entity and its values.
