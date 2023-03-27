@@ -62,6 +62,7 @@ const insertOperators = (columnType: string): OperatorValue[] => {
 };
 
 /**
+ * FilterModes component
  * Displays a dropdown menu of available filter modes for the given column.
  * @function FilterModes
  * @param column - The column to filter.
