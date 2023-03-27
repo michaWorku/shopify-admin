@@ -72,8 +72,8 @@ export const getRoleByScalarField = async (fieldName: string, fieldValue: string
                 [fieldName]: fieldValue,
             },
             include: {
-                users:{
-                    include:{
+                users: {
+                    include: {
                         user: true
                     }
                 },
@@ -171,8 +171,8 @@ export const getAllRoles = async (request: Request, userId: string) => {
                 createdBy: userId,
             },
         })
-        if(!!roleCount){
-           roles = await db.role.findMany({
+        if (!!roleCount) {
+            roles = await db.role.findMany({
                 take,
                 skip,
                 orderBy: [
@@ -186,10 +186,10 @@ export const getAllRoles = async (request: Request, userId: string) => {
                     ...filterParams,
                 },
             })
-            
+
             return {
                 data: roles,
-                metaData : {
+                metaData: {
                     page: pageNo,
                     pageSize: take,
                     sort: [sortField, sortType],
@@ -198,10 +198,85 @@ export const getAllRoles = async (request: Request, userId: string) => {
                     total: roleCount,
                 }
             }
-            
+
         }
-        throw new customErr('Custom_Error','Role not found', 404)
-    } catch (error: any) {
-        throw Error(error)
+        throw new customErr('Custom_Error', 'Role not found', 404)
+    } catch (err) {
+        return errorHandler(err);
     }
 }
+
+/**
+ * Updates a role by ID
+ * @param {string} roleId - ID of the role to update
+ * @param {object} data - Updated role data
+ * @returns {Promise<object>} Updated role object
+ * @throws {Error} If no role found with given ID
+ */
+export const updateRoleById = async (roleId: string, data: any): Promise<any> => {
+    try {
+        const updatedRole = await db.role.update({
+            where: { id: roleId },
+            data
+        });
+        return json(Response({
+            data: updatedRole
+        }), {
+            status: 200
+        });
+    } catch (err) {
+        return errorHandler(err);
+    }
+};
+
+/**
+ * Updates the permissions of a role by ID
+ * @param {string} roleId - The ID of the role to update
+ * @param {string} name - The new name of the role
+ * @param {Array<string>} connect - An array of permission IDs to connect to the role
+ * @param {Array<string>} disconnect - An array of permission IDs to disconnect from the role
+ * @returns {Promise<{ data: Role }>} An object with the updated role data
+*/
+export const updateRolePermissions = async (
+    roleId: string,
+    name: string,
+    connect: [],
+    disconnect: []
+) => {
+    try {
+        const permissions = {
+            create: connect.filter((e) => e !== undefined && e !== null).map((elt) => {
+                return {
+                    permission: {
+                        connect: {
+                            id: elt,
+                        },
+                    },
+                };
+            }),
+            deleteMany: disconnect.filter((e) => e !== undefined && e !== null).map((elt) => {
+                return {
+                    permissionId: elt,
+                };
+            }),
+        };
+
+        const updatedRole = await db.role.update({
+            where: {
+                id: roleId,
+            },
+            data: {
+                name: name || undefined,
+                permissions,
+            },
+        });
+        return json(Response({
+            data: updatedRole
+        }), {
+            status: 200
+        });
+    } catch (error) {
+        console.log(error);
+        return errorHandler(error);
+    }
+};
