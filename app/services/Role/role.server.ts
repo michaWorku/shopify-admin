@@ -5,33 +5,55 @@ import { Role } from '@prisma/client'
 import getParams from '~/utils/params/getParams.server'
 import { searchCombinedColumn } from '~/utils/params/search.server'
 import { filterFunction } from '~/utils/params/filter.server'
+import canUser from '~/utils/casl/ability'
+import { checkUserPermissions } from './Permissions/permission.server'
 
 /**
- * Creates a new role in the database.
+ * Creates a new role for a user
+ *
  * @async
  * @function createRole
- * @param {string} userId - The ID of the user creating the role.
- * @param {object} roleData - The role data with an array of permission IDs associated with the role.
- * @returns {Promise<object>} The created role object.
- * @throws {Error} Throws an error if there's an issue creating the role.
+ * @param {string} userId - The user ID
+ * @param {object} roleData - The role data
+ * @param {string} roleData.name - The name of the role
+ * @param {string[]} roleData.permissions - An array of permission IDs
+ * @returns {object} - The created role
+ * @throws {CustomError} If user ID is missing or role data is missing or invalid
  */
-export const createRole = async (userId: string, roleData: any) => {
-
+ export const createRole = async (userId: string, roleData: any) => {
     try {
+        // Check user ID and role data
         if (!userId) {
             throw new customErr('Custom_Error', 'User ID is required', 404)
         }
 
         if (!roleData || !roleData.name || !roleData.permissions) {
-            throw new customErr('Custom_Error', 'Role data is missing or invalid', 404);
+            throw new customErr('Custom_Error', 'Role data is missing or invalid', 404)
         }
 
+        // Check user's permissions
+        const canCreateRole = await checkUserPermissions(userId, roleData.permissions)
+        if (!canCreateRole) {
+            return json(
+                Response({
+                    error: {
+                        error: {
+                            message:
+                                'You are not authorized to create a role',
+                        },
+                    },
+                }),
+                { status: 403 }
+            )
+        }
+
+        // Create role
         const createdRole = await db.role.create({
             data: {
-                name: roleData?.name,
+                name: roleData.name,
                 createdBy: userId,
                 permissions: {
-                    create: roleData?.permissions?.map((permissionId: string) => {
+                    create: roleData.permissions.map((permissionId: string) => {
                         return {
                             permission: {
                                 connect: {
