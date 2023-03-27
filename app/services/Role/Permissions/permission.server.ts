@@ -7,7 +7,7 @@ import canUser from "~/utils/casl/ability"
 /**
  * Get user permissions for which the role is active
  * @async
- * @function getAllPermissions
+ * @function getUserPermissions
  * @param {string} userId - The ID of the user
  * @returns {Promise<Permission[]>}}
  */
