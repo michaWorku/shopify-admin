@@ -1,4 +1,5 @@
 import { Client, Permission } from "@prisma/client"
+import { json } from '@remix-run/node'
 import canUser from "~/utils/casl/ability"
 import customErr, { Response, ResponseType, errorHandler } from "~/utils/handler.server"
 import { db } from "../db.server"
@@ -167,3 +168,66 @@ export const getAllClients = async (request: Request, userId?: string): Promise<
     }
 };
 
+
+/**
+ * Updates a client by ID
+ * @async
+ * @function updatedClientById
+ * @param {string} clientId - ID of the client to update
+ * @param {object} data - Updated client data
+ * @returns {Promise<object>} Updated client object
+ * @throws {Error} If no client found with given ID
+ */
+export const updateclientById = async (clientId: string, data: any): Promise<any> => {
+    if (!clientId) {
+        throw new customErr('Custom_Error', 'Client ID is required', 404)
+    }
+    try {
+        const updatedCclient = await db.client.update({
+            where: { id: clientId },
+            data
+        });
+
+        return json(Response({
+            data: updatedCclient
+        }), {
+            status: 200
+        });
+    } catch (err) {
+        return errorHandler(err);
+    }
+};
+
+/**
+ * Get a client by unique field.
+ * @async
+ * @function getClientByField
+ * @param {string} clientId - The ID of the client to get.
+ ** @param {string} fieldName - The name of the scalar field to search for (e.g. "id", "phone").
+ * @param {any} fieldValue - The value of the scalar field to search for (e.g. "197oiaeuio9187",251900000000").
+ * @returns {Promise<object>} The client object.
+ * @throws {Error} If no client is found with the given ID.
+ */
+export const getClientByField = async (clientId: string,fieldName: string, fieldValue: string): Promise<any> => {
+    if (!clientId) {
+        throw new customErr('Custom_Error', 'Client ID is required', 404)
+    }
+    try {
+        const client = await db.role.findUnique({
+            where: {
+                id: clientId,
+            },
+        })
+
+        if (!client) {
+            throw new customErr('Custom_Error', `Client not found with ID: ${clientId}`, 404)
+        }
+        return json(Response({
+            data: client
+        }), {
+            status: 200
+        });
+    } catch (err) {
+        return errorHandler(err)
+    }
+}
