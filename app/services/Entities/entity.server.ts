@@ -180,3 +180,33 @@ export const getEntities = async (userId: string, entity: string): Promise<objec
     }
   };
   
+ /**
+ * Check if an entity exists in the database by ID.
+ * @async
+ * @function checkEntityExist
+ * @param {string} entityName - The name of the entity to check (e.g. "User", "Client").
+ * @param {string} id - The ID of the entity to check.
+ * @returns {Promise<boolean>} True if the entity exists, false otherwise.
+ * @throws {Error} If the entity name is not recognized or the ID is invalid.
+ */
+export const checkEntityExist = async (entityName: string, id: string): Promise<boolean> => {
+  try {
+    const jsonSchema = require('../../../prisma/json-schema/json-schema.json')
+    const entityIdSchema = jsonSchema.definitions?.[entityName]?.properties?.id
+    if (!entityIdSchema) {
+      throw new Error(`Unrecognized entity name: ${entityName}`)
+    }
+    if (typeof id !== entityIdSchema.type) {
+      throw new Error(`Invalid ID format for entity ${entityName}: ${id}`)
+    }
+    const count = await (db as any)[entityName].count({
+      where: {
+        id,
+        deletedAt: null
+      }
+    })
+    return count > 0
+  } catch (error) {
+    return errorHandler(error)
+  }
+}
