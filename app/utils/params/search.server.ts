@@ -6,8 +6,8 @@
 export const searchCombinedColumn = (filterItem: any, columnNames: string[], type?: string) => {
     let operator: string
     let searchArray: any
-    
-    if (!!type &&  type === 'search') {
+
+    if (!!type && type === 'search') {
         operator = 'contains'
         searchArray = filterItem?.trim().toLowerCase().split(' ')
     } else {
@@ -66,3 +66,56 @@ export const searchCombinedColumn = (filterItem: any, columnNames: string[], typ
     console.dir(filter, { depth: null })
     return filter
 }
+
+/**
+ * Creates a search filter object based on the given search term and schema.
+ * @param {string} search - The search term to use.
+ * @param {string} schema - The schema to search on.
+ * @param {string[]} searchColumns - The list of columns to search on.
+ * @returns {object} The search filter object.
+ */
+export const searchFunction = (search: string, schema: string, searchColumns?: string[]): object => {
+    /**
+     * The JSON schema object.
+     * @type {object}
+     */
+    const jsonSchema = require('../../../prisma/json-schema/json-schema.json');
+
+    /**
+     * The model schema object.
+     * @type {object}
+     */
+    const modelSchema = jsonSchema?.definitions?.[schema]?.properties;
+
+    if (search) {
+        const searchParams = {
+            OR: Object.keys(modelSchema)?.map((item) => {
+                if (modelSchema[item]?.originalType === 'String') {
+                    if (schema === 'User' && !!searchColumns) {
+                        /**
+                         * The search filter object for combined columns.
+                         * @type {object}
+                         */
+                        const searchFilter = searchCombinedColumn(search, searchColumns, 'search');
+
+                        return searchFilter;
+                    } else {
+                        if (search.split(' ').length && !!searchColumns) return searchCombinedColumn(search, searchColumns, 'search')
+                        return {
+                            [item]: {
+                                contains: search,
+                                mode: 'insensitive',
+                            },
+                        };
+                    }
+                } else {
+                    return {};
+                }
+            }),
+        };
+
+        return searchParams;
+    } else {
+        return {};
+    }
+};
