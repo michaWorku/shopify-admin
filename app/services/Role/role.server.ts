@@ -230,7 +230,7 @@ export const getAllRoles = async (request: Request, userId: string) => {
 
         const { sortType, sortField, skip, take, pageNo, search, filter } =
             getParams(request)
-        const searchParams = searchCombinedColumn(search, ['name', 'createdBy', 'description'])
+        const searchParams = searchCombinedColumn(search, ['name', 'createdBy', 'description'], 'search')
         const filterParams = filterFunction(filter, 'Role')
 
         let roles = []
@@ -241,6 +241,7 @@ export const getAllRoles = async (request: Request, userId: string) => {
                 createdBy: userId,
             },
         })
+        console.log({roleCount})
         if (!!roleCount) {
             roles = await db.role.findMany({
                 take,
@@ -272,6 +273,8 @@ export const getAllRoles = async (request: Request, userId: string) => {
         }
         throw new customErr('Custom_Error', 'Role not found', 404)
     } catch (err) {
+        console.error('Error occurred getting all roles')
+        console.dir(err, {depth: null})
         return errorHandler(err);
     }
 }

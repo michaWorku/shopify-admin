@@ -1,7 +1,13 @@
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-const prisma = new PrismaClient()
+import SecurePassword from 'secure-password'
 
+const SP = new SecurePassword()
+const prisma = new PrismaClient()
+export const hashPassword = async (password: string) => {
+    const hashedBuffer = await SP.hash(Buffer.from(password))
+    return hashedBuffer.toString('base64')
+}
 async function main() {
     await prisma.$connect()
 
@@ -13,7 +19,7 @@ async function main() {
             email: 'admin@sewasewmultimedia.com',
             gender: 'MALE',
             phone: '0911111111',
-            password: bcrypt.hashSync('password', 10),
+            password: await hashPassword('password'),
             isVerified: true,
             status: 'ACTIVE',
             roles: {

@@ -36,12 +36,10 @@ export const getUserPermissions = async (userId: string): Promise<Permission[]> 
         let filteredPermissions: any = []
         permissions?.map((elt: any) => {
             const filtered = Object.fromEntries(
-                Object.entries(elt.permission).filter(
+                Object.entries(elt).filter(
                     ([key, value]: any) => {
                         if (
-                            (key.includes('action') && value) ||
-                            (key.includes('subject') && value) ||
-                            (key.includes('conditions') && value) ||
+                            (key.includes('action' || 'subject'||'conditions') && value) ||
                             (key.includes('fields') && value.length)
                         ) {
                             return { key: value }
@@ -53,10 +51,11 @@ export const getUserPermissions = async (userId: string): Promise<Permission[]> 
                 filteredPermissions.push(filtered)
             }
         })
-
-        if (!!filteredPermissions) throw new customErr('casl_Bad_Request', 'User has got no permissions', 404)
+        if (!filteredPermissions) throw new customErr('casl_Bad_Request', 'User has got no permissions', 404)
         return filteredPermissions
     } catch (err) {
+        console.error('Error occured getting user permissions')
+        console.dir(err, {depth: null})
         return errorHandler(err);
     }
 }

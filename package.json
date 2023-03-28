@@ -65,6 +65,6 @@
   },
   "sideEffects": false,
   "prisma": {
-    "seed": "ts-node prisma/.seed"
+    "seed": "ts-node prisma/user.seed"
   }
 }

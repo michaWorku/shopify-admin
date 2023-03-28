@@ -1,0 +1,965 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "firstName": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "middleName": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "lastName": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "phone": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "email": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "gender": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "Gender",
+          "enum": [
+            "MALE",
+            "FEMALE"
+          ]
+        },
+        "password": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "birthDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "isVerified": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "originalType": "Boolean"
+        },
+        "status": {
+          "type": "string",
+          "originalType": "Status",
+          "default": "ACTIVE",
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "roles": {
+          "type": "array",
+          "originalType": "RoleUser",
+          "items": {
+            "$ref": "#/definitions/RoleUser"
+          }
+        },
+        "clients": {
+          "type": "array",
+          "originalType": "Client",
+          "items": {
+            "$ref": "#/definitions/Client"
+          }
+        },
+        "submissions": {
+          "type": "array",
+          "originalType": "DynamicFormSubmission",
+          "items": {
+            "$ref": "#/definitions/DynamicFormSubmission"
+          }
+        },
+        "rewards": {
+          "type": "array",
+          "originalType": "UserReward",
+          "items": {
+            "$ref": "#/definitions/UserReward"
+          }
+        },
+        "blulkTasks": {
+          "type": "array",
+          "originalType": "BulkTask",
+          "items": {
+            "$ref": "#/definitions/BulkTask"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "firstName",
+        "middleName",
+        "lastName",
+        "phone",
+        "updatedAt"
+      ]
+    },
+    "Role": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "createdBy": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "users": {
+          "type": "array",
+          "originalType": "RoleUser",
+          "items": {
+            "$ref": "#/definitions/RoleUser"
+          }
+        },
+        "permissions": {
+          "type": "array",
+          "originalType": "RolePermission",
+          "items": {
+            "$ref": "#/definitions/RolePermission"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "originalType": "Status",
+          "default": "ACTIVE",
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "createdBy",
+        "updatedAt"
+      ]
+    },
+    "Permission": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "category": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "subject": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "action": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "conditions": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ],
+          "originalType": "Json"
+        },
+        "fields": {
+          "type": "array",
+          "originalType": "String",
+          "items": {
+            "type": "string"
+          }
+        },
+        "roles": {
+          "type": "array",
+          "originalType": "RolePermission",
+          "items": {
+            "$ref": "#/definitions/RolePermission"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "originalType": "Status",
+          "default": "ACTIVE",
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "subject",
+        "action",
+        "updatedAt"
+      ]
+    },
+    "RoleUser": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/User"
+        },
+        "userId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "role": {
+          "$ref": "#/definitions/Role"
+        },
+        "roleId": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "userId",
+        "roleId"
+      ]
+    },
+    "RolePermission": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/definitions/Role"
+        },
+        "roleId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "permission": {
+          "$ref": "#/definitions/Permission"
+        },
+        "permissionId": {
+          "type": "string",
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "roleId",
+        "permissionId"
+      ]
+    },
+    "Client": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "promotionText": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "phone": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "email": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "status": {
+          "type": "string",
+          "originalType": "Status",
+          "default": "ACTIVE",
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "dynamicForms": {
+          "type": "array",
+          "originalType": "DynamicForm",
+          "items": {
+            "$ref": "#/definitions/DynamicForm"
+          }
+        },
+        "rewards": {
+          "type": "array",
+          "originalType": "Reward",
+          "items": {
+            "$ref": "#/definitions/Reward"
+          }
+        },
+        "users": {
+          "type": "array",
+          "originalType": "User",
+          "items": {
+            "$ref": "#/definitions/User"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "promotionText",
+        "phone",
+        "updatedAt"
+      ]
+    },
+    "UserReward": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "users": {
+          "$ref": "#/definitions/User"
+        },
+        "rewardId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "rewards": {
+          "$ref": "#/definitions/Reward"
+        }
+      },
+      "required": [
+        "userId",
+        "rewardId"
+      ]
+    },
+    "Reward": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "rewardTaken": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "originalType": "Int"
+        },
+        "rewardGiven": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "plan": {
+          "type": "string",
+          "originalType": "PLAN",
+          "default": "DAY",
+          "enum": [
+            "DAY",
+            "WEEK",
+            "MONTH",
+            "YEAR"
+          ]
+        },
+        "clientId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "client": {
+          "$ref": "#/definitions/Client"
+        },
+        "users": {
+          "type": "array",
+          "originalType": "UserReward",
+          "items": {
+            "$ref": "#/definitions/UserReward"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "rewardGiven",
+        "clientId",
+        "updatedAt"
+      ]
+    },
+    "DynamicForm": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "fields": {
+          "type": "array",
+          "originalType": "DynamicFormField",
+          "items": {
+            "$ref": "#/definitions/DynamicFormField"
+          }
+        },
+        "submissions": {
+          "type": "array",
+          "originalType": "DynamicFormSubmission",
+          "items": {
+            "$ref": "#/definitions/DynamicFormSubmission"
+          }
+        },
+        "client": {
+          "$ref": "#/definitions/Client"
+        },
+        "clientId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "createdBy": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "clientId",
+        "updatedAt"
+      ]
+    },
+    "DynamicFormField": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "name": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "label": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "type": {
+          "type": "string",
+          "originalType": "DynamicFormFieldType",
+          "enum": [
+            "TEXT",
+            "NUMBER",
+            "EMAIL",
+            "PHONE",
+            "SELECT",
+            "CHECKBOX",
+            "RADIO",
+            "TEXTAREA",
+            "DATE"
+          ]
+        },
+        "required": {
+          "type": "boolean",
+          "originalType": "Boolean"
+        },
+        "options": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ],
+          "originalType": "Json"
+        },
+        "placeholder": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "defaultValue": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ],
+          "originalType": "Json"
+        },
+        "order": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "dynamicFroms": {
+          "$ref": "#/definitions/DynamicForm"
+        },
+        "formId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "type",
+        "required",
+        "order",
+        "formId",
+        "updatedAt"
+      ]
+    },
+    "DynamicFormSubmission": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "data": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ],
+          "originalType": "Json"
+        },
+        "form": {
+          "$ref": "#/definitions/DynamicForm"
+        },
+        "formId": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "submittedBy": {
+          "$ref": "#/definitions/User"
+        },
+        "submittedById": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "data",
+        "formId",
+        "submittedById",
+        "updatedAt"
+      ]
+    },
+    "BulkTask": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "discription": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "status": {
+          "type": "string",
+          "originalType": "BulkStatus",
+          "enum": [
+            "InProgress",
+            "Complete",
+            "Failed",
+            "Canceled",
+            "Canceling"
+          ]
+        },
+        "taskCount": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "faildCount": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "successCount": {
+          "type": "integer",
+          "originalType": "Int"
+        },
+        "tasks": {
+          "type": "array",
+          "originalType": "Task",
+          "items": {
+            "$ref": "#/definitions/Task"
+          }
+        },
+        "createdById": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "createdBy": {
+          "$ref": "#/definitions/User"
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "discription",
+        "status",
+        "taskCount",
+        "faildCount",
+        "successCount",
+        "createdById",
+        "updatedAt"
+      ]
+    },
+    "Task": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "originalType": "String"
+        },
+        "data": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ],
+          "originalType": "Json"
+        },
+        "status": {
+          "type": "string",
+          "originalType": "BulkStatus",
+          "enum": [
+            "InProgress",
+            "Complete",
+            "Failed",
+            "Canceled",
+            "Canceling"
+          ]
+        },
+        "message": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        },
+        "createdAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "DateTime",
+          "format": "date-time"
+        },
+        "bulk": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/BulkTask"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "originalType": "BulkTask"
+        },
+        "bulkId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "originalType": "String"
+        }
+      },
+      "required": [
+        "data",
+        "status",
+        "updatedAt"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "user": {
+      "$ref": "#/definitions/User"
+    },
+    "role": {
+      "$ref": "#/definitions/Role"
+    },
+    "permission": {
+      "$ref": "#/definitions/Permission"
+    },
+    "roleUser": {
+      "$ref": "#/definitions/RoleUser"
+    },
+    "rolePermission": {
+      "$ref": "#/definitions/RolePermission"
+    },
+    "client": {
+      "$ref": "#/definitions/Client"
+    },
+    "userReward": {
+      "$ref": "#/definitions/UserReward"
+    },
+    "reward": {
+      "$ref": "#/definitions/Reward"
+    },
+    "dynamicForm": {
+      "$ref": "#/definitions/DynamicForm"
+    },
+    "dynamicFormField": {
+      "$ref": "#/definitions/DynamicFormField"
+    },
+    "dynamicFormSubmission": {
+      "$ref": "#/definitions/DynamicFormSubmission"
+    },
+    "bulkTask": {
+      "$ref": "#/definitions/BulkTask"
+    },
+    "task": {
+      "$ref": "#/definitions/Task"
+    }
+  }
+}
