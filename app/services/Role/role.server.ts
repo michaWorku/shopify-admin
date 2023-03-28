@@ -289,6 +289,9 @@ export const getAllRoles = async (request: Request, userId: string) => {
  * @throws {Error} If no role found with given ID
  */
 export const updateRoleById = async (roleId: string, data: any): Promise<any> => {
+    if (!roleId) {
+        throw new customErr('Custom_Error', 'Role ID is required', 404)
+    }
     try {
         const updatedRole = await db.role.update({
             where: { id: roleId },
