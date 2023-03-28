@@ -8,6 +8,7 @@ import interpolate from "~/utils/casl/interpolate"
 import getParams from "~/utils/params/getParams.server"
 import { filterFunction } from "~/utils/params/filter.server"
 import { searchFunction } from "~/utils/params/search.server"
+import { checkEntityExist } from "../Entities/entity.server"
 
 /**
  * Creates a new client with the provided data.
@@ -203,31 +204,69 @@ export const updateclientById = async (clientId: string, data: any): Promise<any
  * @async
  * @function getClientByField
  * @param {string} clientId - The ID of the client to get.
- ** @param {string} fieldName - The name of the scalar field to search for (e.g. "id", "phone").
- * @param {any} fieldValue - The value of the scalar field to search for (e.g. "197oiaeuio9187",251900000000").
+ * @param {string} fieldName - The name of the scalar field to search for (e.g. "id", "phone").
+ * @param {string} fieldValue - The value of the scalar field to search for (e.g. "197oiaeuio9187", "251900000000").
  * @returns {Promise<object>} The client object.
  * @throws {Error} If no client is found with the given ID.
  */
-export const getClientByField = async (clientId: string,fieldName: string, fieldValue: string): Promise<any> => {
-    if (!clientId) {
-        throw new customErr('Custom_Error', 'Client ID is required', 404)
-    }
+export const getClientByField = async (clientId: string, fieldName: string, fieldValue: string): Promise<any> => {
     try {
+        if (!clientId) {
+            throw new customErr('Custom_Error', 'Client ID is required', 404);
+        }
+
         const client = await db.role.findUnique({
             where: {
-                id: clientId,
+                [fieldName]: fieldValue,
+            },
+        });
+
+        if (!client) {
+            throw new customErr('Custom_Error', `Client not found with ${fieldValue}`, 404);
+        }
+
+        return json(Response({
+            data: client,
+        }), {
+            status: 200,
+        });
+    } catch (error) {
+        return errorHandler(error);
+    }
+};
+
+
+ /**
+ * Deletes a client with the given ID.
+ * @async
+ * @function deleteClient
+ * @param {string} clientId - The ID of the client to delete.
+ * @returns {Promise<object>} The deleted client object.
+ * @throws {Error} If no client is found with the given ID.
+ */
+export const deleteClient = async (clientId: string): Promise<any> => {
+    try {
+        const clientExists = await checkEntityExist('client', clientId)
+
+        if (!clientExists) {
+            throw new customErr('Custom_Error', `Client not found with ID: ${clientId}`, 404);
+        }
+
+        const client = await db.client.update({
+            where: {
+                id: String(clientId),
+            },
+            data: {
+                deletedAt: new Date(),
             },
         })
 
-        if (!client) {
-            throw new customErr('Custom_Error', `Client not found with ID: ${clientId}`, 404)
-        }
         return json(Response({
-            data: client
+            data: client,
         }), {
-            status: 200
+            status: 200,
         });
-    } catch (err) {
-        return errorHandler(err)
+    } catch (error) {
+        return errorHandler(error)
     }
 }
