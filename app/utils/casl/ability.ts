@@ -26,7 +26,7 @@ export default async function canUser(
     try {
         const user = await getUserById(userId)
         const permissions = await getUserPermissions(userId) as any
-  
+          
         if (permissionType === AbilityType.BOTH) {
             partial = permissions.some(
                 (per: any) =>
