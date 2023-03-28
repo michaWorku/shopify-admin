@@ -1,6 +1,6 @@
 import { Client, Permission } from "@prisma/client"
 import { json } from '@remix-run/node'
-import canUser from "~/utils/casl/ability"
+import canUser, { AbilityType } from "~/utils/casl/ability"
 import customErr, { Response, ResponseType, errorHandler } from "~/utils/handler.server"
 import { db } from "../db.server"
 import clientPermissions from "~/utils/permissionRepo/clientPermissions"
@@ -9,6 +9,7 @@ import getParams from "~/utils/params/getParams.server"
 import { filterFunction } from "~/utils/params/filter.server"
 import { searchFunction } from "~/utils/params/search.server"
 import { checkEntityExist } from "../Entities/entity.server"
+import { canViewUser } from "~/utils/casl/canViewUser"
 
 /**
  * Creates a new client with the provided data.
@@ -284,4 +285,89 @@ export const deleteClient = async (clientId: string, userId: string): Promise<an
     } catch (error) {
         return errorHandler(error)
     }
+}
+/**
+ * Sets client permissions for a given user.
+ *
+ * @async
+ * @function setClientPermissions
+ * @param {string} userId - The ID of the user to set permissions for.
+ * @param {string} clientId - The ID of the client to set permissions for.
+ * @param {Object} permissions - An object containing the permissions to set.
+ * @returns {Promise<Object>} An object containing the updated client permissions.
+ * @throws {customErr} Throws a custom error if the client or user cannot be found.
+ */
+const setClientPermissions = async (userId: string, clients: any[]):Promise<any> =>{
+  const promises = clients.map(async (clientData: any, index: number) => {
+    const canEdit = await canUser(userId, 'update', 'Client', {
+      clientId: clientData.id,
+    }).then((data) => data?.ok)
+
+    const canViewUsers = await canViewUser(userId, {
+      clientId: clientData.id,
+    })
+
+    const canDelete = await canUser(userId, 'delete', 'Client', {
+      clientId: clientData.id,
+    }).then((data) => data?.ok)
+
+
+    clients[index] = {
+      ...clientData,
+      canEdit,
+      canViewUsers,
+      canDelete,
+    }
+  })
+
+  await Promise.all(promises)
+}
+
+/**
+ * Retrieves all clients for a given user, with associated permissions and capabilities.
+ *
+ * @async
+ * @function getClients
+ * @param {Request} request - The HTTP request object.
+ * @param {string} userId - The ID of the user to retrieve clients for.
+ * @returns {Promise<Object>} An object containing the retrieved clients with associated permissions and capabilities.
+ * @throws {customErr} Throws a custom error if the user does not have permission to access the clients, or if an error occurs while retrieving the clients.
+ */
+export const getClients = async (request: Request, userId: string):Promise<Object> => {
+  try {
+    const canView = await canUser(userId, 'read', 'Client', {})
+
+    if (canView?.status === 200) {
+      const clients = await getAllClients(request)
+
+      if (clients?.data) {
+        await setClientPermissions(userId, clients.data)
+      }
+
+      return clients
+      
+    } else {
+      const canViewPartial = await canUser(
+        userId,
+        'read',
+        'Client',
+        {},
+        AbilityType.PARTIAL
+      )
+
+      if (canViewPartial?.ok) {
+        const clients = (await getAllClients(request, userId)) as any
+
+        if (clients?.data) {
+          await setClientPermissions(userId, clients.data)
+        }
+
+        return clients
+      } else {
+        return canViewPartial
+      }
+    }
+  } catch (err) {
+    return errorHandler(err)
+  }
 }
