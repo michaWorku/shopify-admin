@@ -34,7 +34,7 @@ const RowActions=({
   const ref = useRef();
   const [open, setOpen] = useState(false);
 
-  function RouteMenu({ children, route }: any) {
+  const RouteMenu = ({ children, route }: any)=> {
     return (
       <MenuItem onClick={() => navigate(`${row.original.id}/${route}`)}>
         {children}

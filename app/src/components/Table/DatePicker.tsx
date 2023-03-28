@@ -122,7 +122,7 @@ export const DatePick = ({
  * @param {object} props.column - The column instance provided by react-table.
  * @returns {JSX.Element} The DateFilter component.
  */
-export const  DateFilter =({ table, column }: any) : JSX.Element=>{
+const  DateFilter =({ table, column }: any) : JSX.Element=>{
     const { columnFilterFns } = table.getState()
     const [openDate, setOpenDate] = useState(false)
     const [open, setOpen] = useState(false)
@@ -149,3 +149,5 @@ export const  DateFilter =({ table, column }: any) : JSX.Element=>{
         </Box>
     )
 }
+
+export default DateFilter
