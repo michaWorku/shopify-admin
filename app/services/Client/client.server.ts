@@ -176,13 +176,22 @@ export const getAllClients = async (request: Request, userId?: string): Promise<
  * @function updatedClientById
  * @param {string} clientId - ID of the client to update
  * @param {object} data - Updated client data
+ * @param {string} userId The ID of the user creating the client.
  * @returns {Promise<object>} Updated client object
  * @throws {Error} If no client found with given ID
  */
-export const updateclientById = async (clientId: string, data: any): Promise<any> => {
+export const updateclientById = async (clientId: string, data: any, userId: string): Promise<any> => {
     if (!clientId) {
         throw new customErr('Custom_Error', 'Client ID is required', 404)
     }
+
+    const canUpdate = await canUser(userId, 'update', 'Client', {
+        clientId: clientId,
+    })
+    if (canUpdate?.status !== 200) {
+        return canUpdate
+    }
+
     try {
         const updatedCclient = await db.client.update({
             where: { id: clientId },
@@ -236,20 +245,26 @@ export const getClientByField = async (clientId: string, fieldName: string, fiel
 };
 
 
- /**
- * Deletes a client with the given ID.
- * @async
- * @function deleteClient
- * @param {string} clientId - The ID of the client to delete.
- * @returns {Promise<object>} The deleted client object.
- * @throws {Error} If no client is found with the given ID.
- */
-export const deleteClient = async (clientId: string): Promise<any> => {
+/**
+* Deletes a client with the given ID.
+* @async
+* @function deleteClient
+* @param {string} clientId - The ID of the client to delete.
+* @param {string} userId The ID of the user creating the client.
+* @returns {Promise<object>} The deleted client object.
+* @throws {Error} If no client is found with the given ID.
+*/
+export const deleteClient = async (clientId: string, userId: string): Promise<any> => {
     try {
-        const clientExists = await checkEntityExist('client', clientId)
-
-        if (!clientExists) {
-            throw new customErr('Custom_Error', `Client not found with ID: ${clientId}`, 404);
+        if (!clientId) {
+            throw new customErr('Custom_Error', 'Client ID is required', 404)
+        }
+        
+        const canDelete = await canUser(userId, 'delete', 'Client', {
+            clientId: clientId,
+        })
+        if (canDelete?.status !== 200) {
+            return canDelete
         }
 
         const client = await db.client.update({
