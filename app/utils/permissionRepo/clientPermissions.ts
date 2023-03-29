@@ -42,6 +42,86 @@ export default function clientPermissions() {
         },
         {
             action: 'create',
+            subject: 'Form',
+            conditions: { clientId: '$clientId' },
+            fields: [],
+            name: 'Create form',
+            description:
+                'With this permission the client can create form',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'Form',
+            conditions: { clientId: '$clientId' },
+            fields: [],
+            name: 'View form',
+            description:
+                'With this permission the client can view form',
+            category: 'Client',
+        },
+        {
+            action: 'update',
+            subject: 'Form',
+            conditions: { clientId: '$clientId' },
+            fields: [],
+            name: 'Update form',
+            description:
+                'With this permission the client can update form',
+            category: 'Client',
+        },
+        {
+            action: 'create',
+            subject: 'Reward',
+            conditions: { clientId: '$clientId' },
+            fields: [],
+            name: 'Create reward',
+            description:
+                'With this permission the client can create reward',
+            category: 'Client',
+        },
+        {
+            action: 'create',
+            subject: 'Reward',
+            conditions: { clientId: '$clientId' },
+            fields: [],
+            name: 'Create reward',
+            description:
+                'With this permission the client can create reward',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'Reward',
+            conditions: { clientId: '$clientId' },
+            fields: [],
+            name: 'View reward',
+            description:
+                'With this permission the client can view reward',
+            category: 'Client',
+        },
+        {
+            action: 'update',
+            subject: 'Reward',
+            conditions: { clientId: '$clientId' },
+            fields: [],
+            name: 'Update reward',
+            description:
+                'With this permission the client can update reward',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'Submission',
+            conditions: { clientId: '$clientId' },
+            fields: [],
+            name: 'View User form submisions',
+            description:
+                'With this permission the client can view user form submissions',
+            category: 'Client',
+        },
+        {
+            action: 'create',
             subject: 'Role',
             conditions: { clientId: '$clientId' },
             fields: [],
