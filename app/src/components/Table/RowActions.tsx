@@ -3,7 +3,6 @@ import { Box, IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { useNavigate } from "@remix-run/react";
 import { useRef, useState } from "react";
 
-
 /**
  * RowActions component that renders a row actions menu for a given row in a table.
  * @component
@@ -18,8 +17,8 @@ import { useRef, useState } from "react";
  * @param {String} [props.page] - The current page name.
  * @param {Array} [props.routeMenus] - An array of route menus.
  * @returns {JSX.Element} A JSX Element that renders the row actions menu for a given row in a table.
-*/
-const RowActions=({
+ */
+const RowActions = ({
   row,
   handleDelete,
   editCol,
@@ -29,18 +28,18 @@ const RowActions=({
   setLoading,
   page,
   routeMenus,
-}: any): JSX.Element =>{
+}: any): JSX.Element => {
   const navigate = useNavigate();
   const ref = useRef();
   const [open, setOpen] = useState(false);
 
-  const RouteMenu = ({ children, route }: any)=> {
+  const RouteMenu = ({ children, route }: any) => {
     return (
       <MenuItem onClick={() => navigate(`${row.original.id}/${route}`)}>
         {children}
       </MenuItem>
     );
-  }
+  };
 
   return (
     <Box sx={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
@@ -88,27 +87,26 @@ const RowActions=({
               <MoreVert />
             </IconButton>
           </Tooltip>
-          {routeMenus.map(
-            (routeMenu: any) =>
-              routeMenu.some((menu: any) => menu.abilities.ability) &&
-              routeMenu.abilities.map((ability: any) => (
-                <Menu
-                  anchorEl={ref.current}
-                  open={open}
-                  onClose={() => setOpen(false)}
-                >
-                  {ability.ability && (
-                    <RouteMenu route={ability.route}>
-                      {ability.menuItem}
+          {routeMenus?.some((menu: any) => menu.ability) && (
+            <Menu
+              anchorEl={ref.current}
+              open={open}
+              onClose={() => setOpen(false)}
+            >
+              {routeMenus?.map(
+                (routeMenu: any) =>
+                  routeMenu.ability && (
+                    <RouteMenu route={routeMenu.route}>
+                      {routeMenu.menuItem}
                     </RouteMenu>
-                  )}
-                </Menu>
-              ))
+                  )
+              )}
+            </Menu>
           )}
         </Box>
       )}
     </Box>
   );
-}
+};
 
-export default RowActions
+export default RowActions;
