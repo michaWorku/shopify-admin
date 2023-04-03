@@ -91,6 +91,9 @@ export const getAllClientDynamicForms = async (request: Request, clientId?: stri
             skip,
             orderBy: [{ [sortField]: sortType }],
             where: dynamicFormsWhere,
+            include:{
+                fields: true
+            }
         });
 
         let exportData;
