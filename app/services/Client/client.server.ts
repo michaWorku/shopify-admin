@@ -9,7 +9,7 @@ import getParams from "~/utils/params/getParams.server"
 import { filterFunction } from "~/utils/params/filter.server"
 import { searchFunction } from "~/utils/params/search.server"
 import { checkEntityExist } from "../Entities/entity.server"
-import { canViewUser } from "~/utils/casl/canViewUser"
+import { canPerformAction } from "~/utils/casl/canPerformAction"
 
 /**
  * Creates a new client with the provided data.
@@ -65,6 +65,7 @@ export const createClient = async (clientData: Client, userId: string): Promise<
 
         return Response({
             data: result.newClient,
+            message: 'Client successfully created',
         })
     } catch (err) {
         return errorHandler(err)
@@ -163,9 +164,10 @@ export const getAllClients = async (request: Request, userId?: string): Promise<
                 },
             });
         }
-
         throw new customErr('Custom_Error', 'No clients found', 404);
     } catch (error) {
+        console.log('Error occured loading clients')
+        console.dir(error, { depth: null })
         return errorHandler(error);
     }
 };
@@ -181,7 +183,7 @@ export const getAllClients = async (request: Request, userId?: string): Promise<
  * @returns {Promise<object>} Updated client object
  * @throws {Error} If no client found with given ID
  */
-export const updateclientById = async (clientId: string, data: any, userId: string): Promise<any> => {
+export const updateClientById = async (clientId: string, data: any, userId: string): Promise<any> => {
     if (!clientId) {
         throw new customErr('Custom_Error', 'Client ID is required', 404)
     }
@@ -200,7 +202,8 @@ export const updateclientById = async (clientId: string, data: any, userId: stri
         });
 
         return json(Response({
-            data: updatedCclient
+            data: updatedCclient,
+            message: 'Client updated successfully'
         }), {
             status: 200
         });
@@ -260,7 +263,7 @@ export const deleteClient = async (clientId: string, userId: string): Promise<an
         if (!clientId) {
             throw new customErr('Custom_Error', 'Client ID is required', 404)
         }
-        
+
         const canDelete = await canUser(userId, 'delete', 'Client', {
             clientId: clientId,
         })
@@ -279,6 +282,7 @@ export const deleteClient = async (clientId: string, userId: string): Promise<an
 
         return json(Response({
             data: client,
+            message: 'Client deleted successfully'
         }), {
             status: 200,
         });
@@ -297,30 +301,41 @@ export const deleteClient = async (clientId: string, userId: string): Promise<an
  * @returns {Promise<Object>} An object containing the updated client permissions.
  * @throws {customErr} Throws a custom error if the client or user cannot be found.
  */
-const setClientPermissions = async (userId: string, clients: any[]):Promise<any> =>{
-  const promises = clients.map(async (clientData: any, index: number) => {
-    const canEdit = await canUser(userId, 'update', 'Client', {
-      clientId: clientData.id,
-    }).then((data) => data?.ok)
+const setClientPermissions = async (userId: string, clients: any[]): Promise<any> => {
+    const promises = clients.map(async (clientData: any, index: number) => {
+        const canEdit = await canPerformAction(userId, 'update', 'Client', {
+            clientId: clientData.id,
+        })
 
-    const canViewUsers = await canViewUser(userId, {
-      clientId: clientData.id,
+        const canViewUsers = await canPerformAction(userId, 'read', 'User', {
+            clientId: clientData.id,
+        })
+        const canViewForms = await canPerformAction(userId, 'read', 'Form', {
+            clientId: clientData.id,
+        })
+        const canViewRewards = await canPerformAction(userId, 'read', 'Reward', {
+            clientId: clientData.id,
+        })
+        const canViewSubmissions = await canPerformAction(userId, 'read', 'Submission', {
+            clientId: clientData.id,
+        })
+
+        const canDelete = await canPerformAction(userId, 'delete', 'Client', {
+            clientId: clientData.id,
+        })
+
+        clients[index] = {
+            ...clientData,
+            canEdit,
+            canViewUsers,
+            canDelete,
+            canViewForms,
+            canViewRewards,
+            canViewSubmissions
+        }
     })
 
-    const canDelete = await canUser(userId, 'delete', 'Client', {
-      clientId: clientData.id,
-    }).then((data) => data?.ok)
-
-
-    clients[index] = {
-      ...clientData,
-      canEdit,
-      canViewUsers,
-      canDelete,
-    }
-  })
-
-  await Promise.all(promises)
+    await Promise.all(promises)
 }
 
 /**
@@ -333,41 +348,41 @@ const setClientPermissions = async (userId: string, clients: any[]):Promise<any>
  * @returns {Promise<Object>} An object containing the retrieved clients with associated permissions and capabilities.
  * @throws {customErr} Throws a custom error if the user does not have permission to access the clients, or if an error occurs while retrieving the clients.
  */
-export const getClients = async (request: Request, userId: string):Promise<Object> => {
-  try {
-    const canView = await canUser(userId, 'read', 'Client', {})
+export const getClients = async (request: Request, userId: string): Promise<Object> => {
+    try {
+        const canView = await canUser(userId, 'read', 'Client', {})
 
-    if (canView?.status === 200) {
-      const clients = await getAllClients(request)
+        if (canView?.status === 200) {
+            const clients = await getAllClients(request)
 
-      if (clients?.data) {
-        await setClientPermissions(userId, clients.data)
-      }
+            if (clients?.data) {
+                await setClientPermissions(userId, clients.data)
+            }
 
-      return clients
-      
-    } else {
-      const canViewPartial = await canUser(
-        userId,
-        'read',
-        'Client',
-        {},
-        AbilityType.PARTIAL
-      )
+            return clients
 
-      if (canViewPartial?.ok) {
-        const clients = (await getAllClients(request, userId)) as any
+        } else {
+            const canViewPartial = await canUser(
+                userId,
+                'read',
+                'Client',
+                {},
+                AbilityType.PARTIAL
+            )
 
-        if (clients?.data) {
-          await setClientPermissions(userId, clients.data)
+            if (canViewPartial?.ok) {
+                const clients = (await getAllClients(request, userId)) as any
+
+                if (clients?.data) {
+                    await setClientPermissions(userId, clients.data)
+                }
+
+                return clients
+            } else {
+                return canViewPartial
+            }
         }
-
-        return clients
-      } else {
-        return canViewPartial
-      }
+    } catch (err) {
+        return errorHandler(err)
     }
-  } catch (err) {
-    return errorHandler(err)
-  }
 }
