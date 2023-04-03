@@ -28,6 +28,8 @@ const RowActions = ({
   setLoading,
   page,
   routeMenus,
+  handleEdit,
+  setEditData
 }: any): JSX.Element => {
   const navigate = useNavigate();
   const ref = useRef();
@@ -62,8 +64,8 @@ const RowActions = ({
           <IconButton
             color="default"
             onClick={() => {
-              setLoading && setLoading(true);
-              navigate(row.original.id);
+              setEditData(row.original)
+              handleEdit()
             }}
           >
             <Edit />
@@ -96,7 +98,7 @@ const RowActions = ({
               {routeMenus?.map(
                 (routeMenu: any) =>
                   routeMenu.ability && (
-                    <RouteMenu route={routeMenu.route}>
+                    <RouteMenu route={routeMenu.route} key={routeMenu?.menuItem}>
                       {routeMenu.menuItem}
                     </RouteMenu>
                   )
