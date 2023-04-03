@@ -142,6 +142,9 @@ export const userLogin = async (email: string, password: string) => {
 };
 
 export const getUserById = async (userId: string) => {
+  if (!userId) {
+    throw new customErr('Custom_Error', 'User ID is required', 404)
+}
   try {
     return await db.user.findUnique({
       where: { id: userId },

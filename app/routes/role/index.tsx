@@ -19,8 +19,6 @@ import { toast } from "react-toastify";
 import { useMemo } from "react";
 import { Response, errorHandler } from "~/utils/handler.server";
 import moment from "moment";
-import { CustomizedTable } from "~/src/components/Table";
-import AddRoleForm from "~/src/components/AddRoleForm";
 import { authenticator } from "~/services/auth.server";
 import { commitSession, getSession } from "~/services/session.server";
 import { createRole, getAllRoles } from "~/services/Role/role.server";
@@ -33,9 +31,11 @@ import canUser, { AbilityType } from "~/utils/casl/ability";
 import { validate } from "~/utils/validators/validate";
 import { roleSchema } from "~/utils/schema/roleSchema";
 import FilterModes from "~/src/components/Table/CustomFilter";
-import { DateFilter } from "~/src/components/Table/DatePicker";
 import StatusUpdate from "~/src/components/Table/StatusUpdate";
 import RowActions from "~/src/components/Table/RowActions";
+import DateFilter from "~/src/components/Table/DatePicker";
+import { CustomizedTable } from "~/src/components/Table";
+import AddRoleForm from "~/src/components/AddRoleForm";
 
 /**
  * Loader function to fetch role and permisions.
