@@ -1,6 +1,7 @@
 import { DynamicFormField, Prisma } from "@prisma/client"
 import canUser from "~/utils/casl/ability"
 import { db } from "../db.server"
+import { JsonFunction, json } from '@remix-run/node'
 import customErr, { Response, ResponseType, errorHandler } from "~/utils/handler.server"
 import getParams from "~/utils/params/getParams.server";
 import { searchFunction } from "~/utils/params/search.server";
@@ -20,7 +21,7 @@ interface DynamicForm {
  * @param {string} clientId - The ID of the client associated with the form
  * @returns {Promise<ResponseType>} - A promise that resolves to a response object
 */
-export const createForm = async (formData: DynamicForm, userId: string, clientId: string): Promise<ResponseType> => {
+export const createForm = async (formData: DynamicForm, userId: string, clientId: string): Promise<any> => {
     try {
         const canCreate = await canUser(userId, 'create', 'Form', {})
         if (canCreate?.status !== 200) {
@@ -43,9 +44,11 @@ export const createForm = async (formData: DynamicForm, userId: string, clientId
             }
         });
 
-        return Response({
+        return json(Response({
             data,
             message: 'Form successfully created',
+        }), {
+            status: 201
         })
     } catch (err) {
         return errorHandler(err)
@@ -62,7 +65,7 @@ export const createForm = async (formData: DynamicForm, userId: string, clientId
  * @throws {customErr} - An error indicating that no dynamic forms were found.
  * @throws {Error} - An error indicating that an unexpected error occurred.
  */
-export const getAllClientDynamicForms = async (request: Request, clientId?: string): Promise<ResponseType> => {
+export const getAllClientDynamicForms = async (request: Request, clientId?: string): Promise<any> => {
     try {
         const { sortType, sortField, skip, take, pageNo, search, filter, exportType } = getParams(request);
 
@@ -102,7 +105,7 @@ export const getAllClientDynamicForms = async (request: Request, clientId?: stri
             exportData = await db.dynamicForm.findMany({});
         }
 
-        return Response({
+        return json(Response({
             data: dynamicForms,
             metaData: {
                 page: pageNo,
@@ -114,10 +117,49 @@ export const getAllClientDynamicForms = async (request: Request, clientId?: stri
                 exportType,
                 exportData,
             },
-        });
+        }), { status: 200 })
     } catch (error) {
         console.log('Error occurred loading dynamic forms.');
         console.dir(error, { depth: null });
         return errorHandler(error);
     }
 };
+
+/**
+ * Updates a dynamic form field by ID
+ * @async
+ * @function updateDynamicFormById
+ * @param {string} dynamicFormId - ID of the dynamic form to update
+ * @param {object} data - Updated dynamic form field data
+ * @param {string} userId - The ID of the user updating the dynamic form
+ * @param {string} clientId - The ID of the client associated with the forms.
+ * @returns {Promise<object>} Updated dynamic form  object
+ * @throws {customErr} If no dynamic form found with given ID
+ */
+export const updateDynamicFormById = async (dynamicFormId: string, data: any, userId: string, clientId: string): Promise<any> => {
+    if (!dynamicFormId) {
+        throw new customErr('Custom_Error', 'Dynamic form field ID is required', 404);
+    }
+
+    const canUpdate = await canUser(userId, 'update', 'DynamicFormField', {
+        clientId,
+    });
+    if (canUpdate?.status !== 200) {
+        return canUpdate;
+    }
+
+    try {
+        const updatedDynamicFormField = await db.dynamicFormField.update({
+            where: { id: dynamicFormId },
+            data,
+        });
+
+        return json(Response({
+            data: updatedDynamicFormField,
+            message: 'Dynamic form field updated successfully',
+        }), { status: 200 })
+    } catch (error) {
+        return errorHandler(error);
+    }
+};
+
