@@ -5,7 +5,7 @@ import {
     PrismaClientKnownRequestError,
     PrismaClientUnknownRequestError,
     PrismaClientValidationError,
-} from '@prisma/client/runtime'
+} from '@prisma/client'
 import { json, MaxPartSizeExceededError } from '@remix-run/node'
 import { formatFileSize } from './format'
 
@@ -49,11 +49,18 @@ export default class customErr {
 }
 
 export const errorHandler = async (err: any) => {
+    console.log('error handler')
+    console.log({isInstance: err instanceof PrismaClientKnownRequestError})
+    console.dir(err, { depth: null })
     if (err.status === 302) {
+        console.log('error status is 302')
         return err
     }
     if (err instanceof PrismaClientKnownRequestError) {
+        console.log('error type PrismaClientKnownRequestError')
+        console.dir(err, { depth: null })
         if (err.code === 'P2002') {
+            console.dir(err, { depth: null })
             return json(
                 Response({
                     error: {
@@ -294,6 +301,7 @@ export const errorHandler = async (err: any) => {
 }
 
 export type ResponseType = {
+    message?: string
     data?: any
     metaData?: any
     error?: {
