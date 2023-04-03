@@ -163,3 +163,49 @@ export const updateDynamicFormById = async (dynamicFormId: string, data: any, us
     }
 };
 
+/**
+ * Deletes a dynamic form with the given ID.
+ * @async
+ * @function deleteDynamicForm
+ * @param {string} dynamicFormId - The ID of the dynamic form to delete.
+ * @param {string} userId - The ID of the user deleting the dynamic form.
+ * @param {string} clientId - The ID of the client associated with the forms. 
+* @returns {Promise<object>} The deleted dynamic form object.
+ * @throws {Error} If no dynamic form is found with the given ID.
+ */
+export const deleteDynamicForm = async (dynamicFormId: string, userId: string, clientId: string): Promise<any> => {
+    try {
+        if (!dynamicFormId) {
+            throw new customErr('Custom_Error', 'Dynamic Form ID is required', 404);
+        }
+
+        const canDelete = await canUser(userId, 'delete', 'DynamicForm', {
+            clientId,
+        });
+
+        if (canDelete?.status !== 200) {
+            return canDelete;
+        }
+
+        const dynamicForm = await db.dynamicForm.update({
+            where: {
+                id: String(dynamicFormId),
+            },
+            data: {
+                deletedAt: new Date(),
+            },
+        });
+
+        return json(
+            Response({
+                data: dynamicForm,
+                message: 'Dynamic Form deleted successfully',
+            }),
+            {
+                status: 200,
+            }
+        );
+    } catch (error) {
+        return errorHandler(error);
+    }
+};
