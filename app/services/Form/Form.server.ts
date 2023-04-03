@@ -1,11 +1,12 @@
 import { DynamicFormField, Prisma } from "@prisma/client"
-import canUser from "~/utils/casl/ability"
+import canUser, { AbilityType } from "~/utils/casl/ability"
 import { db } from "../db.server"
 import { JsonFunction, json } from '@remix-run/node'
 import customErr, { Response, ResponseType, errorHandler } from "~/utils/handler.server"
 import getParams from "~/utils/params/getParams.server";
 import { searchFunction } from "~/utils/params/search.server";
 import { filterFunction } from "~/utils/params/filter.server";
+import { canPerformAction } from "~/utils/casl/canPerformAction"
 
 interface DynamicForm {
     name: string;
@@ -209,3 +210,60 @@ export const deleteDynamicForm = async (dynamicFormId: string, userId: string, c
         return errorHandler(error);
     }
 };
+
+/**
+ * Retrieves all dynamic forms for a given client, with associated permissions and capabilities.
+ *
+ * @async
+ * @function getDynamicForms
+ * @param {Request} request - The HTTP request object.
+ * @param {string} userId - The ID of the user to retrieve dynamic forms for.
+ * @param {string} clientId - The ID of the client to retrieve dynamic forms for.
+ * @returns {Promise<Object>} An object containing the retrieved dynamic forms with associated permissions and capabilities.
+ * @throws {customErr} Throws a custom error if the user does not have permission to access the dynamic forms, or if an error occurs while retrieving them.
+ */
+ export const getDynamicForms = async (request: Request, userId: string, clientId: string): Promise<Object> => {
+    try {
+      const canViewDynamicForms = await canUser(userId, 'read', 'DynamicForm', {});
+      if (canViewDynamicForms?.status !== 200) {
+        const canViewDynamicFormsPartial = await canUser(userId, 'read', 'DynamicForm', {}, AbilityType.PARTIAL);
+        if (!canViewDynamicFormsPartial?.ok) {
+          return canViewDynamicFormsPartial;
+        }
+      }
+      const dynamicForms = await getAllClientDynamicForms(request, clientId);
+      if (dynamicForms?.data) {
+        await setDynamicFormPermissions(userId, dynamicForms.data, clientId);
+      }
+      return dynamicForms;
+    } catch (err) {
+      return errorHandler(err);
+    }
+  };
+  
+  /**
+   * Sets Dynamic form permissions for a given client.
+   *
+   * @async
+   * @function setDynamicFormPermissions
+   * @param {string} userId - The ID of the user to set permissions for.
+   * @param {Object[]} dynamicForms - An array of dynamic forms to set permissions for.
+   * @param {string} clientId - The ID of the client to set permissions for.
+   * @returns {Promise<void>} A promise that resolves when the permissions have been set.
+   * @throws {customErr} Throws a custom error if the client or user cannot be found.
+   */
+  const setDynamicFormPermissions = async (userId: string, dynamicForms: any[], clientId: string): Promise<void> => {
+    const promises = dynamicForms.map(async (dynamicFormData: any, index: number) => {
+      const canEdit = await canPerformAction(userId, 'update', 'DynamicForm', { clientId });
+      const canViewFormField = await canPerformAction(userId, 'read', 'DynamicFormField', { clientId });
+      const canDelete = await canPerformAction(userId, 'delete', 'DynamicForm', { clientId });
+      dynamicForms[index] = {
+        ...dynamicFormData,
+        canEdit,
+        canDelete,
+        canViewFormField
+      };
+    });
+    await Promise.all(promises);
+  };
+  
