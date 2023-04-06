@@ -1,4 +1,4 @@
-import { DynamicFormField, Prisma } from "@prisma/client"
+import { DynamicFormField, DynamicFormFieldType, Prisma } from "@prisma/client"
 import canUser, { AbilityType } from "~/utils/casl/ability"
 import { db } from "../db.server"
 import { JsonFunction, json } from '@remix-run/node'
@@ -149,6 +149,41 @@ export const getAllClientDynamicForms = async (request: Request, clientId?: stri
 };
 
 /**
+ * Get a dynamic form by unique field.
+ * @async
+ * @function getDynamicFormByField
+ * @param {string} formId - The ID of the dynamic form to get.
+ * @returns {Promise<object>} The dynamic form object.
+ * @throws {Error} If no form is found with the given ID.
+ */
+export const getDynamicFormByField = async (formId: string): Promise<any> => {
+    try {
+        if (!formId) {
+            throw new customErr('Custom_Error', 'Form ID is required', 404);
+        }
+
+        const form = await db.dynamicForm.findUnique({
+            where: {
+                id: formId,
+            },
+            include: {
+                fields: true
+            }
+        });
+        console.dir({ form }, { depth: null });
+        if (!form) {
+            throw new customErr('Custom_Error', `Form not found with ${formId}`, 404);
+        }
+
+        return Response({
+            data: form,
+        })
+    } catch (error) {
+        return errorHandler(error);
+    }
+};
+
+/**
  * Updates a dynamic form field by ID
  * @async
  * @function updateDynamicFormById
@@ -164,7 +199,7 @@ export const updateDynamicFormById = async (formId: string, data: DynamicForm, u
         throw new customErr('Custom_Error', 'Dynamic form field ID is required', 404);
     }
 
-    const canUpdate = await canUser(userId, 'update', 'DynamicFormField', {
+    const canUpdate = await canUser(userId, 'update', 'DynamicForm', {
         clientId,
     });
     if (canUpdate?.status !== 200) {
@@ -235,6 +270,121 @@ export const updateDynamicFormById = async (formId: string, data: DynamicForm, u
     }
 };
 
+/**
+ * Updates a dynamic form field by ID
+ * @async function updateDynamicFormField
+ * @param {string} formId - The ID of the dynamic form
+ * @param {DynamicFormField} dynamicFormField - The updated dynamic form field object
+ * @param {string} userId - The ID of the user making the request
+ * @param {string} clientId - The ID of the client making the request
+ * @returns {Promise<any>} - A Promise that resolves to the updated dynamic form field object or an error object
+ */
+export const updateDynamicFormField = async (
+    formId: string,
+    dynamicFormField: DynamicFormField,
+    userId: string,
+    clientId: string
+): Promise<any> => {
+
+    if (!formId) {
+        throw new customErr(
+            "Custom_Error",
+            "Dynamic form ID is required",
+            404
+        );
+    }
+
+    const canUpdate = await canUser(userId, "update", "DynamicFormField", {
+        clientId,
+    });
+
+    if (canUpdate?.status !== 200) {
+        return canUpdate;
+    }
+    const data = {
+        name: dynamicFormField?.name,
+        label: dynamicFormField?.label,
+        order: dynamicFormField?.order,
+        required: dynamicFormField?.required,
+        type: dynamicFormField?.type,
+        defaultValue: dynamicFormField?.defaultValue as any,
+        description: dynamicFormField?.description,
+        placeholder: dynamicFormField?.placeholder,
+    }
+
+    try {
+        const updatedDynamicFormField = await db.dynamicFormField.upsert({
+            update: {
+                ...data
+            },
+            where: {
+                id: dynamicFormField?.id,
+            },
+            create: {
+                formId: formId,
+                ...data
+            }
+        });
+
+        return json(
+            Response({
+                data: updatedDynamicFormField,
+                message: "Dynamic form field updated successfully",
+            }),
+            { status: 200 }
+        );
+    } catch (error) {
+        return errorHandler(error);
+    }
+};
+
+/**
+ * Deletes a dynamic form field by ID.
+ * 
+ * @param {string} formId - The ID of the dynamic form to which the field belongs.
+ * @param {string} fieldId - The ID of the dynamic form field to delete.
+ * @param {string} userId - The ID of the user performing the delete operation.
+ * @param {string} clientId - The ID of the client associated with the dynamic form.
+ * @returns {Promise<{ data: any, message: string }>} A promise that resolves to an object containing the deleted dynamic form field and a success message.
+ * @throws {customErr} Throws a custom error if the form ID or field ID are missing or if the user does not have permission to delete the field.
+ */
+export const deleteDynamicFormField = async (
+    formId: string,
+    fieldId: string,
+    userId: string,
+    clientId: string
+): Promise<{ data: any, message: string }> => {
+    if (!formId) {
+        throw new customErr('Custom_Error', 'Dynamic form ID is required', 404);
+    }
+
+    if (!fieldId) {
+        throw new customErr('Custom_Error', 'Dynamic form field ID is required', 404);
+    }
+
+    const canDelete = await canUser(userId, 'delete', 'DynamicFormField', {
+        clientId,
+    });
+
+    if (canDelete?.status !== 200) {
+        return canDelete;
+    }
+
+    try {
+        const deletedDynamicFormField = await db.dynamicFormField.delete({
+            where: {
+                id: fieldId,
+            },
+        });
+
+        return {
+            data: deletedDynamicFormField,
+            message: 'Dynamic form field deleted successfully',
+        };
+    } catch (error) {
+        return errorHandler(error);
+    }
+};
 
 /**
  * Deletes a dynamic form with the given ID.
