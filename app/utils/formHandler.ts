@@ -14,9 +14,10 @@ import { z } from 'zod';
  */
  export const formHandler = async (request: Request, schema: z.ZodObject<any>) => {
     const form = await request.formData();
-    console.log({ form });
     let formData = Object.fromEntries(form) as any;
-    console.log({ formData });
+  
+    formData= JSON.parse(formData.data)
+    console.dir(formData, {depth: null});
     const hasPhone = formData.hasOwnProperty('phone');
 
     if (hasPhone) {
@@ -33,6 +34,7 @@ import { z } from 'zod';
         formData,
         schema
     );
+    console.dir(fieldError, {depth: null});
     if (!success) {
         return json(
             Response({
@@ -44,7 +46,7 @@ import { z } from 'zod';
             { status: 422 }
         );
     }
-    return data
+    return {success,data}
 }
 
 
