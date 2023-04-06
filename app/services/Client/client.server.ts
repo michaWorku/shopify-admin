@@ -228,7 +228,7 @@ export const getClientByField = async (clientId: string, fieldName: string, fiel
             throw new customErr('Custom_Error', 'Client ID is required', 404);
         }
 
-        const client = await db.role.findUnique({
+        const client = await db.client.findUnique({
             where: {
                 [fieldName]: fieldValue,
             },

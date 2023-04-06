@@ -108,15 +108,21 @@ export const action: ActionFunction = async ({ request }) => {
     console.log({ clientId });
     switch (request.method) {
       case "POST":
-        const addClientData = await formHandler(request, clientSchema);
-        response = await createClient(addClientData, user.id);
+        const addClientData = (await formHandler(request, clientSchema))as any;
+        if (!addClientData?.success) {
+          return addClientData;
+        }
+        response = await createClient(addClientData?.data, user.id);
         break;
       case "PATCH":
-        const editClientData = await formHandler(
+        const editClientData = (await formHandler(
           request,
           clientSchemaForUpdate
-        );
-        response = await updateClientById(clientId, editClientData, user.id);
+        )) as any
+        if (!editClientData?.success) {
+          return editClientData;
+        }
+        response = await updateClientById(clientId, editClientData?.data, user.id);
         break;
       case "DELETE":
         response = await deleteClient(clientId, user.id);
@@ -138,7 +144,7 @@ export const DefaultDialogInfo = {
   id: "",
   title: "Remove a Client",
   contentText: "Are you sure you want to remove this client?",
-  action: "client",
+  action: "clients",
 };
 /**
  * Renders the Clients component.
@@ -234,7 +240,7 @@ const Clients = () => {
             moreDetails={true}
             page="clients"
             handleDelete={handleDelete}
-            handleEdit={handleOpenModal}
+            handleEdit={handleModal}
             setEditData={setEditData}
             routeMenus={[
               {
@@ -279,7 +285,8 @@ const Clients = () => {
     if (!!fetcher?.data) setActionData(fetcher?.data);
   }, [fetcher?.data]);
 
-  const handleOpenModal = () => {
+  const handleModal = (row:any) => {
+    setEditData(row);
     setOpenModal(true);
   };
 
@@ -303,7 +310,7 @@ const Clients = () => {
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
         customAction={(table: any) => (
-          <Button variant="add" onClick={handleOpenModal}>
+          <Button variant="add" onClick={()=>handleModal(undefined)}>
             Add Client
           </Button>
         )}

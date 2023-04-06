@@ -55,11 +55,11 @@ const ClientForm = ({
     });
   }, [editData]);
 
-  const onSubmitHandler: SubmitHandler<clientInput> = (values) => {
-    console.log({ values });
-    fetcher.submit(values, {
+  const onSubmitHandler: SubmitHandler<clientInput> = (data) => {
+    console.log({ data });
+    fetcher.submit({ data: JSON.stringify(data) }, {
       method: !editData?.id ? "post" : "patch",
-      action: !editData?.id ? "client" : `client?clientId=${editData?.id}`,
+      action: !editData?.id ? "clients" : `clients?clientId=${editData?.id}`,
     });
   };
   const handleCloseModal = () => {
