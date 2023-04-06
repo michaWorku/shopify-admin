@@ -41,15 +41,15 @@ type DeleteAlertProps = {
  * @param {Object} props - The props object.
  * @param {Object} props.deleteDialog - An object containing the details of the dialog box.
  * @param {Function} props.setDeleteDialog - A function to set the state of deleteDialog.
+ * @param {Object} props.fetcher A fetcher instance to handle API calls.
  * @returns {JSX.Element} - A JSX Element representing the DeleteAlert component.
  * @returns
  */
 const DeleteAlert: FC<DeleteAlertProps> = ({
   deleteDialog,
   setDeleteDialog,
+  fetcher,
 }): JSX.Element => {
-  const fetcher = useFetcher();
-
   const handleCloseDialog = () => {
     setDeleteDialog({
       open: false,
@@ -95,7 +95,11 @@ const DeleteAlert: FC<DeleteAlertProps> = ({
               fontSize: "0.875rem",
               width: "7rem",
               height: "2.2rem",
-              color: palette.primary.main,
+              color: "primary.main",
+              ":hover": {
+                backgroundColor: "#e5e5e5",
+                color: "primary.main",
+              },
             }}
             type="button"
           >
@@ -104,10 +108,15 @@ const DeleteAlert: FC<DeleteAlertProps> = ({
           <Box px={0.5} />
           <Button
             sx={{
-              backgroundColor: "primary.main",
+              color: "primary.main",
+              backgroundColor: "secondary.main",
               fontSize: "0.875rem",
               width: "7rem",
               height: "2.2rem",
+              ":hover": {
+                backgroundColor: "primary.main",
+                color: '#fff'
+              },
             }}
             type="button"
             disabled={
