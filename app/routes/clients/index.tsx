@@ -216,7 +216,7 @@ const Clients = () => {
         Cell: ({ row }) => (
           <StatusUpdate
             row={row}
-            route={`/client?clientId=${row.original.id}`}
+            route={`/clients?clientId=${row.original.id}`}
           />
         ),
       },
@@ -289,7 +289,7 @@ const Clients = () => {
       id: clientId,
       title: "Remove a Client",
       contentText: "Are you sure you want to remove this client?",
-      action: `client?clientId=${clientId}`,
+      action: `clients?clientId=${clientId}`,
     });
   };
 

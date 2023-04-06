@@ -17,7 +17,7 @@ import palette from "~/src/theme/palette";
 
 const ListItems = [
   {
-    item: "client",
+    item: "clients",
     icon: <PeopleIcon />,
   },
   {
