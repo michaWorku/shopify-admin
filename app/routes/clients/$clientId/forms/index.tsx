@@ -259,7 +259,7 @@ const Forms = () => {
             row={row}
             viewDetail={false}
             moreDetails={true}
-            page="clients"
+            page="forms"
             handleDelete={handleDelete}
             handleEdit={handleModal}
             routeMenus={[
@@ -314,7 +314,7 @@ const Forms = () => {
       <CustomizedTable
         columns={columns}
         data={loaderData}
-        page="Client"
+        page="Form"
         exportFileName="Forms"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
