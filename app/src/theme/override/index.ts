@@ -1,7 +1,11 @@
 import MuiButton from './Button';
+import MuiCheckbox from './CheckBox';
+import MuiTextField from './TextField';
 
 const components = {
-    MuiButton
+    MuiButton,
+    MuiCheckbox,
+    // MuiTextField
 }
 
 

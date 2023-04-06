@@ -8,7 +8,8 @@ declare module "@mui/material/Button" {
     getSubscription: true;
     profileEdit: true;
     export: true;
-    add: true
+    add: true;
+    text: true;
   }
 }
 
@@ -19,27 +20,37 @@ const MuiButton = {
       color: "#fff",
       borderRadius: "8px",
       ":hover": {
-        color: "#4E0D0E",
+        color: palette.primary.main,
         background: "#e5e5e5",
       },
     },
     export: {
       fontSize: "0.875rem",
       borderRadius: "8px",
-      color: "#4E0D0E",
-      ':hover':{
+      color: palette.primary.main,
+      ":hover": {
         background: palette.grey[100],
-      }
+      },
     },
     add: {
       fontSize: "0.875rem",
       borderRadius: "8px",
-      background: '#4E0D0E',
+      background: palette.primary.main,
       color: "#FFF",
-      ':hover':{
+      ":hover": {
         background: palette.grey[100],
-        color: '#4E0D0E'
-      }
+        color: palette.primary.main,
+      },
+    },
+    text: {
+      fontSize: "0.875rem",
+      borderRadius: "8px",
+      background: "#FFF",
+      color: "#ffcc00",
+      ":hover": {
+        background: "#FFF",
+        color: "#ffcc00",
+      },
     },
   },
 };
