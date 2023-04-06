@@ -16,7 +16,7 @@ import { useNavigation, useSubmit } from "@remix-run/react";
  * @param {string} props.route - The route URL.
  * @param {boolean} props.disable - A flag indicating whether to disable the component.
  */
-const  StatusUpdate=({ row, route, disable }: any): JSX.Element=> {
+const StatusUpdate = ({ row, route, disable }: any): JSX.Element => {
   const submit = useSubmit();
   const navigation = useNavigation();
 
@@ -68,7 +68,10 @@ const  StatusUpdate=({ row, route, disable }: any): JSX.Element=> {
           alignItems: "center",
           width: 190,
           borderRadius: 1,
-          bgcolor: row?.original?.status === "ACTIVE" ? "success.lighter" : "error.lighter",
+          bgcolor:
+            row?.original?.status === "ACTIVE"
+              ? "success.lighter"
+              : "error.lighter",
         }}
       >
         {getStatusIcon()}
@@ -85,8 +88,12 @@ const  StatusUpdate=({ row, route, disable }: any): JSX.Element=> {
               onChange={() =>
                 submit(
                   {
-                    status:
-                      row.original.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
+                    data: JSON.stringify({
+                      status:
+                        row.original.status === "ACTIVE"
+                          ? "INACTIVE"
+                          : "ACTIVE",
+                    }),
                   },
                   {
                     method: "patch",
@@ -100,6 +107,6 @@ const  StatusUpdate=({ row, route, disable }: any): JSX.Element=> {
       </Box>
     </Box>
   );
-}
+};
 
 export default StatusUpdate;

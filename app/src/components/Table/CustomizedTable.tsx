@@ -45,7 +45,7 @@ const CustomizedTable = ({
     <Box sx={{ height: 200 }}>
       <MaterialReactTable
         columns={columns}
-        data={data?.data?.data || data?.data || []}
+        data={data?.data?.data || data?.data || data || []}
         rowCount={data?.metaData?.total || 0}
         enableColumnFilterModes
         enableColumnResizing
