@@ -57,7 +57,7 @@ const Reward: FC<RewardProps> = ({
   return (
     <Grid
       container
-      spacing={3}
+      spacing={2}
       display="flex"
       alignItems="center"
       justifyContent="start"
@@ -91,14 +91,21 @@ const Reward: FC<RewardProps> = ({
               onChange={(event, value: any) =>
                 onChange(forms?.find((form: any) => form?.name === value)?.id)
               }
+              placeholder="Search form"
+              sx={{
+                '& .MuiFormLabel-root':{
+                  color: 'primary.main'
+                }
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Search form"
-                  placeholder="Search form"
+                  label="Search Form"
+                  placeholder="Search Form"
+                  required
                   InputProps={{
                     ...params.InputProps,
-                    type: "search",
+                    type: "search"
                   }}
                   error={
                     !!errors["formId"] ||
@@ -398,8 +405,8 @@ const RewardForm: React.FC<any> = ({
                   }}
                 >
                   <Box sx={{ px: 5, pt: 5 }}>
-                    <Typography variant="h6">Add New Form Field</Typography>
-                    <Typography>Add a new Form Field</Typography>
+                    <Typography variant="h6">Add New Reward</Typography>
+                    <Typography>Add a new Reward</Typography>
                   </Box>
 
                   <Box
