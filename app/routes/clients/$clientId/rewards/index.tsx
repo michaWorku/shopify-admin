@@ -1,5 +1,5 @@
 import { Box, Button } from "@mui/material";
-import { DynamicForm, Reward, Status } from "@prisma/client";
+import { Reward, Status } from "@prisma/client";
 import { ActionFunction, LoaderFunction, json } from "@remix-run/node";
 import {
   useFetcher,
@@ -25,15 +25,9 @@ import { formHandler } from "~/utils/formHandler";
 import { toast } from "react-toastify";
 import DeleteAlert, { DeleteDialogType } from "~/src/components/DeleteAlert";
 import {
-  createForm,
-  deleteDynamicForm,
   getDynamicForms,
-  updateDynamicFormById,
 } from "~/services/Form/Form.server";
 import { RewardForm } from "~/src/components/Forms";
-import {
-  dynamicFormSchema,
-} from "~/utils/schema/dynamicFormSchema";
 import { createReward, deleteRewardById, getRewards, updateRewardById } from "~/services/Reward/Reward.server";
 import { rewardSchema, updateRewardSchema } from "~/utils/schema/rewardSchema";
 
