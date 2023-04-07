@@ -373,6 +373,18 @@
         "rewardGiven": {
           "type": "integer"
         },
+        "createdBy": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "default": "ACTIVE",
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
         "plan": {
           "type": "string",
           "default": "DAY",

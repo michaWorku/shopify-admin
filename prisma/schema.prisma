@@ -116,6 +116,8 @@ model Reward {
   description String?
   rewardTaken Int?
   rewardGiven Int
+  createdBy   String
+  status      Status       @default(ACTIVE)
   plan        PLAN         @default(DAY)
   clientId    String
   client      Client       @relation(fields: [clientId], references: [id])
