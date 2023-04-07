@@ -1,8 +1,8 @@
-import { DynamicFormField, DynamicFormFieldType, Prisma } from "@prisma/client"
+import { DynamicFormField, Prisma } from "@prisma/client"
 import canUser, { AbilityType } from "~/utils/casl/ability"
 import { db } from "../db.server"
-import { JsonFunction, json } from '@remix-run/node'
-import customErr, { Response, ResponseType, errorHandler } from "~/utils/handler.server"
+import { json } from '@remix-run/node'
+import customErr, { Response, errorHandler } from "~/utils/handler.server"
 import getParams from "~/utils/params/getParams.server";
 import { searchFunction } from "~/utils/params/search.server";
 import { filterFunction } from "~/utils/params/filter.server";
@@ -12,17 +12,6 @@ interface DynamicForm {
     name: string;
     description: string;
     fields: any;
-}
-
-type DynamicFormFieldUpdateManyData = {
-    name?: string;
-    label?: string;
-    type?: string;
-    defaultValue?: string;
-    required?: boolean;
-    placeholder?: string;
-    description?: string;
-    order?: number;
 }
 
 /**
@@ -371,9 +360,13 @@ export const deleteDynamicFormField = async (
     }
 
     try {
-        const deletedDynamicFormField = await db.dynamicFormField.delete({
+        
+        const deletedDynamicFormField = await db.dynamicFormField.update({
             where: {
-                id: fieldId,
+                id: String(formId),
+            },
+            data: {
+                deletedAt: new Date(),
             },
         });
 
