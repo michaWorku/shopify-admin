@@ -97,6 +97,12 @@ const Reward: FC<RewardProps> = ({
                   color: 'primary.main'
                 }
               }}
+              placeholder="Search form"
+              sx={{
+                '& .MuiFormLabel-root':{
+                  color: 'primary.main'
+                }
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
