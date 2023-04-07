@@ -16,6 +16,7 @@ generator jsonSchema {
   includeRequiredFields    = "true"
   persistOriginalType      = "true"
 }
+
 model User {
   id          String                  @id @default(uuid())
   firstName   String
@@ -27,7 +28,7 @@ model User {
   password    String?
   birthDate   DateTime?
   isVerified  Boolean?
-  status      Status @default(ACTIVE)
+  status      Status                  @default(ACTIVE)
   roles       RoleUser[]
   clients     Client[]
   submissions DynamicFormSubmission[]
@@ -118,6 +119,8 @@ model Reward {
   plan        PLAN         @default(DAY)
   clientId    String
   client      Client       @relation(fields: [clientId], references: [id])
+  formId      String
+  form        DynamicForm  @relation(fields: [formId], references: [id])
   users       UserReward[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -132,6 +135,7 @@ model DynamicForm {
   submissions DynamicFormSubmission[]
   client      Client                  @relation(fields: [clientId], references: [id])
   clientId    String
+  reward      Reward[]
   createdBy   String?
   createdAt   DateTime                @default(now())
   updatedAt   DateTime                @updatedAt
@@ -232,4 +236,3 @@ enum BulkStatus {
   Canceled
   Canceling
 }
-
