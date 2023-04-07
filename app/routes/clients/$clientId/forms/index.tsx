@@ -30,7 +30,7 @@ import {
   getDynamicForms,
   updateDynamicFormById,
 } from "~/services/Form/Form.server";
-import { DynamicForm as AddDynamicForm } from "~/src/components/";
+import { DynamicForm as AddDynamicForm } from "~/src/components/Forms";
 import {
   dynamicFormSchema,
 } from "~/utils/schema/dynamicFormSchema";

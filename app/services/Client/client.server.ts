@@ -179,7 +179,7 @@ export const getAllClients = async (request: Request, userId?: string): Promise<
  * @function updatedClientById
  * @param {string} clientId - ID of the client to update
  * @param {object} data - Updated client data
- * @param {string} userId The ID of the user creating the client.
+ * @param {string} userId The ID of the user updating the client.
  * @returns {Promise<object>} Updated client object
  * @throws {Error} If no client found with given ID
  */
@@ -196,13 +196,13 @@ export const updateClientById = async (clientId: string, data: any, userId: stri
     }
 
     try {
-        const updatedCclient = await db.client.update({
+        const updatedClient = await db.client.update({
             where: { id: clientId },
             data
         });
 
         return json(Response({
-            data: updatedCclient,
+            data: updatedClient,
             message: 'Client updated successfully'
         }), {
             status: 200

@@ -26,7 +26,7 @@ import {
   clientSchema,
   clientSchemaForUpdate,
 } from "~/utils/schema/clientSchema";
-import { ClientForm } from "~/src/components";
+import { ClientForm } from "~/src/components/Forms";
 import { formHandler } from "~/utils/formHandler";
 import { toast } from "react-toastify";
 import DeleteAlert, { DeleteDialogType } from "~/src/components/DeleteAlert";

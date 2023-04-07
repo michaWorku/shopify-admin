@@ -1,4 +1,12 @@
-import { Box, Card, IconButton, Modal, Slide, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  Grid,
+  IconButton,
+  Modal,
+  Slide,
+  Typography,
+} from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { Form } from "@remix-run/react";
 import CloseIcon from "@mui/icons-material/Close";
@@ -39,6 +47,7 @@ const ClientForm = ({
   );
 
   const {
+    control,
     register,
     formState: { errors },
     handleSubmit,
@@ -57,10 +66,13 @@ const ClientForm = ({
 
   const onSubmitHandler: SubmitHandler<clientInput> = (data) => {
     console.log({ data });
-    fetcher.submit({ data: JSON.stringify(data) }, {
-      method: !editData?.id ? "post" : "patch",
-      action: !editData?.id ? "clients" : `clients?clientId=${editData?.id}`,
-    });
+    fetcher.submit(
+      { data: JSON.stringify(data) },
+      {
+        method: !editData?.id ? "post" : "patch",
+        action: !editData?.id ? "clients" : `clients?clientId=${editData?.id}`,
+      }
+    );
   };
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -115,128 +127,83 @@ const ClientForm = ({
                   },
                   height: "calc(100vh - 265px)",
                   px: 5,
+                  py: 3
                 }}
               >
-                <ControlledTextField
-                  name="name"
-                  register={register}
-                  actionData={actionData}
-                  errors={errors}
-                  defaultValue={editData?.name}
-                />
-                <ControlledTextField
-                  name="promotionText"
-                  register={register}
-                  actionData={actionData}
-                  errors={errors}
-                  defaultValue={editData?.promotionText}
-                />
-                <ControlledTextField
-                  name="url"
-                  register={register}
-                  actionData={actionData}
-                  errors={errors}
-                  defaultValue={editData?.url}
-                />
-                <ControlledTextField
-                  name="phone"
-                  register={register}
-                  actionData={actionData}
-                  errors={errors}
-                  defaultValue={editData?.phone}
-                />
-                <ControlledTextField
-                  name="email"
-                  register={register}
-                  actionData={actionData}
-                  errors={errors}
-                  defaultValue={editData?.email}
-                />
-                {/* <TextField
-          placeholder="Name * "
-          sx={{ py: 1 }}
-          fullWidth
-          {...register("name")}
-          error={
-            !!errors["name"] || actionData?.error?.fieldError?.fieldErrors?.name
-          }
-          helperText={
-            !!errors["name"]
-              ? errors["name"]?.message
-              : actionData?.error?.fieldError?.fieldErrors?.name
-              ? actionData?.error?.fieldError?.fieldErrors?.name?.join(",")
-              : null
-          }
-        /> 
-        <TextField
-          {...register("phone")}
-          placeholder="Phone *"
-          sx={{ py: 1 }}
-          fullWidth
-          error={
-            !!errors["phone"] ||
-            actionData?.error?.fieldError?.fieldErrors?.phone
-          }
-          helperText={
-            !!errors["phone"]
-              ? errors["phone"]?.message
-              : actionData?.error?.fieldError?.fieldErrors?.phone
-              ? actionData?.error?.fieldError?.fieldErrors?.phone?.join(",")
-              : null
-          }
-        />
-        <TextField
-          placeholder="Email *"
-          {...register("email")}
-          sx={{ py: 1 }}
-          fullWidth
-          error={
-            !!errors["email"] ||
-            actionData?.error?.fieldError?.fieldErrors?.email
-          }
-          helperText={
-            !!errors["email"]
-              ? errors["email"]?.message
-              : actionData?.error?.fieldError?.fieldErrors?.email
-              ? actionData?.error?.fieldError?.fieldErrors?.email?.join(",")
-              : null
-          }
-        />
-        <TextField
-          placeholder="Promotion Text * "
-          {...register("promotionText")}
-          sx={{ py: 1 }}
-          fullWidth
-          error={
-            !!errors["promotionText"] ||
-            actionData?.error?.fieldError?.fieldErrors?.promotionText
-          }
-          helperText={
-            !!errors["promotionText"]
-              ? errors["promotionText"]?.message
-              : actionData?.error?.fieldError?.fieldErrors?.promotionText
-              ? actionData?.error?.fieldError?.fieldErrors?.promotionText?.join(
-                  ","
-                )
-              : null
-          }
-        />
-        <TextField
-          placeholder="url * "
-          {...register("url")}
-          sx={{ py: 1 }}
-          fullWidth
-          error={
-            !!errors["url"] || actionData?.error?.fieldError?.fieldErrors?.url
-          }
-          helperText={
-            !!errors["url"]
-              ? errors["url"]?.message
-              : actionData?.error?.fieldError?.fieldErrors?.url
-              ? actionData?.error?.fieldError?.fieldErrors?.url?.join(", ")
-              : null
-          }
-        />*/}
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <ControlledTextField
+                      name="name"
+                      label="Name"
+                      defaultValue={editData?.name || ""}
+                      control={control}
+                      errors={errors["name"]?.message}
+                      placeholder="Name"
+                      fullWidth
+                      actionData={
+                        actionData?.error?.fieldError?.fieldErrors["name"]
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ControlledTextField
+                      name="promotionText"
+                      label="Promotion Text"
+                      defaultValue={editData?.promotionText || ""}
+                      control={control}
+                      errors={errors["promotionText"]?.message}
+                      placeholder="Promotion Text"
+                      fullWidth
+                      actionData={
+                        actionData?.error?.fieldError?.fieldErrors[
+                          "promotionText"
+                        ]
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ControlledTextField
+                      name="url"
+                      label="URL"
+                      defaultValue={editData?.url || ""}
+                      control={control}
+                      errors={errors["url"]?.message}
+                      placeholder="URL"
+                      fullWidth
+                      actionData={
+                        actionData?.error?.fieldError?.fieldErrors["url"]
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ControlledTextField
+                      name="phone"
+                      label="Phone"
+                      defaultValue={editData?.phone || ""}
+                      control={control}
+                      errors={errors["phone"]?.message}
+                      placeholder="Phone"
+                      fullWidth
+                      actionData={
+                        actionData?.error?.fieldError?.fieldErrors["phone"]
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ControlledTextField
+                      name="email"
+                      label="Email"
+                      defaultValue={editData?.email || ""}
+                      control={control}
+                      errors={errors["email"]?.message}
+                      placeholder="Email"
+                      fullWidth
+                      actionData={
+                        actionData?.error?.fieldError?.fieldErrors["email"]
+                      }
+                    />
+                  </Grid>
+                </Grid>
               </Box>
               <Box
                 sx={{

@@ -35,7 +35,7 @@ import StatusUpdate from "~/src/components/Table/StatusUpdate";
 import RowActions from "~/src/components/Table/RowActions";
 import DateFilter from "~/src/components/Table/DatePicker";
 import { CustomizedTable } from "~/src/components/Table";
-import AddRoleForm from "~/src/components/AddRoleForm";
+import AddRoleForm from "~/src/components/Forms/AddRoleForm";
 
 /**
  * Loader function to fetch role and permisions.

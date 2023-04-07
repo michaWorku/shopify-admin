@@ -7,66 +7,38 @@ import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   TextField,
-  Checkbox,
-  FormControlLabel,
   MenuItem,
-  Button,
   Modal,
   Slide,
   Box,
   Card,
   Grid,
-  Divider,
   Typography,
   IconButton,
+  Autocomplete,
 } from "@mui/material";
 
 import { Controller } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, useLocation } from "@remix-run/react";
-import {
-  dynamicFormFieldSchema,
-  dynamicFormSchema,
-} from "~/utils/schema/dynamicFormSchema";
-import { flattenErrors } from "~/utils/validators/validate";
+import { Reward } from "@prisma/client";
+import { rewardSchema } from "~/utils/schema/rewardSchema";
 
-const FIELDOPTIONS = [
-  "TEXT",
-  "NUMBER",
-  "EMAIL",
-  "PHONE",
-  "SELECT",
-  "CHECKBOX",
-  "RADIO",
-  "TEXTAREA",
-  "DATE",
-];
+const PLANOPTIONS = ["DAY", "WEEK", "MONTH", "YEAR"];
 
-type Field = {
-  id?: string;
-  index: number;
-  name: string;
-  label: string;
-  description: string;
-  type: string;
-  placeholder: string;
-  defaultValue?: any;
-  order?: number;
-  required?: boolean;
-};
-
-type AddFieldProps = {
-  field: any;
+type RewardProps = {
+  reward: any;
   control: Control<any>;
   errors: any;
   register: any;
   actionData?: any;
+  forms?: any;
 };
 /**
- * AddField component displays a form to add new field
- * @component AddField
- * @param {object} props - props for AddField component
+ * Reward component displays a reward form
+ * @component Reward
+ * @param {object} props - props for Reward component
  * @param {object} props.field - field object
  * @param {object} props.control - react-hook-form controller
  * @param {object} props.errors - react-hook-form errors
@@ -74,12 +46,13 @@ type AddFieldProps = {
  * @param {object} props.actionData - object containing action data
  * @returns {JSX.Element} - JSX element containing the form to add new field
  */
-const AddField: FC<AddFieldProps> = ({
-  field,
+const Reward: FC<RewardProps> = ({
+  reward,
   control,
   errors,
   register,
   actionData,
+  forms,
 }) => {
   return (
     <Grid
@@ -87,14 +60,15 @@ const AddField: FC<AddFieldProps> = ({
       spacing={3}
       display="flex"
       alignItems="center"
-      justifyContent="center"
+      justifyContent="start"
+      mt={1}
     >
-      <input type="hidden" {...register("id")} value={field?.id} />
-      <Grid item xs={4}>
+      <input type="hidden" {...register("id")} value={reward?.id} />
+      <Grid item xs={6}>
         <ControlledTextField
           name="name"
           label="Name"
-          defaultValue={field?.name}
+          defaultValue={reward?.name}
           control={control}
           required
           errors={errors["name"]?.message}
@@ -103,38 +77,81 @@ const AddField: FC<AddFieldProps> = ({
           fullWidth
         />
       </Grid>
-      <Grid item xs={4}>
-        <ControlledTextField
-          name="label"
-          label="Label"
-          defaultValue={field?.label}
+      <Grid item xs={6}>
+        <Controller
+          name="formId"
           control={control}
-          required
-          errors={errors["label"]?.message}
-          actionData={actionData?.error?.fieldError?.fieldErrors["label"]}
-          placeholder="Label"
-          fullWidth
+          defaultValue={reward?.formId}
+          render={({ field: { onChange, value }, fieldState: { isDirty } }) => (
+            <Autocomplete
+              id="formId"
+              disableClearable
+              value={forms?.find((form: any) => form?.id === reward?.formId)?.name || value}
+              options={forms?.map((option: any) => option?.name)}
+              onChange={(event, value: any) =>
+                onChange(forms?.find((form: any) => form?.name === value)?.id)
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search form"
+                  placeholder="Search form"
+                  InputProps={{
+                    ...params.InputProps,
+                    type: "search",
+                  }}
+                  error={
+                    !!errors["formId"] ||
+                    actionData?.error?.fieldError?.fieldErrors?.["formId"]
+                  }
+                  helperText={
+                    !!errors["formId"]
+                      ? errors["formId"]?.message
+                      : actionData?.error?.fieldError?.fieldErrors?.["formId"]
+                      ? actionData?.error?.fieldError?.fieldErrors?.[
+                          "formId"
+                        ]?.join(",")
+                      : null
+                  }
+                />
+              )}
+            />
+          )}
         />
       </Grid>
-      <Grid item xs={4}>
-        <Controller
-          name="type"
+      <Grid item xs={12}>
+        <ControlledTextField
+          name="description"
+          errors={errors["description"]?.message}
+          actionData={actionData?.error?.fieldError?.fieldErrors["description"]}
+          label="Description"
+          defaultValue={reward?.description}
           control={control}
-          defaultValue={field?.type ? field?.type : "TEXT"}
+          required
+          fullWidth
+          multiline
+          minRows={2}
+        />
+      </Grid>
+      <Grid item xs={6}>
+        <Controller
+          name="plan"
+          control={control}
+          defaultValue={reward?.plan ? reward?.plan : "DAY"}
           render={({
             field: { value, ...fields },
             fieldState: { isDirty },
           }) => (
             <TextField
               {...fields}
-              value={isDirty ? value : field?.type ? field?.type : "TEXT"}
+              value={isDirty ? value : reward?.plan ? reward?.plan : "DAY"}
               select
-              label="Type"
-              placeholder={field?.placeholder}
+              label="Plan"
+              placeholder={reward?.placeholder}
               variant="standard"
               required
               fullWidth
-              helperText="Please select field type"
+              helperText="Please select field plan"
               sx={{
                 "& legend": { display: "none" },
                 "& fieldset": { top: 0 },
@@ -148,7 +165,7 @@ const AddField: FC<AddFieldProps> = ({
                 },
               }}
             >
-              {FIELDOPTIONS?.map((option: any) => (
+              {PLANOPTIONS?.map((option: any) => (
                 <MenuItem key={option} value={option}>
                   {option}
                 </MenuItem>
@@ -157,72 +174,18 @@ const AddField: FC<AddFieldProps> = ({
           )}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <ControlledTextField
-          name="description"
-          errors={errors["description"]?.message}
-          actionData={actionData?.error?.fieldError?.fieldErrors["description"]}
-          label="Description"
-          defaultValue={field?.description}
+          name="rewardGiven"
+          label="Reward Given"
+          defaultValue={reward?.rewardGiven}
           control={control}
           required
-          fullWidth
-          multiline
-          minRows={2}
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <ControlledTextField
-          name="placeholder"
-          label="Place holder"
-          defaultValue={field?.placeholder}
-          control={control}
-          required
-          errors={errors["placeholder"]?.message}
-          actionData={actionData?.error?.fieldError?.fieldErrors["placeholder"]}
-          placeholder="Place holder"
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <ControlledTextField
-          name="defaultValue"
-          label="Default Value"
-          defaultValue={
-            field?.defaultValue === 0 ? field?.index : field?.defaultValue
-          }
-          control={control}
-          errors={errors["defaultValue"]?.message}
-          actionData={
-            actionData?.error?.fieldError?.fieldErrors["defaultValue"]
-          }
-          placeholder="Default Value"
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <ControlledTextField
-          name="order"
-          label="Order"
-          defaultValue={field?.order === 0 ? field?.index : field?.order}
-          control={control}
-          required
-          errors={errors["order"]?.message}
-          actionData={actionData?.error?.fieldError?.fieldErrors["order"]}
-          placeholder="Order"
+          errors={errors["rewardGiven"]?.message}
+          actionData={actionData?.error?.fieldError?.fieldErrors["rewardGiven"]}
+          placeholder="Reward Given"
           fullWidth
           type="number"
-        />
-      </Grid>
-      <Grid item container xs={12}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              {...register(`required`)}
-              defaultChecked={field?.required}
-            />
-          }
-          label="Required"
         />
       </Grid>
     </Grid>
@@ -319,28 +282,11 @@ const ControlledTextField: React.FC<ControlledTextFieldProps> = ({
   );
 };
 
-type DynamicForm = z.infer<typeof dynamicFormSchema>;
-
-type DynamicFormField = z.infer<typeof dynamicFormFieldSchema>;
-
-const defaultFormFields = [
-  {
-    name: "",
-    label: "",
-    type: "TEXT",
-    defaultValue: "",
-    required: true,
-    placeholder: "",
-    description: "",
-    order: 1 as number,
-  },
-] as DynamicFormField[];
-
 /**
- * A dynamic form component to add, update, or delete form fields.
- * @component DynamicForm
+ * A Reward form component to create, update reward.
+ * @component RewardForm
  * @param {Object} props - The props object
- * @param {Object} props.dynamicForm The schema for the dynamic form.
+ * @param {Object} props.rewardForm The schema for the dynamic form.
  * @param {Function} props.openModal A function that opens the modal component.
  * @param {Object} props.actionData The data for an action.
  * @param {Object} props.editData The data for an edit.
@@ -348,10 +294,11 @@ const defaultFormFields = [
  * @param {Function} props.setActionData A function that sets the action data.
  * @param {Function} props.setOpenModal A function that sets the open modal state.
  * @param {Object} props.fetcher A fetcher instance to handle API calls.
+ * @param {Object} props.forms A form data
  * @returns {React.FC} A React functional component.
  */
 
-const DynamicFormField: React.FC<any> = ({
+const RewardForm: React.FC<any> = ({
   openModal,
   actionData,
   editData,
@@ -359,6 +306,7 @@ const DynamicFormField: React.FC<any> = ({
   setOpenModal,
   fetcher,
   setEditData,
+  forms,
 }) => {
   const isSubmittingOrLoading = ["submitting", "loading"].includes(
     fetcher.state
@@ -372,27 +320,20 @@ const DynamicFormField: React.FC<any> = ({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<DynamicForm>({
+  } = useForm<Reward>({
     mode: "onChange",
-    resolver: zodResolver(dynamicFormFieldSchema, undefined, {
+    resolver: zodResolver(rewardSchema, undefined, {
       rawValues: true,
     }),
   });
 
   useEffect(() => {
     console.log({ editData });
-    [
-      "name",
-      "label",
-      "type",
-      "description",
-      "placeholder",
-      "order",
-      "required",
-      "defaultValue",
-    ].forEach((field: any) => {
-      if (!!editData) setValue(field, editData[field as keyof DynamicForm]);
-    });
+    ["name", "formId", "description", "plan", "rewardGiven"].forEach(
+      (field: any) => {
+        if (!!editData) setValue(field, editData[field as keyof Reward]);
+      }
+    );
   }, [editData]);
 
   const location = useLocation();
@@ -420,10 +361,9 @@ const DynamicFormField: React.FC<any> = ({
       { data: JSON.stringify(data) },
       {
         method: !editData?.id ? "post" : "patch",
-        action: location.pathname,
-        // action: !editData?.id
-        //   ? location.pathname
-        //   : `${location.pathname}?formId=${editData?.id}`,
+        action: !editData?.id
+          ? location.pathname
+          : `${location.pathname}?rewardId=${editData?.id}`,
       }
     );
   };
@@ -485,12 +425,13 @@ const DynamicFormField: React.FC<any> = ({
                   pt: 0.5,
                 }}
               >
-                <AddField
-                  field={editData}
+                <Reward
+                  reward={editData}
                   control={control}
                   errors={errors}
                   actionData={actionData}
                   register={register}
+                  forms={forms}
                 />
               </Box>
               <Box
@@ -539,4 +480,4 @@ const DynamicFormField: React.FC<any> = ({
   );
 };
 
-export default DynamicFormField;
+export default RewardForm;

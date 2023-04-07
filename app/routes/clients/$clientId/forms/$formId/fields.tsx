@@ -34,7 +34,7 @@ import {
   getDynamicFormByField,
   updateDynamicFormField,
 } from "~/services/Form/Form.server";
-import { DynamicFormField as AddDynamicFormField } from "~/src/components/";
+import { DynamicFormField as AddDynamicFormField } from "~/src/components/Forms";
 import {
   dynamicFormFieldSchema,
   dynamicFormSchema,
