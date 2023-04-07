@@ -97,12 +97,6 @@ const Reward: FC<RewardProps> = ({
                   color: 'primary.main'
                 }
               }}
-              placeholder="Search form"
-              sx={{
-                '& .MuiFormLabel-root':{
-                  color: 'primary.main'
-                }
-              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -394,7 +388,7 @@ const RewardForm: React.FC<any> = ({
         <Box sx={{ position: "relative", float: "right" }}>
           <Card
             sx={{
-              width: { xs: "100vw", sm: 800 },
+              width: { xs: "100vw", sm: 600 },
               height: "100vh",
             }}
           >
@@ -453,7 +447,7 @@ const RewardForm: React.FC<any> = ({
                   justifyContent: "flex-end",
                   position: "fixed",
                   bottom: 0,
-                  width: { xs: "100vw", sm: 800 },
+                  width: { xs: "100vw", sm: 600 },
                   height: 80,
                   p: 3,
                   bgcolor: "#F5F5F5",
