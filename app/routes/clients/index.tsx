@@ -11,7 +11,7 @@ import {
   deleteClient,
   getClients,
   updateClientById,
-} from "~/services/Client/client.server";
+} from "~/services/Client/Client.server";
 import { authenticator } from "~/services/auth.server";
 import {
   CustomizedTable,
