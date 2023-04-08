@@ -30,7 +30,7 @@ model User {
   isVerified  Boolean?
   status      Status                  @default(ACTIVE)
   roles       RoleUser[]
-  clients     Client[]
+  clients     ClientUser[]
   submissions DynamicFormSubmission[]
   rewards     UserReward[]
   blulkTasks  BulkTask[]
@@ -85,6 +85,17 @@ model RolePermission {
   @@id([roleId, permissionId])
 }
 
+model ClientUser {
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String
+  isRewareded  Boolean @default(true)
+  isSystemUser Boolean @default(false)
+  client       Client  @relation(fields: [clientId], references: [id])
+  clientId     String
+
+  @@id([userId, clientId])
+}
+
 model Client {
   id            String        @id @default(uuid())
   name          String
@@ -95,10 +106,10 @@ model Client {
   status        Status        @default(ACTIVE)
   dynamicForms  DynamicForm[]
   rewards       Reward[]
-  users         User[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   deletedAt     DateTime?
+  users         ClientUser[]
 }
 
 model UserReward {

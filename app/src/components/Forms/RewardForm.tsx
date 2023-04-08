@@ -1,8 +1,6 @@
 import { FC, useEffect } from "react";
-import { useForm, useFieldArray, Control } from "react-hook-form";
+import { useForm, Control } from "react-hook-form";
 import { z } from "zod";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import {

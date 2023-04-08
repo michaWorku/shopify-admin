@@ -72,7 +72,7 @@
         "clients": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/Client"
+            "$ref": "#/definitions/ClientUser"
           }
         },
         "submissions": {
@@ -261,6 +261,31 @@
         }
       }
     },
+    "ClientUser": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/User"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "isRewareded": {
+          "type": "boolean",
+          "default": true
+        },
+        "isSystemUser": {
+          "type": "boolean",
+          "default": false
+        },
+        "client": {
+          "$ref": "#/definitions/Client"
+        },
+        "clientId": {
+          "type": "string"
+        }
+      }
+    },
     "Client": {
       "type": "object",
       "properties": {
@@ -309,12 +334,6 @@
             "$ref": "#/definitions/Reward"
           }
         },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/User"
-          }
-        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -329,6 +348,12 @@
             "null"
           ],
           "format": "date-time"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ClientUser"
+          }
         }
       }
     },
@@ -763,6 +788,9 @@
     },
     "rolePermission": {
       "$ref": "#/definitions/RolePermission"
+    },
+    "clientUser": {
+      "$ref": "#/definitions/ClientUser"
     },
     "client": {
       "$ref": "#/definitions/Client"
