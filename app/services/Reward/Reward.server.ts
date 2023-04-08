@@ -273,7 +273,7 @@ export const deleteRewardById = async (rewardId: string, clientId: string, userI
  * @returns {Promise<obj>} The retrieved users for a given reward.
  * @throws {Error} Throws an error if the provided client id, reward id is invalid and users are not found.
  */
-export const getRewardUsers = async (request: Request, clientId: string, rewardId: string) : Promise<any> => {
+export const getRewardUsers = async (request: Request, clientId: string, rewardId: string): Promise<any> => {
     if (!clientId) {
         throw new customErr('Custom_Error', 'Client ID is required', 404)
     }
@@ -288,15 +288,17 @@ export const getRewardUsers = async (request: Request, clientId: string, rewardI
 
         const usersWhere: Prisma.UserWhereInput = {
             deletedAt: null,
-            rewards: {
-                every: {
-                    rewardId
-                }
-            },
             clients: {
-                every: {
-                    clientId,
-                    isRewareded: true
+                some: {
+                    isRewareded: true,
+                    client: {
+                        id: clientId,
+                        rewards: {
+                            some: {
+                                id: rewardId
+                            }
+                        }
+                    }
                 }
             },
             ...searchParams,
