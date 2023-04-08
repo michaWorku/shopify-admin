@@ -95,9 +95,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
  */
 const RewardUsers = () => {
   const loaderData = useLoaderData<typeof loader>();
-  const location = useLocation();
-  const [actionData, setActionData] = useState(null);
-  const fetcher = useFetcher();
   const navigation = useNavigation();
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
@@ -156,20 +153,13 @@ const RewardUsers = () => {
     []
   );
 
-  useEffect(() => {
-    console.log({ loaderData });
-  }, [loaderData]);
 
   useEffect(() => {
-    console.log({ fetcher });
-    if (!!fetcher?.data?.error?.error?.message) {
-      toast.error(fetcher?.data?.error?.error?.message);
+    console.log({ loaderData });
+    if (!!loaderData?.data?.error?.error?.message) {
+      toast.error(loaderData?.data?.error?.error?.message);
     }
-    if (!!fetcher?.data?.message) {
-      toast.success(fetcher?.data?.message);
-    }
-    if (!!fetcher?.data) setActionData(fetcher?.data);
-  }, [fetcher?.data]);
+  }, [loaderData]);
 
 
   return (
