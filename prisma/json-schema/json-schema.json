@@ -8,13 +8,22 @@
           "type": "string"
         },
         "firstName": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "middleName": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "lastName": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "phone": {
           "type": "string"
@@ -618,6 +627,15 @@
             "object",
             "array",
             "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "default": "PENDING",
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
           ]
         },
         "form": {
