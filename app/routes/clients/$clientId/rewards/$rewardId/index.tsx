@@ -41,7 +41,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     console.log({ user, params });
     // Check if the user can read a reward users
     const canRead = (await canUser(user?.id, "read", "User", {
-      rewardId: params?.rewardId,
       clientId: params?.clientId,
     })) as any;
 
