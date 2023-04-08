@@ -1,5 +1,5 @@
 import { redirect } from "react-router";
-import { Prisma, User } from "@prisma/client";
+import { Client, ClientUser, Prisma, User } from "@prisma/client";
 import { z } from "zod";
 import moment from "moment-timezone";
 import customErr, { badRequest } from "~/utils/handler.server";
@@ -146,7 +146,7 @@ export const getUserById = async (userId: string) => {
     throw new customErr('Custom_Error', 'User ID is required', 404)
 }
   try {
-    return await db.user.findUnique({
+    const user = await db.user.findUnique({
       where: { id: userId },
       include: {
         clients: true,
@@ -155,7 +155,21 @@ export const getUserById = async (userId: string) => {
         rewards: true,
         blulkTasks: true
       }
+    }) as any
+    let clientUser :string[] = []
+    let clientSystemUser :string[] = []
+
+    user?.clients?.forEach((client: ClientUser) => {
+      if(client.isSystemUser) {
+        clientSystemUser.push(client.clientId);
+        return 
+      }
+      if(client.isRewareded){
+        clientUser.push(client.clientId)
+      }
     });
+    
+    return Object.assign(user, {clientIds: clientSystemUser.length ? clientSystemUser : clientUser})
   } catch (error) {
     throw (error)
   }
