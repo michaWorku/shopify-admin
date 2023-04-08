@@ -16,7 +16,7 @@ export const getUserPermissions = async (userId: string): Promise<Permission[]> 
         const permissions = await db.permission.findMany({
             where: {
                 roles: {
-                    every: {
+                    some: {
                         role: {
                             status: "ACTIVE",
                             users: {
@@ -39,7 +39,9 @@ export const getUserPermissions = async (userId: string): Promise<Permission[]> 
                 Object.entries(elt).filter(
                     ([key, value]: any) => {
                         if (
-                            (key.includes('action' || 'subject'||'conditions') && value) ||
+                            (key.includes('action') && value) ||
+                            (key.includes('subject') && value) ||
+                            (key.includes('conditions') && value) ||
                             (key.includes('fields') && value.length)
                         ) {
                             return { key: value }
@@ -51,7 +53,7 @@ export const getUserPermissions = async (userId: string): Promise<Permission[]> 
                 filteredPermissions.push(filtered)
             }
         })
-        if (!filteredPermissions) throw new customErr('casl_Bad_Request', 'User has got no permissions', 404)
+        if (!filteredPermissions.length) throw new customErr('casl_Bad_Request', 'User has got no permissions', 404)
         return filteredPermissions
     } catch (err) {
         console.error('Error occured getting user permissions')
