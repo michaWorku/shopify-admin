@@ -3,7 +3,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'User',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Create client user',
             description:
@@ -13,7 +13,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'User',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'View client users',
             description:
@@ -23,7 +23,7 @@ export default function clientPermissions() {
         {
             action: 'update',
             subject: 'User',
-            conditions: { edit_partial: false, clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Edit client users',
             description:
@@ -33,7 +33,7 @@ export default function clientPermissions() {
         {
             action: 'delete',
             subject: 'User',
-            conditions: { delete_partial: false, clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Delete client users',
             description:
@@ -43,7 +43,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'Form',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Create form',
             description:
@@ -53,7 +53,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Form',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'View form',
             description:
@@ -63,7 +63,7 @@ export default function clientPermissions() {
         {
             action: 'update',
             subject: 'Form',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Update form',
             description:
@@ -73,7 +73,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'Reward',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Create reward',
             description:
@@ -83,7 +83,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'Reward',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Create reward',
             description:
@@ -93,7 +93,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Reward',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'View reward',
             description:
@@ -103,7 +103,7 @@ export default function clientPermissions() {
         {
             action: 'update',
             subject: 'Reward',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Update reward',
             description:
@@ -113,7 +113,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Submission',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'View User form submisions',
             description:
@@ -123,7 +123,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'Role',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Create client role',
             description:
@@ -133,7 +133,7 @@ export default function clientPermissions() {
         {
             action: 'update',
             subject: 'Role',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Edit client role ',
             description:
@@ -143,7 +143,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Payment',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'View client payments',
             description:
@@ -153,7 +153,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Client',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'View this client',
             description:
@@ -163,7 +163,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'UsageReport',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: "Create client's usage report",
             description:
@@ -173,7 +173,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'UsageReport',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: "View client's Usage Report",
             description:
@@ -183,7 +183,7 @@ export default function clientPermissions() {
         {
             action: 'request',
             subject: 'Invoice',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: 'Requset client invoice',
             description:
@@ -193,7 +193,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Invoice',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: "View client's invoice",
             description:
@@ -203,7 +203,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Notification',
-            conditions: { clientId: '$clientId' },
+            conditions: {"clientId":{"$in":"${user.clientIds}"}},
             fields: [],
             name: "View client's Notifications",
             description:
