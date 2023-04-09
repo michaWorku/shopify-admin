@@ -7,7 +7,7 @@ import { searchCombinedColumn } from '~/utils/params/search.server'
 import { filterFunction } from '~/utils/params/filter.server'
 import canUser from '~/utils/casl/ability'
 import { checkUserPermissions, getAllEntityPermissions, getAllPermissions, getAllSystemPermissions } from './Permissions/permission.server'
-import { getEntities } from '../Entities/entity.server'
+import { getEntities } from '../Entities/Entity.server'
 
 export interface EntityPermission {
     [key: string]: {

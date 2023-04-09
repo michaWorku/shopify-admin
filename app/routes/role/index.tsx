@@ -26,7 +26,7 @@ import { getSystemPermissions } from "~/services/Role/Permissions/permission.ser
 import {
   getEntities,
   getEntityPermissions,
-} from "~/services/Entities/entity.server";
+} from "~/services/Entities/Entity.server";
 import canUser, { AbilityType } from "~/utils/casl/ability";
 import { validate } from "~/utils/validators/validate";
 import { roleSchema } from "~/utils/schema/roleSchema";
