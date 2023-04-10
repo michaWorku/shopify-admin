@@ -1,6 +1,7 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useForm, useFieldArray, Control } from "react-hook-form";
 import { z } from "zod";
+import ClearIcon from "@mui/icons-material/Clear";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import SendIcon from "@mui/icons-material/Send";
@@ -19,6 +20,8 @@ import {
   Divider,
   Typography,
   IconButton,
+  InputAdornment,
+  Chip,
 } from "@mui/material";
 
 import { Controller } from "react-hook-form";
@@ -228,6 +231,71 @@ const AddField: FC<AddFieldProps> = ({
           fullWidth
         />
       </Grid>
+      <Grid item xs={8}>
+        <Controller
+          name={`fields.${field?.index}.options`}
+          control={control}
+          defaultValue={field?.options}
+          render={({ field: { value, onChange } }) => (
+            <TextField
+              variant="outlined"
+              fullWidth
+              label="Options"
+              placeholder="Type and press enter to add a option"
+              onKeyDown={(event: any) => {
+                if (event.key === "Enter" && event.target.value) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  event.nativeEvent.stopImmediatePropagation();
+                  onChange([...value, event.target.value]);
+                  event.target.value = "";
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <>
+                    {value?.map((option: any, index: number) => (
+                      <Chip
+                        key={index}
+                        label={option}
+                        onDelete={() => {
+                          const newValues = [...value];
+                          newValues.splice(index, 1);
+                          onChange(newValues);
+                        }}
+                        style={{ margin: "4px" }}
+                      />
+                    ))}
+                  </>
+                ),
+                endAdornment: (
+                  <>
+                    <InputAdornment position="end">
+                      <ClearIcon
+                        onClick={() => {
+                          onChange([]);
+                        }}
+                      />
+                    </InputAdornment>
+                  </>
+                ),
+              }}
+              sx={{
+                "& .MuiInputLabel-root ": {
+                  color: "primary.main",
+                  fontSize: "1rem",
+                  fontWeight: "400",
+                },
+                "& .MuiTypography-root": {
+                  color: "primary.main",
+                  fontSize: "1rem",
+                  fontWeight: "400",
+                },
+              }}
+            />
+          )}
+        />
+      </Grid>
       <Grid item xs={4}>
         <ControlledTextField
           name={`fields.${field?.index}.defaultValue`}
@@ -270,7 +338,7 @@ const AddField: FC<AddFieldProps> = ({
           type="number"
         />
       </Grid>
-      <Grid item container xs={12}>
+      <Grid item container xs={4}>
         <FormControlLabel
           control={
             <Checkbox
@@ -312,6 +380,7 @@ const defaultFormFields = [
     placeholder: "",
     description: "",
     order: 1 as number,
+    options: [],
   },
 ] as DynamicFormField[];
 
@@ -331,7 +400,6 @@ const defaultFormFields = [
  */
 
 const DynamicForm: React.FC<any> = ({
-  dynamicForm,
   openModal,
   actionData,
   editData,
@@ -348,7 +416,6 @@ const DynamicForm: React.FC<any> = ({
     control,
     handleSubmit,
     register,
-    watch,
     formState: { errors },
     reset,
     setValue,
@@ -365,9 +432,9 @@ const DynamicForm: React.FC<any> = ({
       if (!!editData) setValue(field, editData[field as keyof DynamicForm]);
     });
     if (!editData) {
-      setValue('name', "")
-      setValue('description', "")
-      setValue("fields", defaultFormFields)
+      setValue("name", "");
+      setValue("description", "");
+      setValue("fields", defaultFormFields);
     }
   }, [editData]);
 
@@ -375,10 +442,10 @@ const DynamicForm: React.FC<any> = ({
     control,
     name: "fields",
   });
-  const location = useLocation();
 
   const addFormField = () => {
     append({
+      id: "",
       name: "",
       label: "",
       type: "TEXT",
@@ -387,6 +454,7 @@ const DynamicForm: React.FC<any> = ({
       placeholder: "",
       description: "",
       order: (fields.length + 1) as number,
+      options: [],
     });
   };
 
@@ -408,9 +476,36 @@ const DynamicForm: React.FC<any> = ({
     //     },
     //   ],
     // };
-    console.log({ data });
+    const formatedData = {
+      name: data?.name,
+      description: data?.description,
+      fields: data?.fields.map((field: any) => ({
+        ...field,
+        name: field?.name
+          ?.split(" ")
+          .map((value: string, index: number) =>
+            index ? value?.charAt(0).toUpperCase() + value.slice(1) : value
+          )
+          .join(""),
+        label: field?.label
+          ?.split(" ")
+          .map(
+            (value: string, index: number) =>
+              value?.charAt(0).toUpperCase() + value.slice(1)
+          )
+          .join(" "),
+        placeholder: field?.placeholder
+          ?.split(" ")
+          .map(
+            (value: string, index: number) =>
+              value?.charAt(0).toUpperCase() + value.slice(1)
+          )
+          .join(" "),
+      })),
+    };
+    console.log({ data, formatedData });
     fetcher.submit(
-      { data: JSON.stringify(data) },
+      { data: JSON.stringify(formatedData) },
       {
         method: !editData?.id ? "post" : "patch",
         action: !editData?.id
@@ -516,21 +611,23 @@ const DynamicForm: React.FC<any> = ({
                   </Grid>
                 </Grid>
 
-                {fields?.map((field: any, index: number) => (
-                  <Box key={field.id + index}>
-                    <Divider />
-                    <AddField
-                      key={field.id + index}
-                      field={{ ...field, index }}
-                      control={control}
-                      errors={errors}
-                      actionData={actionData}
-                      register={register}
-                      remove={remove}
-                      length={fields?.length}
-                    />
-                  </Box>
-                ))}
+                {fields
+                  ?.sort((a: any, b: any) => a.order - b.order)
+                  ?.map((field: any, index: number) => (
+                    <Box key={field.id + index}>
+                      {!!index && <Divider sx={{ my: 1.5 }} />}
+                      <AddField
+                        key={field.id + index}
+                        field={{ ...field, index }}
+                        control={control}
+                        errors={errors}
+                        actionData={actionData}
+                        register={register}
+                        remove={remove}
+                        length={fields?.length}
+                      />
+                    </Box>
+                  ))}
                 <Grid
                   item
                   xs={12}
