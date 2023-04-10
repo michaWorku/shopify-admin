@@ -108,7 +108,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 /**
- * Action function performs a specific operation on a dynamic form field. 
+ * Action function performs a specific operation on a dynamic form field.
  * @async function action
  * @param {Object} context - The context object.
  * @param {Request} context.request - The HTTP request.
@@ -356,7 +356,23 @@ const FormFields = () => {
         }
         renderTopToolbarCustomActions={({ table }) =>
           loaderData?.data?.canCreate && (
-            <Button variant="add" onClick={() => handleModal(undefined)}>
+            <Button
+              variant="add"
+              onClick={() =>
+                handleModal({
+                  id: "",
+                  name: "",
+                  label: "",
+                  type: "TEXT",
+                  defaultValue: "",
+                  required: true,
+                  placeholder: "",
+                  description: "",
+                  order: (loaderData?.data?.data.length + 1) as number,
+                  options: [],
+                })
+              }
+            >
               Add Field
             </Button>
           )
