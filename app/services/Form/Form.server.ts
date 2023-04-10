@@ -196,9 +196,11 @@ export const updateDynamicFormById = async (formId: string, data: DynamicForm, u
     }
 
     try {
-        const updatedDynamicFormField = await db.dynamicForm.upsert({
-            where: { id: formId },
-            update: {
+        const updatedDynamicFormField = await db.dynamicForm.update({
+            where: {
+                id: formId,
+            },
+            data: {
                 name: data.name,
                 description: data.description,
                 createdBy: userId,
@@ -207,31 +209,19 @@ export const updateDynamicFormById = async (formId: string, data: DynamicForm, u
                         data?.fields?.map((field: any) => ({
                             where: { id: field.id },
                             data: {
-                                name: field.name,
-                                label: field.label,
-                                type: field.type,
-                                defaultValue: field.defaultValue,
-                                required: field.required,
-                                placeholder: field.placeholder,
-                                description: field.description,
-                                order: field.order,
+                                name: field?.name,
+                                label: field?.label,
+                                type: field?.type,
+                                defaultValue: field?.defaultValue,
+                                required: field?.required,
+                                placeholder: field?.placeholder,
+                                description: field?.description,
+                                order: field?.order,
+                                options: field?.options
                             },
                         })),
-
-                },
-            },
-            create: {
-                name: data?.name,
-                description: data?.description,
-                createdBy: userId,
-                client: {
-                    connect: {
-                        id: clientId
-                    }
-                },
-                fields: {
                     createMany: {
-                        data: data?.fields?.map((field: any) => ({
+                        data: data?.fields?.filter((field: any)=> !field?.id).map((field: any) => ({
                             name: field?.name,
                             label: field?.label,
                             type: field?.type,
@@ -240,6 +230,7 @@ export const updateDynamicFormById = async (formId: string, data: DynamicForm, u
                             placeholder: field?.placeholder,
                             description: field?.description,
                             order: field?.order,
+                            options: field?.options
                         })),
 
                     },
@@ -248,7 +239,7 @@ export const updateDynamicFormById = async (formId: string, data: DynamicForm, u
             include: {
                 fields: true,
             },
-        });
+        })
 
         return json(Response({
             data: updatedDynamicFormField,
@@ -299,6 +290,7 @@ export const updateDynamicFormField = async (
         defaultValue: dynamicFormField?.defaultValue as any,
         description: dynamicFormField?.description,
         placeholder: dynamicFormField?.placeholder,
+        options: dynamicFormField?.options as any
     }
 
     try {
@@ -360,7 +352,7 @@ export const deleteDynamicFormField = async (
     }
 
     try {
-        
+
         const deletedDynamicFormField = await db.dynamicFormField.update({
             where: {
                 id: String(formId),
