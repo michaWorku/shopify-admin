@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 
 import tostify from "react-toastify/dist/ReactToastify.css";
 import ClientStyleContext from "./src/context/ClientStyleContext";
@@ -95,27 +97,29 @@ const Document = withEmotionCache(
 // https://remix.run/api/conventions#route-filenames
 export default function App() {
   return (
-    <ThemeConfig>
-      <GlobalStyles />
-      <CssBaseline />
-      <Document>
-        <Layout>
-          <Outlet />
-        </Layout>
-        <ToastContainer
-          position="bottom-left"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-      </Document>
-    </ThemeConfig>
+    <Document>
+      <ThemeConfig>
+        <GlobalStyles />
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+          <Layout>
+            <Outlet />
+          </Layout>
+          <ToastContainer
+            position="bottom-left"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+        </LocalizationProvider>
+      </ThemeConfig>
+    </Document>
   );
 }
 
