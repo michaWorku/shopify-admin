@@ -1,12 +1,12 @@
 /* eslint-disable react/jsx-pascal-case */
 
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   Link,
   useActionData,
   useLoaderData,
+  useNavigate,
   useNavigation,
 } from "@remix-run/react";
 import { Outlet } from "@remix-run/react";
@@ -19,23 +19,22 @@ import { toast } from "react-toastify";
 import { useMemo } from "react";
 import { Response, errorHandler } from "~/utils/handler.server";
 import moment from "moment";
+import { CustomizedTable } from "~/src/components/Table";
+import AddRoleForm from "~/src/components/Forms/AddRoleForm";
 import { authenticator } from "~/services/auth.server";
 import { commitSession, getSession } from "~/services/session.server";
 import { createRole, getAllRoles } from "~/services/Role/role.server";
 import { getSystemPermissions } from "~/services/Role/Permissions/permission.server";
 import {
   getEntities,
-  getEntityPermissions,
 } from "~/services/Entities/entity.server";
 import canUser, { AbilityType } from "~/utils/casl/ability";
 import { validate } from "~/utils/validators/validate";
 import { roleSchema } from "~/utils/schema/roleSchema";
 import FilterModes from "~/src/components/Table/CustomFilter";
+import  DateFilter  from "~/src/components/Table/DatePicker";
 import StatusUpdate from "~/src/components/Table/StatusUpdate";
 import RowActions from "~/src/components/Table/RowActions";
-import DateFilter from "~/src/components/Table/DatePicker";
-import { CustomizedTable } from "~/src/components/Table";
-import AddRoleForm from "~/src/components/Forms/AddRoleForm";
 
 /**
  * Loader function to fetch role and permisions.
@@ -50,24 +49,23 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       failureRedirect: "/login",
     });
 
-    // Get the user's session
+    // // Get the user's session
     const session = await getSession(request.headers.get("Cookie"));
 
-    // Get the message from the session, if any
+    // // Get the message from the session, if any
     const message = session.get("message") || null;
     session.unset("message");
 
     // Get all roles for the user
-    const roles = await getAllRoles(request, user.id);
-    console.log({roles})
+    const roles = await getAllRoles(request, user.id) as any;
     // Get system permissions for the user
     const systemPermission = await getSystemPermissions(user.id);
 
     // Get all clients for the user
-    const clients = await getEntities(user.id, "client");
+    const clients = await getEntities(user.id);
 
     // Check if the user can create a new role
-    const able = await canUser(user.id, "create", "Role", {}, AbilityType.BOTH);
+    const able = await canUser(user.id, "create", "Role", {}, AbilityType.BOTH) as any;
 
     let systemPermissions;
     if (systemPermission?.data) {
@@ -88,7 +86,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       },
       metaData: roles?.metaData,
     };
-
     // Return the response with the session cookie set
     return json(responseData, {
       status: 200,
@@ -110,22 +107,6 @@ export const action: ActionFunction = async ({ request }) => {
 
     const formData = await request.formData();
     const fields = Object.fromEntries(formData) as any;
-    if (fields.type) {
-      const permissions = await getEntityPermissions(
-        user.id,
-        fields.entityKey,
-        JSON.parse(fields?.entities) as any
-      );
-      return json(
-        Response({
-          data: {
-            permissions: {
-              [fields.type]: permissions,
-            },
-          },
-        })
-      );
-    }
     const permissions: any = fields?.permissions;
     fields.permissions = JSON.parse(permissions);
     const { success } = await validate(fields, roleSchema);
@@ -160,6 +141,7 @@ export const handle = {
 export default function ViewRole() {
   const loaderData = useLoaderData();
   const actionData = useActionData();
+  const navigate = useNavigate()
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -173,7 +155,9 @@ export default function ViewRole() {
       setLoadingEdit(false);
     }
   }, [navigation.state]);
-
+  function handleEdit(row: any){
+    navigate(`${row}`)
+  }
   const columns = useMemo<MRT_ColumnDef<Role>[]>(
     () => [
       {
@@ -216,42 +200,25 @@ export default function ViewRole() {
         flex: 1,
         enableColumnFilter: false,
         Cell: ({ row, table }) => (
-          <RowActions row={row} page="role" deleteCol={false} />
+          <RowActions row={row} page="role" handleEdit={() => handleEdit(row?.original?.id)}  deleteCol={false} />
         ),
       },
     ],
     []
   );
 
-  // useEffect(() => {
-  //     if (loaderData?.data?.message) {
-  //         enqueueSnackbar(loaderData?.data?.message, {
-  //             variant: 'success',
-  //             preventDuplicate: true,
-  //         })
-  //     }
-  // }, [loaderData, enqueueSnackbar])
-
-  // useEffect(() => {
-  //     if (actionData !== undefined) {
-  //         if (actionData?.error?.error) {
-  //             enqueueSnackbar(
-  //                 actionData?.error?.error?.message || 'Network Error',
-  //                 {
-  //                     variant: 'error',
-  //                     preventDuplicate: true,
-  //                 }
-  //             )
-  //         }
-  //         if (!actionData?.error && actionData?.data?.name) {
-  //             handleCloseModal()
-  //             enqueueSnackbar('Role created successfully', {
-  //                 variant: 'success',
-  //                 preventDuplicate: true,
-  //             })
-  //         }
-  //     }
-  // }, [actionData, enqueueSnackbar])
+  useEffect(() => {
+      if (actionData !== undefined) {
+          if (actionData?.error?.error) {
+            toast.error(actionData?.error?.error?.message)
+            
+          }
+          if (!actionData?.error && actionData?.data?.role) {
+              handleCloseModal()
+              toast.success(actionData?.data?.message)
+          }
+      }
+  }, [actionData])
 
   const handleOpenModal = () => {
     setOpenModal(true);
@@ -259,7 +226,6 @@ export default function ViewRole() {
   const handleCloseModal = () => {
     setOpenModal(false);
   };
-  console.log({ loaderData });
   return (
     <Box m={2}>
       <CustomizedTable
@@ -289,7 +255,7 @@ export default function ViewRole() {
                   height: "100vh",
                 }}
               >
-                <AddRoleForm handleCloseModal={handleCloseModal} />
+                <AddRoleForm handleCloseModal={handleCloseModal} loaderData={loaderData} actionData={actionData}/>
               </Card>
             </Box>
           </Slide>
