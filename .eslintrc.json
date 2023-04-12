@@ -1,0 +1,14 @@
+/** @type {import('eslint').Linter.Config} */
+{
+    "extends": ["@remix-run/eslint-config", "@remix-run/eslint-config/node", "eslint:recommended"],
+    "rules":{
+      "no-useless-catch": ["off"],
+      "prettier/prettier": [
+        "error",
+        {
+          "endOfLine": "auto"
+        }
+    ]
+    }
+  }
+  
