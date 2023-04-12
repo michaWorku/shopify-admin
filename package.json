@@ -9,7 +9,8 @@
     "start": "remix-serve build"
   },
   "dependencies": {
-    "@casl/ability": "^6.3.3",
+    "@casl/ability": "^6.4.0",
+    "@casl/prisma": "^1.3.3",
     "@emotion/cache": "latest",
     "@emotion/react": "latest",
     "@emotion/server": "latest",
@@ -28,6 +29,7 @@
     "@vercel/node": "^2.8.11",
     "axios": "^1.2.2",
     "bcryptjs": "^2.4.3",
+    "dayjs": "^1.11.7",
     "export-to-csv": "^0.2.1",
     "isbot": "latest",
     "lodash": "^4.17.21",
@@ -48,6 +50,7 @@
   },
   "devDependencies": {
     "@remix-run/dev": "latest",
+    "@remix-run/eslint-config": "^1.15.0",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.15.5",
     "@types/otp-generator": "^4.0.0",
@@ -55,6 +58,7 @@
     "@types/react-dom": "latest",
     "@types/secure-password": "^4.0.0",
     "esbuild-register": "^3.4.2",
+    "eslint": "^8.38.0",
     "prisma": "^4.11.0",
     "prisma-json-schema-generator": "^2.0.17",
     "ts-node": "^10.9.1",
