@@ -69,7 +69,7 @@ const Navbar = () => {
             <Box sx={{alignSelf: 'start'}}>
               <Typography variant="h6" component="h6">
                {
-                location.pathname.slice(1)
+                location.pathname.slice(1) === 'systemusers' ? 'System Users' : location.pathname.slice(1)
                }
               </Typography>
             </Box>
