@@ -119,17 +119,14 @@ export const getPermissionById = async (id: string) => {
  * @returns A Promise resolving to an array of permission objects
  * @throws An error if the provided entity key is invalid or if there's an error querying the database
  */
-export const getAllEntityPermissions = async (entityKey: string, entityId: string) => {
+export const getAllEntityPermissions = async () => {
     try {
-        if (!isValidEntityKey(entityKey)) {
-            throw new Error(`Invalid entity key: ${entityKey}`)
-        }
 
         const permissions = await db.permission.findMany({
             where: {
                 conditions: {
-                    path: [entityKey],
-                    equals: entityId,
+                    path: ['clientId'],
+                    string_contains:'user.clientIds'
                 },
             },
         })
@@ -138,7 +135,7 @@ export const getAllEntityPermissions = async (entityKey: string, entityId: strin
             data: permissions,
         })
     } catch (err) {
-        console.error(`Error getting permissions for entity ${entityKey} with ID ${entityId}: ${err}`)
+        console.error(`Error getting permissions for entity  ${err}`)
         return errorHandler(err);
     }
 }
@@ -152,10 +149,10 @@ export const getAllEntityPermissions = async (entityKey: string, entityId: strin
 * @param {string} entityId - The ID of the entity for which permissions are to be retrieved
 * @returns {Promise} A Promise object representing the permissions of the user for the entity
 */
-export const getUserEntityPermissions = async (userId: string, entityKey: string, entityId: string) => {
+export const getUserEntityPermissions = async (userId: string) => {
     try {
-        if (!isValidEntityKey(entityKey)) {
-            throw new Error(`Invalid entity key: ${entityKey}`)
+        if (!(userId)) {
+            throw new Error(`Invalid userId: ${userId}`)
         }
         const permissions = await db.permission.findMany({
             where: {
@@ -172,10 +169,11 @@ export const getUserEntityPermissions = async (userId: string, entityKey: string
                         }
                     }
                 },
-                conditions: {
-                    path: [entityKey],
-                    equals: entityId,
-                },
+                // conditions: {
+                //     path: ['clientId'],
+                //     // string_contains: ""
+                //     array_contains: ['${user.clientIds}']
+                // },
             },
         })
 
@@ -295,8 +293,8 @@ export const isValidEntityKey = (entityKey: string): boolean => {
   
       const getPermissionByEntity = async (item: any) => {
         const permission = iCanViewAll?.status === 200 ?
-          await getAllEntityPermissions(entityKey, item.id) :
-          await getUserEntityPermissions(userId, entityKey, item.id)
+          await getAllEntityPermissions() :
+          await getUserEntityPermissions(userId)
   
         return permission?.data?.length ?
           { [item.name]: permission } :
@@ -408,12 +406,7 @@ export const checkUserPermissions = async (userId: string, permissionIds: string
             where: { id: permissionId },
         })
         if (permission) {
-            const can = await canUser(
-                userId,
-                'create',
-                'Role',
-                permission.conditions
-            )
+            const can = await canUser(userId, 'create', 'Role', permission.conditions)
             if (can?.status !== 200) {
                 return false
             }
