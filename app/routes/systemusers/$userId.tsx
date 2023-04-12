@@ -29,7 +29,6 @@ import {
     useSearchParams,
 } from '@remix-run/react'
 import Close from '@mui/icons-material/Close'
-import { getUserEntities } from '~/services/Entities/entity.server'
 import {
     deleteSystemUser,
     updateSystemUser,
@@ -43,6 +42,7 @@ import { getUserById } from '~/services/User/users.server'
 import { getUserCreatedRole } from '~/services/Role/role.server'
 import { DesktopDatePicker } from '@mui/x-date-pickers'
 import { toast } from 'react-toastify'
+import { getUserEntities } from '~/services/Entities/Entity.server'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
     try {
@@ -363,6 +363,7 @@ const SystemUsers = () => {
                                         // inputFormat="MM/DD/YYYY"
                                         value={birthDate}
                                         onChange={handleBirthDateChange}
+                                        //@ts-ignore
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
