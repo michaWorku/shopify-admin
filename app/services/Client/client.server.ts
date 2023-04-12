@@ -1,4 +1,4 @@
-import { Client, Permission } from "@prisma/client"
+import { Client, Permission, Prisma } from "@prisma/client"
 import { json } from '@remix-run/node'
 import canUser, { AbilityType } from "~/utils/casl/ability"
 import customErr, { Response, ResponseType, errorHandler } from "~/utils/handler.server"
@@ -8,7 +8,7 @@ import interpolate from "~/utils/casl/interpolate"
 import getParams from "~/utils/params/getParams.server"
 import { filterFunction } from "~/utils/params/filter.server"
 import { searchFunction } from "~/utils/params/search.server"
-import { checkEntityExist } from "../Entities/entity.server"
+import { checkEntityExist } from "../Entities/Entity.server"
 import { canPerformAction } from "~/utils/casl/canPerformAction"
 
 /**
@@ -386,3 +386,81 @@ export const getClients = async (request: Request, userId: string): Promise<Obje
         return errorHandler(err)
     }
 }
+
+/**
+ * Retrieve users of a client.
+ * @async
+ * @function getRewardUsers
+ * @param {string} clientId - The ID of the client.
+ * @returns {Promise<obj>} The retrieved users for a given client.
+ * @throws {Error} Throws an error if the provided client id  is invalid and users are not found.
+ */
+ export const getClientUsers = async (request: Request, clientId: string): Promise<any> => {
+    if (!clientId) {
+        throw new customErr('Custom_Error', 'Client ID is required', 404)
+    }
+    try {
+        const { sortType, sortField, skip, take, pageNo, search, filter, exportType } = getParams(request);
+
+        const searchParams = searchFunction(search, 'User', ['firstName', 'middleName', 'lastName']);
+        const filterParams = filterFunction(filter, 'User');
+
+        const usersWhere: Prisma.UserWhereInput = {
+            deletedAt: null,
+            clients: {
+                some: {
+                    isRewareded: true,
+                    client: {
+                        id: clientId
+                    }
+                }
+            },
+            ...searchParams,
+            ...filterParams,
+        };
+
+        const usersCount = await db.user.count({ where: usersWhere });
+
+        if (usersCount === 0) {
+            throw new customErr('Custom_Error', 'No user found', 404);
+        }
+
+        const users = await db.user.findMany({
+            take,
+            skip,
+            orderBy: [{ [sortField]: sortType }],
+            where: usersWhere
+        });
+
+        let exportData;
+
+        if (exportType === 'page') {
+            exportData = users;
+        } else if (exportType === 'filtered') {
+            exportData = await db.user.findMany({
+                orderBy: [{ [sortField]: sortType }],
+                where: usersWhere,
+            });
+        } else {
+            exportData = await db.user.findMany({});
+        }
+
+        return Response({
+            data: users,
+            metaData: {
+                page: pageNo,
+                pageSize: take,
+                total: usersCount,
+                sort: [sortField, sortType],
+                searchVal: search,
+                filter,
+                exportType,
+                exportData,
+            },
+        })
+    } catch (error) {
+        console.log('Error occurred loading users.');
+        console.dir(error, { depth: null });
+        return errorHandler(error);
+    }
+};

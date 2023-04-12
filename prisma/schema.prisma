@@ -1,8 +1,12 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
+}
+
+generator jsonSchema {
+  provider                 = "prisma-json-schema-generator"
+  persistOriginalType      = "true"
+  keepRelationScalarFields = "true"
+  includeRequiredFields    = "true"
 }
 
 datasource db {
@@ -10,18 +14,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator jsonSchema {
-  provider                 = "prisma-json-schema-generator"
-  keepRelationScalarFields = "true"
-  includeRequiredFields    = "true"
-  persistOriginalType      = "true"
-}
-
 model User {
   id          String                  @id @default(uuid())
-  firstName   String
-  middleName  String
-  lastName    String
+  firstName   String?
+  middleName  String?
+  lastName    String?
   phone       String                  @unique
   email       String?
   gender      Gender?
@@ -29,14 +26,14 @@ model User {
   birthDate   DateTime?
   isVerified  Boolean?
   status      Status                  @default(ACTIVE)
-  roles       RoleUser[]
-  clients     ClientUser[]
-  submissions DynamicFormSubmission[]
-  rewards     UserReward[]
-  blulkTasks  BulkTask[]
   createdAt   DateTime                @default(now())
   updatedAt   DateTime                @updatedAt
   deletedAt   DateTime?
+  blulkTasks  BulkTask[]
+  clients     ClientUser[]
+  submissions DynamicFormSubmission[]
+  roles       RoleUser[]
+  rewards     UserReward[]
 }
 
 model Role {
@@ -44,11 +41,11 @@ model Role {
   name        String           @unique
   description String?
   createdBy   String
-  users       RoleUser[]
-  permissions RolePermission[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   status      Status           @default(ACTIVE)
+  permissions RolePermission[]
+  users       RoleUser[]
 }
 
 model Permission {
@@ -60,38 +57,37 @@ model Permission {
   action      String
   conditions  Json?
   fields      String[]         @default([])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  status      Status           @default(ACTIVE)
   roles       RolePermission[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  status    Status   @default(ACTIVE)
 }
 
 model RoleUser {
-  user   User   @relation(fields: [userId], references: [id])
   userId String
-  role   Role   @relation(fields: [roleId], references: [id])
   roleId String
+  role   Role   @relation(fields: [roleId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   @@id([userId, roleId])
 }
 
 model RolePermission {
-  role         Role       @relation(fields: [roleId], references: [id])
   roleId       String
-  permission   Permission @relation(fields: [permissionId], references: [id])
   permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  role         Role       @relation(fields: [roleId], references: [id])
 
   @@id([roleId, permissionId])
 }
 
 model ClientUser {
-  user         User    @relation(fields: [userId], references: [id])
   userId       String
   isRewareded  Boolean @default(true)
   isSystemUser Boolean @default(false)
-  client       Client  @relation(fields: [clientId], references: [id])
   clientId     String
+  client       Client  @relation(fields: [clientId], references: [id])
+  user         User    @relation(fields: [userId], references: [id])
 
   @@id([userId, clientId])
 }
@@ -104,19 +100,19 @@ model Client {
   phone         String        @unique
   email         String?
   status        Status        @default(ACTIVE)
-  dynamicForms  DynamicForm[]
-  rewards       Reward[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   deletedAt     DateTime?
   users         ClientUser[]
+  dynamicForms  DynamicForm[]
+  rewards       Reward[]
 }
 
 model UserReward {
   userId   String
-  users    User   @relation(fields: [userId], references: [id])
   rewardId String
   rewards  Reward @relation(fields: [rewardId], references: [id])
+  users    User   @relation(fields: [userId], references: [id])
 
   @@id([userId, rewardId])
 }
@@ -127,32 +123,32 @@ model Reward {
   description String?
   rewardTaken Int?
   rewardGiven Int
-  createdBy   String
-  status      Status       @default(ACTIVE)
   plan        PLAN         @default(DAY)
   clientId    String
-  client      Client       @relation(fields: [clientId], references: [id])
-  formId      String
-  form        DynamicForm  @relation(fields: [formId], references: [id])
-  users       UserReward[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
+  formId      String
+  createdBy   String
+  status      Status       @default(ACTIVE)
+  client      Client       @relation(fields: [clientId], references: [id])
+  form        DynamicForm  @relation(fields: [formId], references: [id])
+  users       UserReward[]
 }
 
 model DynamicForm {
   id          String                  @id @default(uuid())
   name        String
   description String?
-  fields      DynamicFormField[]
-  submissions DynamicFormSubmission[]
-  client      Client                  @relation(fields: [clientId], references: [id])
   clientId    String
-  reward      Reward[]
   createdBy   String?
   createdAt   DateTime                @default(now())
   updatedAt   DateTime                @updatedAt
   deletedAt   DateTime?
+  client      Client                  @relation(fields: [clientId], references: [id])
+  fields      DynamicFormField[]
+  submissions DynamicFormSubmission[]
+  reward      Reward[]
 }
 
 model DynamicFormField {
@@ -166,23 +162,24 @@ model DynamicFormField {
   placeholder  String?
   defaultValue Json?
   order        Int
-  dynamicFroms DynamicForm          @relation(fields: [formId], references: [id])
   formId       String
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
   deletedAt    DateTime?
+  dynamicFroms DynamicForm          @relation(fields: [formId], references: [id])
 }
 
 model DynamicFormSubmission {
   id            String      @id @default(uuid())
   data          Json
-  form          DynamicForm @relation(fields: [formId], references: [id])
   formId        String
-  submittedBy   User        @relation(fields: [submittedById], references: [id])
   submittedById String
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   deletedAt     DateTime?
+  status        Status      @default(PENDING)
+  form          DynamicForm @relation(fields: [formId], references: [id])
+  submittedBy   User        @relation(fields: [submittedById], references: [id])
 }
 
 model BulkTask {
@@ -192,12 +189,12 @@ model BulkTask {
   taskCount    Int
   faildCount   Int
   successCount Int
-  tasks        Task[]
   createdById  String
-  createdBy    User       @relation(fields: [createdById], references: [id])
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   deletedAt    DateTime?
+  createdBy    User       @relation(fields: [createdById], references: [id])
+  tasks        Task[]
 }
 
 model Task {
@@ -208,8 +205,8 @@ model Task {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   deletedAt DateTime?
-  bulk      BulkTask?  @relation(fields: [bulkId], references: [id])
   bulkId    String?
+  bulk      BulkTask?  @relation(fields: [bulkId], references: [id])
 }
 
 enum DynamicFormFieldType {

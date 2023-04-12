@@ -303,7 +303,7 @@ const Reward = () => {
             routeMenus={[
               {
                 ability: row?.original?.canViewUsers,
-                route: "users",
+                route: "/",
                 menuItem: "Users",
               },
             ]}

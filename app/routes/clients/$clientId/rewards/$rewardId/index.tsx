@@ -23,10 +23,9 @@ import { toast } from "react-toastify";
 import {
   getRewardUsers,
 } from "~/services/Reward/Reward.server";
-import { getClientUsers } from "~/services/Client/Client.server";
 
 /**
- * Loader function to fetch users of a client.
+ * Loader function to fetch users of a reward.
  * @async function loader
  * @param request The incoming HTTP request.
  * @param params The URL params for the current route.
@@ -40,21 +39,22 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     });
 
     console.log({ user, params });
-    // Check if the user can read a client users
+    // Check if the user can read a reward users
     const canRead = (await canUser(user?.id, "read", "User", {
       clientId: params?.clientId,
     })) as any;
 
-    // Get all all users that get any reward of a client
-    let clientUsers;
-    clientUsers = (await getClientUsers(
+    // Get all all users that get a reward
+    let rewardUsers;
+    rewardUsers = (await getRewardUsers(
       request,
       params?.clientId as string,
+      params?.rewardId as string
     )) as any;
 
-    console.dir({ form: clientUsers?.data });
+    console.dir({ form: rewardUsers?.data });
 
-    if (clientUsers?.status === 404) {
+    if (rewardUsers?.status === 404) {
       // const test = await dynamicForms.json()
       // console.log({ data: test });
       return json(
@@ -75,7 +75,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     return json(
       Response({
         data: {
-          ...clientUsers,
+          ...rewardUsers,
           canRead: canRead?.status === 200,
           user,
         },
@@ -89,10 +89,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 /**
- * Renders the Client User component.
- * @returns {JSX.Element} JSX element containing the client users table.
+ * Renders the Reward User component.
+ * @returns {JSX.Element} JSX element containing the rewards table.
  */
-const ClientUsers = () => {
+const RewardUsers = () => {
   const loaderData = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const columns = useMemo<MRT_ColumnDef<User>[]>(
@@ -152,7 +152,9 @@ const ClientUsers = () => {
     []
   );
 
+
   useEffect(() => {
+    console.log({ loaderData });
     if (!!loaderData?.data?.error?.error?.message) {
       toast.error(loaderData?.data?.error?.error?.message);
     }
@@ -165,7 +167,7 @@ const ClientUsers = () => {
         columns={columns}
         data={loaderData}
         page="users"
-        exportFileName="Client Users"
+        exportFileName="Rewards Users"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
       />
@@ -173,4 +175,4 @@ const ClientUsers = () => {
   );
 };
 
-export default ClientUsers;
+export default RewardUsers;
