@@ -1,27 +1,35 @@
 import { json } from '@remix-run/node'
 import { db } from '../db.server'
 import customErr, { Response, errorHandler } from '~/utils/handler.server'
-import { Client, Permission, Role, RolePermission } from '@prisma/client'
+import {
+    Client,
+    Permission,
+    Role,
+    RolePermission,
+    Status,
+} from '@prisma/client'
 import getParams from '~/utils/params/getParams.server'
 import { searchCombinedColumn } from '~/utils/params/search.server'
 import { filterFunction } from '~/utils/params/filter.server'
 import canUser from '~/utils/casl/ability'
-import { checkUserPermissions, getAllEntityPermissions, getAllPermissions, getAllSystemPermissions } from './Permissions/permission.server'
-import { getEntities } from '../Entities/entity.server'
+import {
+    getAllEntityPermissions,
+    getAllPermissions,
+    getAllSystemPermissions,
+} from './Permissions/permission.server'
 
 export interface EntityPermission {
     [key: string]: {
-        [key: string]: any;
+        [key: string]: any
         hasSelected?: Boolean
-        permissions: Permission[];
-    }[];
+        permissions: Permission[]
+    }[]
 }
 
 const propertyNames: { [key: string]: string } = {
-    clients: 'client'
-};
+    clients: 'client',
+}
 
-const entityTypes = ['client']
 /**
  * Creates a new role for a user
  *
@@ -42,18 +50,23 @@ export const createRole = async (userId: string, roleData: any) => {
         }
 
         if (!roleData || !roleData.name || !roleData.permissions) {
-            throw new customErr('Custom_Error', 'Role data is missing or invalid', 404)
+            throw new customErr(
+                'Custom_Error',
+                'Role data is missing or invalid',
+                404
+            )
         }
 
         // Check user's permissions
-        const canCreateRole = await checkUserPermissions(userId, roleData.permissions)
+        const canCreateRole = await canUser(userId, 'create', 'Role', {
+            clientId: roleData.clientId,
+        })
         if (!canCreateRole) {
             return json(
                 Response({
                     error: {
                         error: {
-                            message:
-                                'You are not authorized to create a role',
+                            message: 'You are not authorized to create a role',
                         },
                     },
                 }),
@@ -80,7 +93,15 @@ export const createRole = async (userId: string, roleData: any) => {
             },
         })
 
-        return json(Response({ data: createdRole }), { status: 201, statusText: 'OK' })
+        return json(
+            Response({
+                data: {
+                    role: createdRole,
+                    message: 'Role Successfuly created!',
+                },
+            }),
+            { status: 201, statusText: 'OK' }
+        )
     } catch (err) {
         return errorHandler(err)
     }
@@ -104,10 +125,17 @@ export const getRoleById = async (roleId: string) => {
             where: {
                 id: roleId,
             },
+            include: {
+                permissions: true,
+            },
         })
 
         if (!role) {
-            throw new customErr('Custom_Error', `Role not found with ID: ${roleId}`, 404)
+            throw new customErr(
+                'Custom_Error',
+                `Role not found with ID: ${roleId}`,
+                404
+            )
         }
 
         return role
@@ -115,7 +143,6 @@ export const getRoleById = async (roleId: string) => {
         return errorHandler(err)
     }
 }
-
 
 /**
  * Retrieves all role from the database based on a scalar field.
@@ -126,12 +153,19 @@ export const getRoleById = async (roleId: string) => {
  * @returns {Promise<object>} The retrieved role object.
  * @throws {Error} Throws an error if there's an issue retrieving the role.
  */
-export const getRolesByScalarField = async (fieldName: string, fieldValue: string) => {
-    const validScalarFields = ['name', 'description', 'createdBy', 'status'];
+export const getRolesByScalarField = async (
+    fieldName: string,
+    fieldValue: string
+) => {
+    const validScalarFields = ['name', 'description', 'createdBy', 'status']
 
     try {
         if (!validScalarFields.includes(fieldName)) {
-            throw new customErr('Custom_Error', `Invalid field name provided`, 400);
+            throw new customErr(
+                'Custom_Error',
+                `Invalid field name provided`,
+                400
+            )
         }
 
         const role = await db.role.findMany({
@@ -141,26 +175,30 @@ export const getRolesByScalarField = async (fieldName: string, fieldValue: strin
             include: {
                 users: {
                     include: {
-                        user: true
-                    }
+                        user: true,
+                    },
                 },
                 permissions: {
                     include: {
-                        permission: true
-                    }
-                }
+                        permission: true,
+                    },
+                },
             },
-        });
+        })
 
         if (!role) {
-            throw new customErr('Custom_Error', `Role with ${fieldName} ${fieldValue} not found`, 404);
+            throw new customErr(
+                'Custom_Error',
+                `Role with ${fieldName} ${fieldValue} not found`,
+                404
+            )
         }
 
-        return json(Response({ data: role }), { status: 200 });
+        return Response({ data: role })
     } catch (err) {
-        return errorHandler(err);
+        return errorHandler(err)
     }
-};
+}
 
 /**
  * Retrieve roles of a user.
@@ -179,24 +217,24 @@ export const getUserRoles = async (userId: string) => {
             where: {
                 users: {
                     some: {
-                        userId
-                    }
-                }
+                        userId: userId,
+                    },
+                },
             },
             include: {
                 permissions: {
                     include: {
-                        permission: true
-                    }
-                }
+                        permission: true,
+                    },
+                },
             },
-        });
+        })
 
-        return json(Response({ data: roles }), { status: 200 });
+        return json(Response({ data: roles }), { status: 200 })
     } catch (err) {
-        return errorHandler(err);
+        return errorHandler(err)
     }
-};
+}
 
 /**
  * Retrieve all roles
@@ -230,7 +268,11 @@ export const getAllRoles = async (request: Request, userId: string) => {
 
         const { sortType, sortField, skip, take, pageNo, search, filter } =
             getParams(request)
-        const searchParams = searchCombinedColumn(search, ['name', 'createdBy', 'description'], 'search')
+        const searchParams = searchCombinedColumn(
+            search,
+            ['name', 'createdBy', 'description'],
+            'search'
+        )
         const filterParams = filterFunction(filter, 'Role')
 
         let roles = []
@@ -241,7 +283,7 @@ export const getAllRoles = async (request: Request, userId: string) => {
                 createdBy: userId,
             },
         })
-        console.log({roleCount})
+        console.log({ roleCount })
         if (!!roleCount) {
             roles = await db.role.findMany({
                 take,
@@ -267,15 +309,14 @@ export const getAllRoles = async (request: Request, userId: string) => {
                     searchVal: search,
                     filter,
                     total: roleCount,
-                }
+                },
             }
-
         }
         throw new customErr('Custom_Error', 'Role not found', 404)
     } catch (err) {
         console.error('Error occurred getting all roles')
-        console.dir(err, {depth: null})
-        return errorHandler(err);
+        console.dir(err, { depth: null })
+        return errorHandler(err)
     }
 }
 
@@ -288,24 +329,30 @@ export const getAllRoles = async (request: Request, userId: string) => {
  * @returns {Promise<object>} Updated role object
  * @throws {Error} If no role found with given ID
  */
-export const updateRoleById = async (roleId: string, data: any): Promise<any> => {
+export const updateRoleById = async (
+    roleId: string,
+    data: any
+): Promise<any> => {
     if (!roleId) {
         throw new customErr('Custom_Error', 'Role ID is required', 404)
     }
     try {
         const updatedRole = await db.role.update({
             where: { id: roleId },
-            data
-        });
-        return json(Response({
-            data: updatedRole
-        }), {
-            status: 200
-        });
+            data,
+        })
+        return json(
+            Response({
+                data: updatedRole,
+            }),
+            {
+                status: 200,
+            }
+        )
     } catch (err) {
-        return errorHandler(err);
+        return errorHandler(err)
     }
-};
+}
 
 /**
  * Updates the permissions of a role by ID
@@ -316,7 +363,7 @@ export const updateRoleById = async (roleId: string, data: any): Promise<any> =>
  * @param {Array<string>} connect - An array of permission IDs to connect to the role
  * @param {Array<string>} disconnect - An array of permission IDs to disconnect from the role
  * @returns {Promise<{ data: Role }>} An object with the updated role data
-*/
+ */
 export const updateRolePermissions = async (
     roleId: string,
     name: string,
@@ -325,21 +372,25 @@ export const updateRolePermissions = async (
 ) => {
     try {
         const permissions = {
-            create: connect.filter((e) => e !== undefined && e !== null).map((elt) => {
-                return {
-                    permission: {
-                        connect: {
-                            id: elt,
+            create: connect
+                .filter((e) => e !== undefined && e !== null)
+                .map((elt) => {
+                    return {
+                        permission: {
+                            connect: {
+                                id: elt,
+                            },
                         },
-                    },
-                };
-            }),
-            deleteMany: disconnect.filter((e) => e !== undefined && e !== null).map((elt) => {
-                return {
-                    permissionId: elt,
-                };
-            }),
-        };
+                    }
+                }),
+            deleteMany: disconnect
+                .filter((e) => e !== undefined && e !== null)
+                .map((elt) => {
+                    return {
+                        permissionId: elt,
+                    }
+                }),
+        }
 
         const updatedRole = await db.role.update({
             where: {
@@ -349,18 +400,44 @@ export const updateRolePermissions = async (
                 name: name || undefined,
                 permissions,
             },
-        });
-        return json(Response({
-            data: updatedRole
-        }), {
-            status: 200
-        });
+        })
+        return json(
+            Response({
+                data: updatedRole,
+            }),
+            {
+                status: 200,
+            }
+        )
     } catch (error) {
-        console.log(error);
-        return errorHandler(error);
+        console.log(error)
+        return errorHandler(error)
     }
-};
+}
 
+export const updateRoleStatus = async (roleId: string, status: Status) => {
+    try {
+        const updatedRole = await db.role.update({
+            where: {
+                id: roleId,
+            },
+            data: {
+                status: status,
+            },
+        })
+        return json(
+            Response({
+                data: updatedRole,
+            }),
+            {
+                status: 200,
+            }
+        )
+    } catch (error) {
+        console.log(error)
+        return errorHandler(error)
+    }
+}
 /**
  * Edits a role by updating its name and permissions.
  *
@@ -373,7 +450,7 @@ export const updateRolePermissions = async (
  * @returns {object} A JSON response with the updated role.
  * @throws {CustomError} If user ID or role ID is missing, or if the user is not authorized to edit the role.
  */
-export const editRole = async (userId: string, roleId: string, data: any, name: string) => {
+export const editRole = async (userId: string, roleId: string, data: any) => {
     try {
         if (!userId) {
             throw new customErr('Custom_Error', 'User ID is required', 404)
@@ -382,33 +459,51 @@ export const editRole = async (userId: string, roleId: string, data: any, name: 
         if (!roleId) {
             throw new customErr('Custom_Error', 'Role ID is required', 404)
         }
+        let updatedRole: any
+        if (data?.status) {
+            updatedRole = await updateRoleStatus(roleId, data?.status)
+        } else {
+            const { rolePermissions } = await getRolePermissions(userId, roleId)
+            let filtered = rolePermissions?.filter((e: any) => e.selected)
+            console.log({ filtered, old: data?.permissions })
 
-        const { rolePermissions } = await getRolePermissions(userId, roleId)
+            const { connect, disconnect } = permissionChange(
+                filtered,
+                data?.permissions
+            )
+            console.log({ connect, disconnect })
 
-        const { connect, disconnect } = permissionChange(rolePermissions, data)
+            updatedRole = await updateRolePermissions(
+                roleId,
+                data?.name,
+                connect,
+                disconnect
+            )
+        }
 
-        const updatedRole = await updateRolePermissions(roleId, name, connect, disconnect)
-
-        return json(Response({ data: updatedRole }), { status: 200, statusText: 'OK' })
+        return json(Response({ data: updatedRole }), {
+            status: 200,
+            statusText: 'OK',
+        })
     } catch (err) {
         return errorHandler(err)
     }
 }
 
 /**
-* Compares the old and new permissions and returns an object with the permissions to connect and disconnect.
-*
-* @function permissionChange
-* @param {Permission[]} oldPermissions - An array of the old permissions.
-* @param {string[]} newPermissions - An array of the new permissions.
-* @returns {object} An object with the permissions to connect and disconnect.
-*/
-export const permissionChange = (oldPermissions: any[], newPermissions: string[]) => {
-    const oldPermissionIds = oldPermissions.map(permission => permission.id)
+ * Compares the old and new permissions and returns an object with the permissions to connect and disconnect.
+ *
+ * @function permissionChange
+ * @param {Permission[]} oldPermissions - An array of the old permissions.
+ * @param {string[]} newPermissions - An array of the new permissions.
+ * @returns {object} An object with the permissions to connect and disconnect.
+ */
+export const permissionChange = (oldRoles: string[], newRoles: string[]) => {
+    // const oldPermissionIds = oldRoles.map(permission => permission.id)
 
-    const disconnect = oldPermissionIds.filter(id => !newPermissions.includes(id))
+    const disconnect = oldRoles.filter((id) => !newRoles.includes(id))
 
-    const connect = newPermissions.filter(id => !oldPermissionIds.includes(id))
+    const connect = newRoles.filter((id) => !oldRoles.includes(id))
 
     return { connect, disconnect }
 }
@@ -427,10 +522,59 @@ export async function getRolePermissions(userId: string, roleId: string) {
     try {
         const role = await getRoleById(roleId)
         const userAllPermissions = await allUserPermissions(userId)
-        const rolePermissionIds = role.permissions.map((p: any) => p.permission.id)
-        const rolePermissions = userAllPermissions.filter((p: any) => rolePermissionIds.includes(p.id))
+
+        const rolePermissionIds = role?.permissions?.map(
+            (p: any) => p.permissionId
+        )
+        const rolePermissions = userAllPermissions.map((p: any) => {
+            if (rolePermissionIds.includes(p.id)) {
+                p.selected = true
+            }
+            return p
+        })
+
         return { role, rolePermissions }
     } catch (err) {
+        return errorHandler(err)
+    }
+}
+export async function getRoleClientPermissions(userId: string, roleId: string) {
+    try {
+        const role = await getRoleById(roleId)
+        const userAllPermissions = await allUserPermissions(userId, 'client')
+        const rolePermissionIds = role.permissions.map(
+            (p: any) => p.permission.id
+        )
+        const rolePermissions = userAllPermissions.map((p: any) => {
+            if (rolePermissionIds.includes(p.id)) {
+                p.selected = true
+            }
+            return p
+        })
+        return { role, rolePermissions }
+    } catch (err) {
+        return errorHandler(err)
+    }
+}
+export async function getRoleSystemPermissions(userId: string, roleId: string) {
+    try {
+        const role = await getRoleById(roleId)
+        const userAllPermissions = await allUserPermissions(userId, 'system')
+
+        const rolePermissionIds = role.permissions.map(
+            (p: any) => p.permission.id
+        )
+        const rolePermissions = userAllPermissions.map((p: any) => {
+            if (
+                rolePermissionIds.includes(p.id) &&
+                !Object.keys(p.conditions).length
+            ) {
+                p.selected = true
+            }
+        })
+        return { role, rolePermissions }
+    } catch (err) {
+        console.log({ err })
         return errorHandler(err)
     }
 }
@@ -445,26 +589,58 @@ export async function getRolePermissions(userId: string, roleId: string) {
  * @returns {Promise<Permission[]>} An array of permissions.
  * @throws {Error} If an error occurs while retrieving the permissions.
  */
-export const allUserPermissions = async (userId: string): Promise<Permission[]> => {
+export const allUserPermissions = async (
+    userId: string,
+    type?: string
+): Promise<Permission[]> => {
     try {
-        const userRoles = await getUserRoles(userId)
+        const userRoles = await (await getUserRoles(userId)).json()
         const rolePermissions: Set<string> = new Set()
         const permissions: Permission[] = []
-
-        for (const role of userRoles) {
-            for (const permission of role.permissions) {
-                const permissionId = permission.id
-                if (permission.action === 'manage' && permission.subject === 'all') {
-                    const { data } = await getAllPermissions()
-                    permissions.push(...data)
+        for (const role of userRoles?.data) {
+            for (const permission of role?.permissions) {
+                const permissionId = permission?.permission?.id
+                if (
+                    permission?.permission?.action === 'manage' &&
+                    permission?.permission?.subject === 'all'
+                ) {
+                    if (type && type === 'system') {
+                        const { data } = await getAllSystemPermissions()
+                        permissions.push(...data)
+                    } else if (type && type === 'client') {
+                        const { data } = await getAllEntityPermissions()
+                        permissions.push(...data)
+                    } else if (!type) {
+                        const { data } = await getAllPermissions()
+                        permissions.push(...data)
+                    }
                     break
-                } else if (!rolePermissions.has(permissionId)) {
-                    rolePermissions.add(permissionId)
-                    permissions.push(permission)
+                } else {
+                    if (
+                        type &&
+                        type === 'system' &&
+                        Object.keys(permission?.permission?.conditions)
+                            .length === 0 &&
+                        !rolePermissions.has(permissionId)
+                    ) {
+                        rolePermissions.add(permissionId)
+                        permissions.push(permission?.permission)
+                    } else if (
+                        type &&
+                        type === 'client' &&
+                        Object.keys(permission?.permission?.conditions)
+                            .length &&
+                        !rolePermissions.has(permissionId)
+                    ) {
+                        rolePermissions.add(permissionId)
+                        permissions.push(permission?.permission)
+                    } else if (!rolePermissions.has(permissionId) && !type) {
+                        rolePermissions.add(permissionId)
+                        permissions.push(permission?.permission)
+                    }
                 }
             }
         }
-
         return permissions
     } catch (err) {
         throw errorHandler(err)
@@ -477,24 +653,26 @@ export const allUserPermissions = async (userId: string): Promise<Permission[]> 
  * @param userId The id of the user who created the roles.
  * @returns An object containing the roles created by the user and their unique permissions.
  */
- export const getUserCreatedRole = async (userId: string): Promise<{ roles: Role[], permissions: Permission[] }> => {
+export const getUserCreatedRole = async (
+    userId: string
+): Promise<{ roles: Role[]; permissions: Permission[] }> => {
     try {
-        const roles = await getRolesByScalarField('createdBy', userId);
-        const permissions: Permission[] = [];
+        const roles = await getRolesByScalarField('createdBy', userId)
+        const permissions: Permission[] = []
 
-        roles.forEach((role:any) => {
-            role.permissions.forEach((permission:Permission) => {
+        roles?.data?.forEach((role: any) => {
+            role.permissions.forEach((permission: Permission) => {
                 if (!permissions.some((p) => p.id === permission.id)) {
-                    permissions.push(permission);
+                    permissions.push(permission)
                 }
-            });
-        });
+            })
+        })
 
-        return { roles, permissions };
+        return { roles: roles?.data, permissions }
     } catch (error) {
-        throw errorHandler(error);
+        return errorHandler(error)
     }
-};
+}
 
 /**
  * Removes permissions from selected permission list based on the specified entity and its values.
@@ -506,144 +684,6 @@ export const allUserPermissions = async (userId: string): Promise<Permission[]> 
  * @param name - The name of the entity.
  * @returns An object containing the new permission list and the original entity permission state.
  */
-export const removePermissions = (
-    state: EntityPermission,
-    selectedPermission: Permission[],
-    value: any[],
-    name: string
-): { newPermission: Permission[], state: EntityPermission } => {
-    // Map entity name to its identifier property name
-    const entityMap: { [key: string]: { id: string } } = {
-        client: { id: 'client.id' },
-    };
-
-    // Create a set of selected entity identifiers to efficiently check against
-    const selectedIds = new Set(value.map((e) => e[entityMap[name].id]));
-
-    // Filter out permissions that do not match the selected entity identifiers or its entities' permissions
-    const newPermission = selectedPermission.filter((permission) => {
-        for (const entity of state[name + 's']) {
-            if (entity !== undefined) {
-                if (selectedIds.has(entity[entityMap[name].id])) {
-                    return true;
-                }
-                if (entity?.permissions.some((p: any) => p.id === permission.id)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    });
-
-    return { newPermission, state };
-};
-
-/**
- * Get permissions allowed for a user based on their role, entity, and action.
- * @async function allowedPermissions
- * @param userId The ID of the user.
- * @param entity The entity for which permissions are being checked.
- * @param entityId The ID of the entity.
- * @param roleId The ID of the role.
- * @param action The action being performed.
- * @param subject The subject of the action being performed.
- * @returns An object containing the role and role permissions allowed for the user.
- */
-export const allowedPermissions = async (
-    userId: string,
-    entity: string,
-    entityId: string,
-    roleId: string,
-    action: string,
-    subject: string
-): Promise<{ role: Role; rolePermissions: Permission[] }> => {
-    try {
-        let rolePermissions: Permission[] = [];
-        const role = await getRoleById(roleId);
-
-        // Check if user is allowed to manage all entities
-        const allPermitted = await canUser(userId, 'manage', 'all', {});
-        if (allPermitted?.status === 200) {
-            if (entity === '' || entity === null || entity === 'system') {
-                const response = await getAllSystemPermissions();
-                rolePermissions = response?.data;
-            } else {
-                const response = await getAllEntityPermissions(entity, entityId);
-                rolePermissions = response?.data;
-            }
-        } else {
-            const userAllPermissions = await allUserPermissions(userId);
-            if (entity === '' || entity === null || entity === 'system') {
-                for (let permission of userAllPermissions) {
-                    if (
-                        permission.conditions === null ||
-                        Object.keys(permission.conditions).length === 0
-                    ) {
-                        rolePermissions.push(permission);
-                    }
-                }
-            } else {
-                const allowed = await canUser(userId, action, subject, {
-                    [entity]: entityId,
-                });
-
-                if (allowed?.status === 200) {
-                    for (let permission of userAllPermissions) {
-                        for (const [key, value] of Object.entries(
-                            permission?.conditions ? permission.conditions : {}
-                        )) {
-                            if (entity === key && entityId === value) {
-                                if (
-                                    !rolePermissions.some((e) => e.id === permission.id)
-                                ) {
-                                    rolePermissions.push(permission);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Set selected flag for each permission
-        rolePermissions.map((elt: any) => {
-            for (let per of role.data.permissions) {
-                if (elt.id === per.permission.id) {
-                    elt.selected = true
-                }
-            }
-        })
-
-        return { role: role.data, rolePermissions: rolePermissions };
-    } catch (err) {
-        return errorHandler(err);
-    }
-};
-
-/**
- * Returns an array of selected permissions for the given entities.
- * @function actionSelectedPermission
- * @param entities The permission state for different entities.
- * @param selectedPermissions The currently selected permissions.
- * @returns An array of selected permissions.
- */
-export const actionSelectedPermission = (
-    entities: EntityPermission,
-    selectedPermissions: Permission[]
-) => {
-    let newPermissions: any[] = selectedPermissions;
-    Object.values(entities).forEach((entityArray) => {
-        entityArray.forEach((entity) => {
-            entity.permissions.forEach((permission: any) => {
-                if (!newPermissions.some((e) => e.id === permission.id) && permission.selected) {
-                    newPermissions.push(permission);
-                }
-            });
-        });
-    });
-    return newPermissions;
-};
-
 /**
  * Maps the new entity permissions with the old entity permissions and returns the updated EntityPermission object.
  * function permissionAllocator
@@ -652,135 +692,6 @@ export const actionSelectedPermission = (
  * @param entity - The name of the entity.
  * @returns The updated EntityPermission object.
  */
-export const permissionAllocator = (
-    newEntityPermissions: any,
-    oldEntityPermissions: any,
-    entity: string
-): EntityPermission => {
-    const entities: {
-        [key: string]: string
-    } = {
-        clients: 'client'
-    }
-
-    if (!entities[entity]) {
-        throw new Error('Invalid entity provided');
-    }
-
-    oldEntityPermissions[entity].map((item: any, index: number) => {
-        newEntityPermissions[entity].map((e: any) => {
-            if (e?.[entities[entity]].id === item?.[entities[entity]].id) {
-                oldEntityPermissions[entity][index] = e;
-            } else {
-                oldEntityPermissions[entity][index] = {
-                    [entities[entity]]: item?.[entities[entity]],
-                    permissions: [],
-                };
-            }
-        });
-    });
-
-    return oldEntityPermissions;
-};
-
-/**
- * Returns entity permissions for a specific user, role, and entity type.
- * @function getEntityPermissions
- * @param userId The ID of the user.
- * @param entities The entities for which to retrieve permissions.
- * @param entityType The type of entity for which to retrieve permissions.
- * @param roleId The ID of the role.
- * @param idName The name of the ID property.
- * @param idValue The value of the ID property.
- * @returns The entity permissions for the user, role, and entity type.
- */
-export const getEntityPermissions = async (
-    userId: string,
-    entities: any[],
-    entityType: string,
-    roleId: string,
-    idName: string,
-    idValue: string,
-): Promise<EntityPermission[]> => {
-    try {
-        const entityPermissions: EntityPermission = {
-            associations: [],
-            departments: [],
-            clients: [],
-            registrantCompanies: [],
-        };
-
-        for (const entity of entities) {
-            const permissions = await allowedPermissions(
-                userId,
-                idName,
-                entity[idValue],
-                roleId,
-                'update',
-                'Role',
-            );
-
-            entityPermissions[entityType].push({
-                [propertyNames[entityType]]: entity,
-                hasSelected: true,
-                permissions: permissions?.rolePermissions.filter(
-                    (permission: any) => permission.selected,
-                ),
-            });
-        }
-
-        return entityPermissions[entityType];
-    } catch (error) {
-        throw errorHandler(error);
-    }
-};
-
-/**
- * Fetches the permissions for a user on multiple entities of a given type
- * @funciton searchEntityPermissions
- * @param {string} userId - The ID of the user whose permissions are being fetched
- * @param {Array<any>} entities - The entities for which permissions are being fetched
- * @param {string} entityType - The type of entities being fetched (e.g.  'client')
- * @param {string} roleId - The ID of the role for which permissions are being fetched
- * @param {string} idName - The name of the ID field for the entity (e.g. 'clientId')
- * @param {string} idValue - The value of the ID field for the entity
- *
- * @returns {Promise<Array<{entity: any, entityPermissions: Array<any>}>} - An array of objects containing the entity and its associated permissions
- */
-export const searchEntityPermissions = async (
-    userId: string,
-    entities: any[],
-    entityType: string,
-    roleId: string,
-    idName: string,
-    idValue: string
-): Promise<Array<{ entity: any, entityPermissions: Array<any> }>> => {
-    if (!entityTypes.includes(entityType)) {
-        throw new customErr('Custom_Error', `Invalid entityType: ${entityType}`, 400);
-    }
-    const fetchedPermissions = [];
-
-    for (const value of entities) {
-        const entity = value[entityType];
-        const permissions = value.permissions.length
-            ? value.permissions
-            : (await allowedPermissions(
-                userId,
-                idName,
-                idValue,
-                roleId,
-                'update',
-                'Role'
-            )).rolePermissions;
-
-        fetchedPermissions.push({
-            entity,
-            entityPermissions: permissions ?? [],
-        });
-    }
-
-    return fetchedPermissions;
-};
 
 /**
  * Formats entity permissions based on the entity name.
@@ -789,12 +700,15 @@ export const searchEntityPermissions = async (
  * @param entityType The type of the entity.
  * @returns The formatted entity permissions.
  */
-export const formatEntityPermissions = (permissions: any, entityType: string): EntityPermission => {
+export const formatEntityPermissions = (
+    permissions: any,
+    entityType: string
+): EntityPermission => {
     const formatted: EntityPermission = {
-        clients: []
+        clients: [],
     }
 
-    const entityProperty = propertyNames[entityType];
+    const entityProperty = propertyNames[entityType]
 
     permissions.map((item: any) => {
         formatted[entityType].push({
@@ -812,14 +726,33 @@ export const formatEntityPermissions = (permissions: any, entityType: string): E
  * @param rawPermissions - The array of permissions to categorize.
  * @returns An object containing the permissions categorized by their category.
  */
- export const categorizePermissions = (rawPermissions: any[]): Record<string, any[]> => {
-    return rawPermissions.reduce((permissions: Record<string, any[]>, permission) => {
-      if (permission.category in permissions) {
-        permissions[permission.category].push(permission);
-      } else {
-        permissions[permission.category] = [permission];
-      }
-      return permissions;
-    }, {});
-  };
-  
+export const categorizePermissions = (rawPermissions: []) => {
+    console.log({ rawPermissions })
+    const permissions = rawPermissions?.reduce(function (
+        permissions: any,
+        permission: any
+    ) {
+        if (permission?.category in permissions) {
+            permissions[permission?.category]?.push(permission)
+        } else {
+            permissions[permission?.category] = [permission]
+        }
+        return permissions
+    },
+    {})
+    return permissions
+}
+
+export const roleChange = (oldPermissions: any[], newPermissions: string[]) => {
+    const oldPermissionIds = oldPermissions.map((permission) => permission.id)
+
+    const disconnect = oldPermissionIds.filter(
+        (id) => !newPermissions.includes(id)
+    )
+
+    const connect = newPermissions.filter(
+        (id) => !oldPermissionIds.includes(id)
+    )
+
+    return { connect, disconnect }
+}
