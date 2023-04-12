@@ -3,7 +3,11 @@
  * @param {string} search - The search term to lookfor.
  * @returns {obj} filter object.
  */
-export const searchCombinedColumn = (filterItem: any, columnNames: string[], type?: string) => {
+export const searchCombinedColumn = (
+    filterItem: any,
+    columnNames: string[],
+    type?: string
+) => {
     let operator: string
     let searchArray: any
 
@@ -20,50 +24,54 @@ export const searchCombinedColumn = (filterItem: any, columnNames: string[], typ
             {
                 ...(searchArray.length === 1
                     ? {
-                        OR: columnNames.map(columnName => ({
-                            [columnName]: {
-                                [operator]: searchArray[0],
-                                mode: 'insensitive',
-                            },
-                        })),
-                    }
+                          OR: columnNames.map((columnName) => ({
+                              [columnName]: {
+                                  [operator]: searchArray[0],
+                                  mode: 'insensitive',
+                              },
+                          })),
+                      }
                     : {}),
                 ...(searchArray.length === 2
                     ? {
-                        AND: [
-                            {
-                                OR: columnNames.slice(0, 2).map(columnName => ({
-                                    [columnName]: {
-                                        [operator]: searchArray[0],
-                                        mode: 'insensitive',
-                                    },
-                                })),
-                            },
-                            {
-                                OR: columnNames.slice(1).map(columnName => ({
-                                    [columnName]: {
-                                        [operator]: searchArray[1],
-                                        mode: 'insensitive',
-                                    },
-                                })),
-                            },
-                        ],
-                    }
+                          AND: [
+                              {
+                                  OR: columnNames
+                                      .slice(0, 2)
+                                      .map((columnName) => ({
+                                          [columnName]: {
+                                              [operator]: searchArray[0],
+                                              mode: 'insensitive',
+                                          },
+                                      })),
+                              },
+                              {
+                                  OR: columnNames
+                                      .slice(1)
+                                      .map((columnName) => ({
+                                          [columnName]: {
+                                              [operator]: searchArray[1],
+                                              mode: 'insensitive',
+                                          },
+                                      })),
+                              },
+                          ],
+                      }
                     : {}),
                 ...(searchArray.length === 3
                     ? {
-                        AND: columnNames.map((columnName, index) => ({
-                            [columnName]: {
-                                [operator]: searchArray[index],
-                                mode: 'insensitive',
-                            },
-                        })),
-                    }
+                          AND: columnNames.map((columnName, index) => ({
+                              [columnName]: {
+                                  [operator]: searchArray[index],
+                                  mode: 'insensitive',
+                              },
+                          })),
+                      }
                     : {}),
             },
         ],
     }
-    console.dir(filter, { depth: null })
+    // console.dir(filter, { depth: null })
     return filter
 }
 
@@ -74,18 +82,22 @@ export const searchCombinedColumn = (filterItem: any, columnNames: string[], typ
  * @param {string[]} searchColumns - The list of columns to search on.
  * @returns {object} The search filter object.
  */
-export const searchFunction = (search: string, schema: string, searchColumns?: string[]): object => {
+export const searchFunction = (
+    search: string,
+    schema: string,
+    searchColumns?: string[]
+): object => {
     /**
      * The JSON schema object.
      * @type {object}
      */
-    const jsonSchema = require('../../../prisma/json-schema/json-schema.json');
+    const jsonSchema = require('../../../prisma/json-schema/json-schema.json')
 
     /**
      * The model schema object.
      * @type {object}
      */
-    const modelSchema = jsonSchema?.definitions?.[schema]?.properties;
+    const modelSchema = jsonSchema?.definitions?.[schema]?.properties
 
     if (search) {
         const searchParams = {
@@ -96,26 +108,35 @@ export const searchFunction = (search: string, schema: string, searchColumns?: s
                          * The search filter object for combined columns.
                          * @type {object}
                          */
-                        const searchFilter = searchCombinedColumn(search, searchColumns, 'search');
+                        const searchFilter = searchCombinedColumn(
+                            search,
+                            searchColumns,
+                            'search'
+                        )
 
-                        return searchFilter;
+                        return searchFilter
                     } else {
-                        if (search.split(' ').length && !!searchColumns) return searchCombinedColumn(search, searchColumns, 'search')
+                        if (search.split(' ').length && !!searchColumns)
+                            return searchCombinedColumn(
+                                search,
+                                searchColumns,
+                                'search'
+                            )
                         return {
                             [item]: {
                                 contains: search,
                                 mode: 'insensitive',
                             },
-                        };
+                        }
                     }
                 } else {
-                    return {};
+                    return {}
                 }
             }),
-        };
+        }
 
-        return searchParams;
+        return searchParams
     } else {
-        return {};
+        return {}
     }
-};
+}
