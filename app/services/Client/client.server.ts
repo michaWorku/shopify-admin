@@ -395,7 +395,7 @@ export const getClients = async (request: Request, userId: string): Promise<Obje
  * @returns {Promise<obj>} The retrieved users for a given client.
  * @throws {Error} Throws an error if the provided client id  is invalid and users are not found.
  */
- export const getClientUsers = async (request: Request, clientId: string): Promise<any> => {
+export const getClientUsers = async (request: Request, clientId: string): Promise<any> => {
     if (!clientId) {
         throw new customErr('Custom_Error', 'Client ID is required', 404)
     }

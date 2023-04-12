@@ -1,0 +1,61 @@
+stages:
+  - lint
+  - build
+  - deploy
+variables:
+  BRANCH_NAME: $CI_COMMIT_REF_NAME
+  TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_PIPELINE_ID
+  SERVICE: ${SERVICE_NAME_${BRANCH_NAME}}
+  SERVER_USER: ${SERVER_USER_${BRANCH_NAME}}
+  SERVER_IP: ${SERVER_IP_${BRANCH_NAME}}
+  SSH_ACCESS_KEY: ${SSH_ACCESS_KEY_${BRANCH_NAME}}
+linttest:
+  image: node:18-alpine
+  stage: lint
+  tags:
+    - gitlab-react
+  script:
+    - npm install
+    - npm run lint
+    - npm run typecheck
+  except:
+    refs:
+      - staging
+      - production
+publish:
+  image: docker:latest
+  stage: build
+  tags:
+    - gitlab-react
+  services:
+    - docker:dind
+  script:
+    - docker build -t $TAG_LATEST .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker push $TAG_LATEST
+  only:
+    refs:
+      - staging
+      - production
+deployment:
+  image: alpine:latest
+  stage: deploy
+  tags:
+    - gitlab-react
+  before_script:
+    - apk update && apk add openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_ACCESS_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+
+  script:
+    - ssh $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
+    - ssh $SERVER_USER@$SERVER_IP "docker pull $TAG_LATEST"
+    - ssh $SERVER_USER@$SERVER_IP "docker service update --force --image $TAG_LATEST $SERVICE"
+  only:
+    refs:
+      - staging
+      - production
