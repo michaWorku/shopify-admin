@@ -11,7 +11,7 @@ import { getUserById } from '~/services/User/users.server'
 import { Response, errorHandler } from '../handler.server'
 
 export enum AbilityType {
-    FULL, // eslint-disable-line    
+    FULL, // eslint-disable-line
     PARTIAL, // eslint-disable-line
     BOTH, // eslint-disable-line
 }
@@ -25,20 +25,17 @@ export default async function canUser(
     let partial
     try {
         const user = await getUserById(userId)
-        const permissions = await getUserPermissions(userId) as any
-          
+        const permissions = (await getUserPermissions(userId)) as any
+
         if (permissionType === AbilityType.BOTH) {
             partial = permissions.some(
                 (per: any) =>
                     (per.action === action || per.action === 'manage') &&
                     (per.subject === subj || per.subject === 'all')
             )
-            const parsedPermissions = interpolate(
-                JSON.stringify(permissions),
-                {
-                    user,
-                }
-            )
+            const parsedPermissions = interpolate(JSON.stringify(permissions), {
+                user,
+            })
             const ability: MongoAbility = createAbility(parsedPermissions)
             ForbiddenError.from(ability).throwUnlessCan(
                 action,
@@ -83,49 +80,19 @@ export default async function canUser(
                 )
             }
         } else {
-            const parsedPermissions = interpolate(
-                JSON.stringify(permissions),
-                {
-                    user,
-                }
-            )
-
+            const parsedPermissions = interpolate(JSON.stringify(permissions), {
+                user,
+            })
             const ability: MongoAbility = createAbility(parsedPermissions)
             ForbiddenError.from(ability).throwUnlessCan(
                 action,
                 subject(subj, daTa)
             )
-            let permittedFields: any[] = []
-            if (action === 'update') {
-                permittedFields = permittedFieldsOf(ability, action, subj, {
-                    fieldsFrom: (rule) =>
-                        rule.fields ||
-                        (Prisma.dmmf.datamodel.models
-                            .find((model) => model.name === subj)
-                            ?.fields.map((e) => e.name) as string[]),
-                })
-                let modelFields = Prisma.dmmf.datamodel.models
-                    .find((model) => model.name === 'User')
-                    ?.fields.map((e) => e.name) as string[]
-                let fields
-                if (permittedFields.length !== 0) {
-                    fields = pick(daTa, modelFields)
-                    if (Object.entries(fields).length) {
-                        Object.entries(fields)?.map(([key, value]: any) => {
-                            if (
-                                !permittedFields.some((elt) => elt === key)
-                            ) {
-                                return ForbiddenError
-                            }
-                        })
-                    }
-                }
-            }
+
             return json(
                 Response({
                     data: {
                         ability: true,
-                        fields: permittedFields,
                     },
                 }),
                 {
@@ -133,7 +100,6 @@ export default async function canUser(
                 }
             )
         }
-
     } catch (err) {
         if (
             err instanceof ForbiddenError &&
