@@ -72,36 +72,6 @@
             "INACTIVE"
           ]
         },
-        "roles": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/RoleUser"
-          }
-        },
-        "clients": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/ClientUser"
-          }
-        },
-        "submissions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DynamicFormSubmission"
-          }
-        },
-        "rewards": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/UserReward"
-          }
-        },
-        "blulkTasks": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/BulkTask"
-          }
-        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -116,6 +86,36 @@
             "null"
           ],
           "format": "date-time"
+        },
+        "blulkTasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BulkTask"
+          }
+        },
+        "clients": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ClientUser"
+          }
+        },
+        "submissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DynamicFormSubmission"
+          }
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RoleUser"
+          }
+        },
+        "rewards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserReward"
+          }
         }
       }
     },
@@ -137,18 +137,6 @@
         "createdBy": {
           "type": "string"
         },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/RoleUser"
-          }
-        },
-        "permissions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/RolePermission"
-          }
-        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -165,6 +153,18 @@
             "ACTIVE",
             "INACTIVE"
           ]
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RolePermission"
+          }
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RoleUser"
+          }
         }
       }
     },
@@ -211,12 +211,6 @@
             "type": "string"
           }
         },
-        "roles": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/RolePermission"
-          }
-        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -233,49 +227,52 @@
             "ACTIVE",
             "INACTIVE"
           ]
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RolePermission"
+          }
         }
       }
     },
     "RoleUser": {
       "type": "object",
       "properties": {
-        "user": {
-          "$ref": "#/definitions/User"
-        },
         "userId": {
+          "type": "string"
+        },
+        "roleId": {
           "type": "string"
         },
         "role": {
           "$ref": "#/definitions/Role"
         },
-        "roleId": {
-          "type": "string"
+        "user": {
+          "$ref": "#/definitions/User"
         }
       }
     },
     "RolePermission": {
       "type": "object",
       "properties": {
-        "role": {
-          "$ref": "#/definitions/Role"
-        },
         "roleId": {
+          "type": "string"
+        },
+        "permissionId": {
           "type": "string"
         },
         "permission": {
           "$ref": "#/definitions/Permission"
         },
-        "permissionId": {
-          "type": "string"
+        "role": {
+          "$ref": "#/definitions/Role"
         }
       }
     },
     "ClientUser": {
       "type": "object",
       "properties": {
-        "user": {
-          "$ref": "#/definitions/User"
-        },
         "userId": {
           "type": "string"
         },
@@ -287,11 +284,14 @@
           "type": "boolean",
           "default": false
         },
+        "clientId": {
+          "type": "string"
+        },
         "client": {
           "$ref": "#/definitions/Client"
         },
-        "clientId": {
-          "type": "string"
+        "user": {
+          "$ref": "#/definitions/User"
         }
       }
     },
@@ -331,18 +331,6 @@
             "INACTIVE"
           ]
         },
-        "dynamicForms": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DynamicForm"
-          }
-        },
-        "rewards": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Reward"
-          }
-        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -363,6 +351,18 @@
           "items": {
             "$ref": "#/definitions/ClientUser"
           }
+        },
+        "dynamicForms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DynamicForm"
+          }
+        },
+        "rewards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Reward"
+          }
         }
       }
     },
@@ -372,14 +372,14 @@
         "userId": {
           "type": "string"
         },
-        "users": {
-          "$ref": "#/definitions/User"
-        },
         "rewardId": {
           "type": "string"
         },
         "rewards": {
           "$ref": "#/definitions/Reward"
+        },
+        "users": {
+          "$ref": "#/definitions/User"
         }
       }
     },
@@ -407,18 +407,6 @@
         "rewardGiven": {
           "type": "integer"
         },
-        "createdBy": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string",
-          "default": "ACTIVE",
-          "enum": [
-            "PENDING",
-            "ACTIVE",
-            "INACTIVE"
-          ]
-        },
         "plan": {
           "type": "string",
           "default": "DAY",
@@ -431,21 +419,6 @@
         },
         "clientId": {
           "type": "string"
-        },
-        "client": {
-          "$ref": "#/definitions/Client"
-        },
-        "formId": {
-          "type": "string"
-        },
-        "form": {
-          "$ref": "#/definitions/DynamicForm"
-        },
-        "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/UserReward"
-          }
         },
         "createdAt": {
           "type": "string",
@@ -461,6 +434,33 @@
             "null"
           ],
           "format": "date-time"
+        },
+        "formId": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "default": "ACTIVE",
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "client": {
+          "$ref": "#/definitions/Client"
+        },
+        "form": {
+          "$ref": "#/definitions/DynamicForm"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserReward"
+          }
         }
       }
     },
@@ -479,29 +479,8 @@
             "null"
           ]
         },
-        "fields": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DynamicFormField"
-          }
-        },
-        "submissions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DynamicFormSubmission"
-          }
-        },
-        "client": {
-          "$ref": "#/definitions/Client"
-        },
         "clientId": {
           "type": "string"
-        },
-        "reward": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Reward"
-          }
         },
         "createdBy": {
           "type": [
@@ -523,6 +502,27 @@
             "null"
           ],
           "format": "date-time"
+        },
+        "client": {
+          "$ref": "#/definitions/Client"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DynamicFormField"
+          }
+        },
+        "submissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DynamicFormSubmission"
+          }
+        },
+        "reward": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Reward"
+          }
         }
       }
     },
@@ -590,9 +590,6 @@
         "order": {
           "type": "integer"
         },
-        "dynamicFroms": {
-          "$ref": "#/definitions/DynamicForm"
-        },
         "formId": {
           "type": "string"
         },
@@ -610,6 +607,9 @@
             "null"
           ],
           "format": "date-time"
+        },
+        "dynamicFroms": {
+          "$ref": "#/definitions/DynamicForm"
         }
       }
     },
@@ -629,23 +629,8 @@
             "null"
           ]
         },
-        "status": {
-          "type": "string",
-          "default": "PENDING",
-          "enum": [
-            "PENDING",
-            "ACTIVE",
-            "INACTIVE"
-          ]
-        },
-        "form": {
-          "$ref": "#/definitions/DynamicForm"
-        },
         "formId": {
           "type": "string"
-        },
-        "submittedBy": {
-          "$ref": "#/definitions/User"
         },
         "submittedById": {
           "type": "string"
@@ -664,6 +649,21 @@
             "null"
           ],
           "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "default": "PENDING",
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "form": {
+          "$ref": "#/definitions/DynamicForm"
+        },
+        "submittedBy": {
+          "$ref": "#/definitions/User"
         }
       }
     },
@@ -695,17 +695,8 @@
         "successCount": {
           "type": "integer"
         },
-        "tasks": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Task"
-          }
-        },
         "createdById": {
           "type": "string"
-        },
-        "createdBy": {
-          "$ref": "#/definitions/User"
         },
         "createdAt": {
           "type": "string",
@@ -721,6 +712,15 @@
             "null"
           ],
           "format": "date-time"
+        },
+        "createdBy": {
+          "$ref": "#/definitions/User"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Task"
+          }
         }
       }
     },
@@ -771,6 +771,12 @@
           ],
           "format": "date-time"
         },
+        "bulkId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "bulk": {
           "anyOf": [
             {
@@ -779,12 +785,6 @@
             {
               "type": "null"
             }
-          ]
-        },
-        "bulkId": {
-          "type": [
-            "string",
-            "null"
           ]
         }
       }
