@@ -1,7 +1,6 @@
 import {
     Outlet,
     useActionData,
-    useFetcher,
     useLoaderData,
     useNavigate,
     useNavigation,
@@ -29,10 +28,10 @@ import { Response, errorHandler } from '~/utils/handler.server'
 import AddUserForm from '~/src/components/Forms/AddUserForm'
 import { getUserCreatedRole } from '~/services/Role/role.server'
 import canUser, { AbilityType } from '~/utils/casl/ability'
-import { getUserEntities } from '~/services/Entities/entity.server'
 import { validate } from '~/utils/validators/validate'
 import { systemUserSchema } from '~/utils/schema/systemUserSchema'
 import { toast } from 'react-toastify'
+import { getUserEntities } from '~/services/Entities/Entity.server'
 
 export const loader: LoaderFunction = async ({ request }) => {
     try {

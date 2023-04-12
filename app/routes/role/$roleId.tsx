@@ -43,7 +43,6 @@ import {
 import { validate } from '~/utils/validators/validate'
 
 import type { Permission } from '@prisma/client'
-import { getEntities } from '~/services/Entities/entity.server'
 import canUser from '~/utils/casl/ability'
 import { authenticator } from '~/services/auth.server'
 import {
@@ -54,6 +53,7 @@ import {
     getRoleSystemPermissions,
 } from '~/services/Role/role.server'
 import { toast } from 'react-toastify'
+import { getEntities } from '~/services/Entities/Entity.server'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
     try {
