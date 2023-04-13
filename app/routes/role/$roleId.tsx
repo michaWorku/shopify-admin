@@ -46,6 +46,7 @@ import type { Permission } from '@prisma/client'
 import canUser from '~/utils/casl/ability'
 import { authenticator } from '~/services/auth.server'
 import {
+    deleteRole,
     editRole,
     getRoleById,
     getRoleClientPermissions,
@@ -54,6 +55,7 @@ import {
 } from '~/services/Role/role.server'
 import { toast } from 'react-toastify'
 import { getEntities } from '~/services/Entities/entity.server'
+import { getUserEntities } from '~/services/Entities/entity.server'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
     try {
@@ -159,6 +161,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         const form = await request.formData()
         const { roleId } = params as any
         const formData = Object.fromEntries(form) as any
+        const clients = (await getUserEntities(user?.id)) as any
 
         if (request.method === 'PATCH') {
             const { success, data, ...fieldError } = await validate(
@@ -210,6 +213,14 @@ export const action: ActionFunction = async ({ request, params }) => {
                     })
                 )
             }
+        }
+        if (request.method === 'DELETE') {
+            const deletedRole = await deleteRole(
+                roleId,
+                user?.id,
+                clients?.data?.id
+            )
+            return deletedRole
         }
     } catch (err) {
         return errorHandler(err)
