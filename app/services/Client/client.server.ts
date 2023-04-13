@@ -12,7 +12,6 @@ import interpolate from '~/utils/casl/interpolate'
 import getParams from '~/utils/params/getParams.server'
 import { filterFunction } from '~/utils/params/filter.server'
 import { searchFunction } from '~/utils/params/search.server'
-import { checkEntityExist } from '../Entities/Entity.server'
 import { canPerformAction } from '~/utils/casl/canPerformAction'
 
 /**
@@ -347,6 +346,12 @@ const setClientPermissions = async (
         const canViewUsers = await canPerformAction(userId, 'read', 'User', {
             clientId: clientData.id,
         })
+        const canViewSystemUsers = await canPerformAction(
+            userId,
+            'read',
+            'SystemUser',
+            {}
+        )
         const canViewForms = await canPerformAction(userId, 'read', 'Form', {
             clientId: clientData.id,
         })
@@ -379,6 +384,7 @@ const setClientPermissions = async (
             canViewForms,
             canViewRewards,
             canViewSubmissions,
+            canViewSystemUsers,
         }
     })
 
@@ -404,11 +410,9 @@ export const getClients = async (
 
         if (canView?.status === 200) {
             const clients = await getAllClients(request)
-
             if (clients?.data) {
                 await setClientPermissions(userId, clients.data)
             }
-
             return clients
         } else {
             const canViewPartial = await canUser(
@@ -426,6 +430,7 @@ export const getClients = async (
                     await setClientPermissions(userId, clients.data)
                 }
 
+                console.log({ clients: clients?.data })
                 return clients
             } else {
                 return canViewPartial
