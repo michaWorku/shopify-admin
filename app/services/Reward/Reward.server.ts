@@ -1,12 +1,14 @@
-import { Prisma, Reward } from "@prisma/client";
+import { DynamicFormSubmission, PLAN, Prisma, Reward } from "@prisma/client";
 import { filterFunction } from "~/utils/params/filter.server";
 import getParams from "~/utils/params/getParams.server";
 import { searchFunction } from "~/utils/params/search.server";
 import { db } from "../db.server";
 import { json } from '@remix-run/node'
-import customErr, { Response, errorHandler } from "~/utils/handler.server";
+import customErr, { Response, ResponseType, badRequest, errorHandler } from "~/utils/handler.server";
 import canUser, { AbilityType } from "~/utils/casl/ability";
 import { canPerformAction } from "~/utils/casl/canPerformAction";
+import { commitSession, getSession } from "../session.server";
+import { createOTP } from "../otp.server";
 
 /**
  * Creates a reard with a set of reward data
@@ -172,12 +174,14 @@ const setRewardPermissions = async (userId: string, rewards: any[], clientId: st
     const promises = rewards.map(async (rewardData: any, index: number) => {
         const canEdit = await canPerformAction(userId, 'update', 'Reward', { clientId });
         const canViewUsers = await canPerformAction(userId, 'read', 'Users', { clientId });
+        const canViewSubmissions = await canPerformAction(userId, 'read', 'DynamicFormSubmission', { clientId });
         const canDelete = await canPerformAction(userId, 'delete', 'Reward', { clientId });
         rewards[index] = {
             ...rewardData,
             canEdit,
             canDelete,
-            canViewUsers
+            canViewUsers,
+            canViewSubmissions
         };
     });
     await Promise.all(promises);
@@ -350,3 +354,385 @@ export const getRewardUsers = async (request: Request, clientId: string, rewardI
         return errorHandler(error);
     }
 };
+
+/**
+ * Retrieves a reward by its ID.
+ * @async
+ * @function getReward
+ * @param {string} rewardId - The ID of the reward to retrieve.
+ * @returns {Promise<object>} The reward object.
+ * @throws {customErr} If the reward ID is not provided or no reward is found with the given ID.
+ */
+export const getReward = async (rewardId: string): Promise<any> => {
+    try {
+        if (!rewardId) {
+            throw new customErr('Custom_Error', 'Reward ID is required', 404);
+        }
+
+        const reward = await db.reward.findUnique({
+            where: {
+                id: rewardId,
+            },
+            include: {
+                form: {
+                    include: {
+                        fields: true
+                    }
+                },
+                client: true,
+                users: true,
+            },
+        });
+
+        if (!reward) {
+            throw new customErr('Custom_Error', `Reward not found with ID ${rewardId}`, 404);
+        }
+
+        return Response({
+            data: reward,
+        })
+    } catch (error) {
+        return errorHandler(error);
+    }
+};
+
+/**
+ * Verifies if the user is eligible for the given reward based on the rewardId, clientId, and phone.
+ * If the reward is already completed, the error message will be returned.
+ * If the user is already rewarded, the response will contain a message that the user already received the reward.
+ * If the users is verifided and is not rewarded, the response will contain reward information
+ * If the user is eligible, an OTP will be generated and returned with the response.
+ * @param {Request} request - The request object.
+ * @param {string} rewardId - The id of the reward to be verified.
+ * @param {string} clientId - The id of the client associated with the reward.
+ * @param {string} phone - The phone number of the user.
+ * @returns {Promise<Response>} The response containing the data of the user's eligibility or the generated OTP.
+ * @throws {customErr} When the rewardId or clientId is missing.
+ * @throws {error} When there's an error while processing the request.
+*/
+export const verifyUser = async (request: Request, rewardId: string, clientId: string, phone: string) => {
+    if (!rewardId) {
+        throw new customErr('Custom_Error', 'Reward ID is required', 404)
+    }
+    if (!clientId) {
+        throw new customErr('Custom_Error', 'Client ID is required', 404)
+    }
+    try {
+        const session = await getSession(request.headers.get("Cookie"));
+
+        const reward = await db.reward.findUnique({
+            where: {
+                id: rewardId,
+            },
+        });
+        if (reward?.rewardGiven === reward?.rewardTaken) {
+            // Reward is completed
+            return json(Response({
+                error: {
+                    error: {
+                        message: "Reward completed"
+                    }
+                },
+                data: {
+                    completed: true
+                }
+            }), {
+                status: 400
+            });
+        } else {
+
+            const checkUserVerifed = await db.user.count({
+                where: {
+                    phone,
+                    isVerified: {
+                        equals: true
+                    }
+                }
+            })
+
+            const checkRewarded = await db.reward.count({
+                where: {
+                    clientId,
+                    users: {
+                        some: {
+                            rewardId,
+                            users: {
+                                phone
+                            }
+                        }
+                    },
+                }
+            })
+
+            console.log({ checkRewarded })
+
+            if (checkRewarded > 0) {
+                return json(Response({
+                    error: { error: { message: 'User has already got a reward' } },
+                    data: { rewareded: true },
+                }), {
+                    status: 400
+                });
+            } else {
+                if (checkUserVerifed > 0) {
+                    const reward = (await getReward(rewardId)) as any;
+
+                    console.dir({ reward: reward?.data });
+
+                    if (reward?.status === 404) {
+                        return json(
+                            Response({
+                                error: {
+                                    error: {
+                                        message: "No reward found",
+                                    },
+                                },
+                            })
+                        );
+                    }
+
+                    return json(
+                        Response({
+                            data: {
+                                ...reward,
+                                submit: true
+                            },
+                        })
+                    );
+                }
+                const fullHash = await createOTP(phone);
+                console.log({ phone, fullHash });
+
+                if (!!fullHash?.data) {
+                    session.set("hash", fullHash?.data?.fullHash);
+                    return json<ResponseType>(
+                        { data: { phone: fullHash?.data?.phone, sendOTP: true } },
+                        {
+                            headers: {
+                                "Set-Cookie": await commitSession(session),
+                            },
+                        }
+                    );
+                }
+                return badRequest({ ...fullHash });
+            }
+        }
+
+    } catch (error) {
+        return errorHandler(error);
+    }
+}
+
+/**
+ * Checks if a reward can be given to a user
+ * @param {string} rewardId - The ID of the reward being checked
+ * @param {string} clientId - The ID of the client
+ * @param {string} phone - The user's phone number
+ * @returns {Promise<Object>} - Returns a promise that resolves to an object containing either an error message or reward data
+ * @throws {CustomError} - Throws a custom error if rewardId or clientId are falsy
+ */
+export const checkReward = async (rewardId: string, clientId: string, phone: string) => {
+    if (!rewardId) {
+        throw new customErr('Custom_Error', 'Reward ID is required', 404);
+    }
+
+    if (!clientId) {
+        throw new customErr('Custom_Error', 'Client ID is required', 404);
+    }
+
+    try {
+        // Find the reward in the database
+        const reward = await db.reward.findUnique({
+            where: { id: rewardId }, include: {
+                client: {
+                    select: {
+                        name: true,
+                        promotionText: true,
+                    }
+                }
+            }
+        });
+
+        // Check if the reward has already been completed
+        if (reward?.rewardGiven === reward?.rewardTaken) {
+            return json(Response({
+                error: { error: { message: "Reward completed" } },
+                data: {
+                    completed: true, plan: reward?.plan,
+                    client: reward?.client
+                }
+            }), { status: 400 });
+        }
+
+        // Check if the user has already been rewarded
+        const rewardedCount = await db.reward.count({
+            where: {
+                clientId,
+                users: {
+                    some: {
+                        rewardId,
+                        users: { phone },
+                        // AND:{
+                        //     rewardId,
+                        //     users:{
+                        //         phone
+                        //     }
+                        // }
+                    }
+                }
+            }
+        });
+
+        console.log({ rewardedCount, rewardId, phone })
+
+        if (rewardedCount > 0) {
+            return json(Response({
+                error: { error: { message: 'User has already got a reward' } },
+                data: {
+                    rewarded: true,
+                    plan: reward?.plan,
+                    client: reward?.client
+                },
+            }), { status: 400 });
+        }
+
+        // Retrieve the reward data
+        const rewardData = (await getReward(rewardId))?.data;
+
+        if (!rewardData) {
+            return json(Response({
+                error: { error: { message: "No reward found" } }
+            }));
+        }
+
+        // Return the reward data
+        return json(Response({
+            data: { ...rewardData, submit: true }
+        }));
+
+    } catch (error) {
+        // Handle any errors thrown during execution
+        return errorHandler(error);
+    }
+};
+
+interface RewardInteface {
+    client: {
+        id: string;
+        name: string;
+    };
+    id: string;
+    plan: PLAN;
+    submissions: {
+        id: string;
+    }[];
+}
+type Submission = DynamicFormSubmission & {
+    reward: Reward;
+    submittedBy: {
+        id: string;
+    };
+}
+
+/**
+ * Rewards a user for submitting a dynamic form
+ * @param {Object} rewardData - The reward data to update
+ * @param {Object} submissionData - The submission data to update
+ * @returns {Promise<Object>} Returns a JSON response with the rewarded user data
+ * @throws {Error} Throws an error if the reward or submission data is missing
+ */
+export const rewardUser = async (rewardData: RewardInteface, submissionData: Submission) => {
+    if (!rewardData) {
+        throw new customErr('Custom_Error', 'Reward is required', 404)
+    }
+    if (!submissionData) {
+        throw new customErr('Custom_Error', 'Submissions is required', 404)
+    }
+    try {
+        const result = await db.$transaction(async (tx) => {
+            const userReward = await tx.userReward.upsert({
+                where: {
+                    userId_rewardId: {
+                        userId: submissionData?.submittedBy?.id,
+                        rewardId: rewardData?.id
+                    }
+                },
+                create: {
+                    userId: submissionData?.submittedBy?.id,
+                    rewardId: rewardData?.id
+
+                },
+                update: {
+                }
+            })
+            const rewardUser = await tx.clientUser.update({
+                where: {
+                    userId_clientId: {
+                        userId: submissionData?.submittedBy?.id,
+                        clientId: rewardData?.client?.id
+                    }
+                },
+                data: {
+                    isRewareded: true,
+                    client: {
+                        update: {
+                            rewards: {
+                                update: {
+                                    where: {
+                                        id: rewardData?.id
+                                    },
+                                    data: {
+                                        rewardTaken: {
+                                            increment: 1,
+                                        },
+                                        submissions: {
+                                            update: {
+                                                where: {
+                                                    id: submissionData?.id
+                                                },
+                                                data: {
+                                                    status: "ACTIVE"
+                                                }
+                                            }
+                                        },
+
+                                    }
+                                },
+
+                            }
+                        }
+                    }
+                },
+                select: {
+                    isRewareded: true,
+                    client: {
+                        select: {
+                            name: true,
+                        }
+                    }
+                }
+            })
+            return {
+                rewarded: rewardUser?.isRewareded,
+                reward: rewardData,
+                submission: submissionData
+            }
+        }, {
+            maxWait: 10000,
+            timeout: 50000
+        })
+
+
+        return json(Response({
+            data: {
+                ...result
+            },
+            message: 'User rewarded'
+        }), {
+            status: 200
+        });
+
+    } catch (err) {
+        return errorHandler(err);
+    }
+}
