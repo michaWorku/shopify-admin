@@ -43,6 +43,7 @@ model Role {
   createdBy   String
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
   status      Status           @default(ACTIVE)
   permissions RolePermission[]
   users       RoleUser[]
@@ -59,15 +60,19 @@ model Permission {
   fields      String[]         @default([])
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
   status      Status           @default(ACTIVE)
   roles       RolePermission[]
 }
 
 model RoleUser {
-  userId String
-  roleId String
-  role   Role   @relation(fields: [roleId], references: [id])
-  user   User   @relation(fields: [userId], references: [id])
+  userId    String
+  roleId    String
+  role      Role      @relation(fields: [roleId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@id([userId, roleId])
 }
@@ -77,17 +82,23 @@ model RolePermission {
   permissionId String
   permission   Permission @relation(fields: [permissionId], references: [id])
   role         Role       @relation(fields: [roleId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
 
   @@id([roleId, permissionId])
 }
 
 model ClientUser {
   userId       String
-  isRewarded  Boolean @default(false)
-  isSystemUser Boolean @default(false)
+  isRewarded   Boolean   @default(false)
+  isSystemUser Boolean   @default(false)
   clientId     String
-  client       Client  @relation(fields: [clientId], references: [id])
-  user         User    @relation(fields: [userId], references: [id])
+  client       Client    @relation(fields: [clientId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   @@id([userId, clientId])
 }
@@ -109,10 +120,13 @@ model Client {
 }
 
 model UserReward {
-  userId   String
-  rewardId String
-  rewards  Reward @relation(fields: [rewardId], references: [id])
-  users    User   @relation(fields: [userId], references: [id])
+  userId    String
+  rewardId  String
+  rewards   Reward    @relation(fields: [rewardId], references: [id])
+  users     User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@id([userId, rewardId])
 }

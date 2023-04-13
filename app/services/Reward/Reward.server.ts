@@ -294,7 +294,7 @@ export const getRewardUsers = async (request: Request, clientId: string, rewardI
             deletedAt: null,
             clients: {
                 some: {
-                    isRewareded: true,
+                    isRewarded: true,
                     client: {
                         id: clientId,
                         rewards: {
@@ -469,7 +469,7 @@ export const verifyUser = async (request: Request, rewardId: string, clientId: s
             if (checkRewarded > 0) {
                 return json(Response({
                     error: { error: { message: 'User has already got a reward' } },
-                    data: { rewareded: true },
+                    data: { rewarded: true },
                 }), {
                     status: 400
                 });
@@ -607,7 +607,7 @@ export const checkReward = async (rewardId: string, clientId: string, phone: str
 
         // Return the reward data
         return json(Response({
-            data: { ...rewardData, submit: true }
+            data: { ...rewardData }
         }));
 
     } catch (error) {
@@ -638,10 +638,11 @@ type Submission = DynamicFormSubmission & {
  * Rewards a user for submitting a dynamic form
  * @param {Object} rewardData - The reward data to update
  * @param {Object} submissionData - The submission data to update
+ * @param {*} submittedData - The data submitted.
  * @returns {Promise<Object>} Returns a JSON response with the rewarded user data
  * @throws {Error} Throws an error if the reward or submission data is missing
  */
-export const rewardUser = async (rewardData: RewardInteface, submissionData: Submission) => {
+export const rewardUser = async (rewardData: RewardInteface, submissionData: Submission, submitedData: any) => {
     if (!rewardData) {
         throw new customErr('Custom_Error', 'Reward is required', 404)
     }
@@ -668,12 +669,12 @@ export const rewardUser = async (rewardData: RewardInteface, submissionData: Sub
             const rewardUser = await tx.clientUser.update({
                 where: {
                     userId_clientId: {
-                        userId: submissionData?.submittedBy?.id,
+                        userId: "submissionData?.submittedBy?.id",
                         clientId: rewardData?.client?.id
                     }
                 },
                 data: {
-                    isRewareded: true,
+                    isRewarded: true,
                     client: {
                         update: {
                             rewards: {
@@ -704,7 +705,7 @@ export const rewardUser = async (rewardData: RewardInteface, submissionData: Sub
                     }
                 },
                 select: {
-                    isRewareded: true,
+                    isRewarded: true,
                     client: {
                         select: {
                             name: true,
@@ -713,7 +714,7 @@ export const rewardUser = async (rewardData: RewardInteface, submissionData: Sub
                 }
             })
             return {
-                rewarded: rewardUser?.isRewareded,
+                rewarded: rewardUser?.isRewarded,
                 reward: rewardData,
                 submission: submissionData
             }
@@ -733,6 +734,16 @@ export const rewardUser = async (rewardData: RewardInteface, submissionData: Sub
         });
 
     } catch (err) {
-        return errorHandler(err);
+        return json(Response({
+            error: {
+                error: {
+                    message: "Failed to reward a user, Please try again"
+                }
+            },
+            data: {
+                submitedData,
+                retry: true
+            }
+        }))
     }
 }

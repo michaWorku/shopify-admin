@@ -16,10 +16,9 @@ type RewardData = {
  */
 export const sewasewReward = async (rewardData: RewardData) => {
     try {
-      const { client_name, subscription_plan, ...dataT } = rewardData;
       const { status, data } = await axios.post(
         `${process.env.SEWASEW_REWARD}`,
-        { ...dataT, subscription_plan: 'gbil_swmu_1w' },
+        { ...rewardData },
         {
           headers: {
             Authorization: `Basic ${Buffer.from(
@@ -32,9 +31,7 @@ export const sewasewReward = async (rewardData: RewardData) => {
       return { status, data };
     } catch (err: any) {
       console.log('error encountered while rewarding a user.');
-      console.dir(err, { depth: null });
       console.dir({ err: err.response?.data });
-      console.log({ status: err?.response?.status, message: err.response?.data?.message });
       return { status: err?.response?.status, message: err.response?.data?.error?.message };
     }
   };

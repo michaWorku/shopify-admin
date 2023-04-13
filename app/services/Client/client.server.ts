@@ -408,7 +408,7 @@ export const getClientUsers = async (request: Request, clientId: string): Promis
             deletedAt: null,
             clients: {
                 some: {
-                    isRewareded: true,
+                    isRewarded: true,
                     client: {
                         id: clientId
                     }
