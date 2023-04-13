@@ -83,7 +83,7 @@ model RolePermission {
 
 model ClientUser {
   userId       String
-  isRewareded  Boolean @default(false)
+  isRewarded  Boolean @default(false)
   isSystemUser Boolean @default(false)
   clientId     String
   client       Client  @relation(fields: [clientId], references: [id])

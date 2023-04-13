@@ -24,7 +24,7 @@ DROP TABLE "_ClientToUser";
 -- CreateTable
 CREATE TABLE "ClientUser" (
     "userId" STRING NOT NULL,
-    "isRewareded" BOOL NOT NULL DEFAULT true,
+    "isRewarded" BOOL NOT NULL DEFAULT true,
     "isSystemUser" BOOL NOT NULL DEFAULT false,
     "clientId" STRING NOT NULL,
 

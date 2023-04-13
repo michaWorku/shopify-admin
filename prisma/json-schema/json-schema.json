@@ -276,7 +276,7 @@
         "userId": {
           "type": "string"
         },
-        "isRewareded": {
+        "isRewarded": {
           "type": "boolean",
           "default": false
         },

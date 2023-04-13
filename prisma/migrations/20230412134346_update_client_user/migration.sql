@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "ClientUser" ALTER COLUMN "isRewareded" SET DEFAULT false;
+ALTER TABLE "ClientUser" ALTER COLUMN "isRewarded" SET DEFAULT false;
