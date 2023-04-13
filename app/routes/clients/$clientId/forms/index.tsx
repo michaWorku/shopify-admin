@@ -314,7 +314,6 @@ const Forms = () => {
       <CustomizedTable
         columns={columns}
         data={loaderData}
-        page="Form"
         exportFileName="Forms"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}

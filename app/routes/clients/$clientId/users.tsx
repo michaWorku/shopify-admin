@@ -164,7 +164,6 @@ const ClientUsers = () => {
       <CustomizedTable
         columns={columns}
         data={loaderData}
-        page="users"
         exportFileName="Client Users"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}

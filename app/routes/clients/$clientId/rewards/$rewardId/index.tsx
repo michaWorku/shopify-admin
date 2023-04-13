@@ -166,7 +166,6 @@ const RewardUsers = () => {
       <CustomizedTable
         columns={columns}
         data={loaderData}
-        page="users"
         exportFileName="Rewards Users"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
