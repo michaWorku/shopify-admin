@@ -53,7 +53,7 @@ import {
     getRoleSystemPermissions,
 } from '~/services/Role/role.server'
 import { toast } from 'react-toastify'
-import { getEntities } from '~/services/Entities/Entity.server'
+import { getEntities } from '~/services/Entities/entity.server'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
     try {
@@ -219,12 +219,10 @@ export const action: ActionFunction = async ({ request, params }) => {
 export default function PagePage() {
     const [searchParams] = useSearchParams()
     const status = searchParams.get('status')
-
     const loaderData = useLoaderData()
     const actionData = useActionData()
     const transition = useNavigation()
     const view = searchParams.get('view')
-    console.log({ loaderData, actionData, status })
 
     const [currentRole, setCurrentRole] = useState<any>(
         loaderData?.data?.role ? loaderData?.data?.role : null

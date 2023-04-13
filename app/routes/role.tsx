@@ -25,7 +25,6 @@ import { authenticator } from '~/services/auth.server'
 import { commitSession, getSession } from '~/services/session.server'
 import { createRole, getAllRoles } from '~/services/Role/role.server'
 import { getSystemPermissions } from '~/services/Role/Permissions/permission.server'
-import { getEntities } from '~/services/Entities/Entity.server'
 
 import canUser, { AbilityType } from '~/utils/casl/ability'
 import { validate } from '~/utils/validators/validate'
@@ -34,6 +33,7 @@ import FilterModes from '~/src/components/Table/CustomFilter'
 import DateFilter from '~/src/components/Table/DatePicker'
 import StatusUpdate from '~/src/components/Table/StatusUpdate'
 import RowActions from '~/src/components/Table/RowActions'
+import { getEntities } from '~/services/Entities/entity.server'
 
 /**
  * Loader function to fetch role and permisions.
