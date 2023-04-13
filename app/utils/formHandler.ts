@@ -12,12 +12,12 @@ import { z } from 'zod';
  * @returns {Promise<object>} - A Promise that resolves to an object containing the parsed and validated form data.
  * @throws {Error} - Throws an error if the validation fails.
  */
- export const formHandler = async (request: Request, schema: z.ZodObject<any>) => {
+export const formHandler = async (request: Request, schema: z.ZodObject<any>) => {
     const form = await request.formData();
     let formData = Object.fromEntries(form) as any;
-  
-    formData= JSON.parse(formData.data)
-    console.dir(formData, {depth: null});
+
+    formData = JSON.parse(formData.data)
+    console.dir(formData, { depth: null });
     const hasPhone = formData.hasOwnProperty('phone');
 
     if (hasPhone) {
@@ -34,7 +34,7 @@ import { z } from 'zod';
         formData,
         schema
     );
-    console.dir(fieldError, {depth: null});
+    console.dir(fieldError, { depth: null });
     if (!success) {
         return json(
             Response({
@@ -46,8 +46,46 @@ import { z } from 'zod';
             { status: 422 }
         );
     }
-    return {success,data}
+    return { success, data }
 }
 
+/**
+ * Parses a request's form data, optionally transforming a phone number to the Ethiopian format.
+ *
+ * @param {Request} request The incoming HTTP request.
+ * @returns {Promise<{ data: any }>} A Promise that resolves to an object with a `data` property containing the parsed form data.
+ */
+export const requestFormHandler = async (request: Request) => {
+    const form = await request.formData();
+    let formData = Object.fromEntries(form) as any;
 
+    formData = JSON.parse(formData.data)
+    console.dir(formData, { depth: null });
+    const hasPhone = formData.hasOwnProperty('phone');
+
+    if (hasPhone) {
+        const parsedPhone = formData.phone.startsWith("+") ? formData.phone.slice(1) : formData.phone;
+        const phone = `251${parsedPhone.startsWith("0")
+            ? parsedPhone.slice(1)
+            : parsedPhone.startsWith("251")
+                ? parsedPhone.slice(3)
+                : parsedPhone
+            }`;
+        formData = { ...formData, phone }
+    }
+
+    if (!Object.keys(formData).length) {
+        return json(
+            Response({
+                error: {
+                    error: { message: "Invalid data" },
+                },
+            }),
+            { status: 422 }
+        );
+    }
+    return {
+        data: formData,
+    }
+}
 

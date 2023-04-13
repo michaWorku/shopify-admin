@@ -8,7 +8,6 @@ import interpolate from "~/utils/casl/interpolate"
 import getParams from "~/utils/params/getParams.server"
 import { filterFunction } from "~/utils/params/filter.server"
 import { searchFunction } from "~/utils/params/search.server"
-import { checkEntityExist } from "../Entities/Entity.server"
 import { canPerformAction } from "~/utils/casl/canPerformAction"
 
 /**

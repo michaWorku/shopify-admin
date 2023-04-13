@@ -7,16 +7,18 @@ import {
   Scripts,
   ScrollRestoration,
   useCatch,
+  useLocation,
 } from "@remix-run/react";
 import { withEmotionCache } from "@emotion/react";
 import {
   CssBaseline,
-  Theme,
   unstable_useEnhancedEffect as useEnhancedEffect,
 } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import tostify from "react-toastify/dist/ReactToastify.css";
 import ClientStyleContext from "./src/context/ClientStyleContext";
 import ThemeConfig from "./src/theme";
@@ -94,27 +96,36 @@ const Document = withEmotionCache(
 // https://remix.run/api/conventions#default-export
 // https://remix.run/api/conventions#route-filenames
 export default function App() {
+  const location = useLocation();
   return (
     <ThemeConfig>
       <GlobalStyles />
       <CssBaseline />
-      <Document>
-        <Layout>
-          <Outlet />
-        </Layout>
-        <ToastContainer
-          position="bottom-left"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-      </Document>
+      <LocalizationProvider dateAdapter={AdapterDateFns} sx={{ color: "primary.main" }}>
+        <Document>
+          {["submit", "login", "signup", "reset"].some((keyword) =>
+            location.pathname.split("/").includes(keyword)
+          ) ? (
+            <Outlet />
+          ) : (
+            <Layout>
+              <Outlet />
+            </Layout>
+          )}
+          <ToastContainer
+            position="bottom-left"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+        </Document>
+      </LocalizationProvider>
     </ThemeConfig>
   );
 }

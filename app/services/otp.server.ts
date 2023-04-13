@@ -1,7 +1,6 @@
 import otpGenerator from "otp-generator";
 import crypto from "crypto";
-import { json } from "@remix-run/server-runtime";
-import customErr, { ResponseType, badRequest } from "~/utils/utils-server";
+import customErr from "~/utils/handler.server";
 import { sendSMS } from "~/utils/sms.server";
 
 export const createOTP = async (phone: string) => {

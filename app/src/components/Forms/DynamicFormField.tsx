@@ -2,6 +2,7 @@ import { FC, useEffect } from "react";
 import { useForm, Control } from "react-hook-form";
 import { z } from "zod";
 import SendIcon from "@mui/icons-material/Send";
+import ClearIcon from "@mui/icons-material/Clear";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   TextField,
@@ -15,15 +16,15 @@ import {
   Grid,
   Typography,
   IconButton,
+  Chip,
+  InputAdornment,
 } from "@mui/material";
 
 import { Controller } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, useLocation } from "@remix-run/react";
-import {
-  dynamicFormFieldSchema,
-} from "~/utils/schema/dynamicFormSchema";
+import { dynamicFormFieldSchema } from "~/utils/schema/dynamicFormSchema";
 import ControlledTextField from "./ControlledTextField";
 
 const FIELDOPTIONS = [
@@ -166,6 +167,71 @@ const FieldForm: FC<FieldFormProps> = ({
           fullWidth
         />
       </Grid>
+      <Grid item xs={8}>
+        <Controller
+          name="options"
+          control={control}
+          defaultValue={field?.options}
+          render={({ field: { value, onChange } }) => (
+            <TextField
+              variant="outlined"
+              fullWidth
+              label="Options"
+              placeholder="Type and press enter to add a option"
+              onKeyDown={(event: any) => {
+                if (event.key === "Enter" && event.target.value) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  event.nativeEvent.stopImmediatePropagation();
+                  onChange([...value, event.target.value]);
+                  event.target.value = "";
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <>
+                    {value?.map((option: any, index: number) => (
+                      <Chip
+                        key={index}
+                        label={option}
+                        onDelete={() => {
+                          const newValues = [...value];
+                          newValues.splice(index, 1);
+                          onChange(newValues);
+                        }}
+                        style={{ margin: "4px" }}
+                      />
+                    ))}
+                  </>
+                ),
+                endAdornment: (
+                  <>
+                    <InputAdornment position="end">
+                      <ClearIcon
+                        onClick={() => {
+                          onChange([]);
+                        }}
+                      />
+                    </InputAdornment>
+                  </>
+                ),
+              }}
+              sx={{
+                "& .MuiInputLabel-root ": {
+                  color: "primary.main",
+                  fontSize: "1rem",
+                  fontWeight: "400",
+                },
+                "& .MuiTypography-root": {
+                  color: "primary.main",
+                  fontSize: "1rem",
+                  fontWeight: "400",
+                },
+              }}
+            />
+          )}
+        />
+      </Grid>
       <Grid item xs={4}>
         <ControlledTextField
           name="defaultValue"
@@ -196,7 +262,7 @@ const FieldForm: FC<FieldFormProps> = ({
           type="number"
         />
       </Grid>
-      <Grid item container xs={12}>
+      <Grid item container xs={4}>
         <FormControlLabel
           control={
             <Checkbox
@@ -210,9 +276,6 @@ const FieldForm: FC<FieldFormProps> = ({
     </Grid>
   );
 };
-
-
-
 
 type DynamicFormField = z.infer<typeof dynamicFormFieldSchema>;
 
@@ -270,8 +333,10 @@ const DynamicFormField: React.FC<any> = ({
       "order",
       "required",
       "defaultValue",
+      "options",
     ].forEach((field: any) => {
-      if (!!editData) setValue(field, editData[field as keyof DynamicFormField]);
+      if (!!editData)
+        setValue(field, editData[field as keyof DynamicFormField]);
     });
   }, [editData]);
 
@@ -295,9 +360,32 @@ const DynamicFormField: React.FC<any> = ({
     //     },
     //   ],
     // };
-    console.log({ data });
+    const formattedData = {
+      ...data,
+      name: data?.name
+        ?.split(" ")
+        .map((value: string, index: number) =>
+          index ? value?.charAt(0).toUpperCase() + value.slice(1) : value
+        )
+        .join(""),
+      label: data?.label
+        ?.split(" ")
+        .map(
+          (value: string, index: number) =>
+            value?.charAt(0).toUpperCase() + value.slice(1)
+        )
+        .join(" "),
+      placeholder: data?.placeholder
+        ?.split(" ")
+        .map(
+          (value: string, index: number) =>
+            value?.charAt(0).toUpperCase() + value.slice(1)
+        )
+        .join(" "),
+    };
+    console.log({ data, formattedData });
     fetcher.submit(
-      { data: JSON.stringify(data) },
+      { data: JSON.stringify(formattedData) },
       {
         method: !editData?.id ? "post" : "patch",
         action: location.pathname,

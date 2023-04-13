@@ -41,12 +41,11 @@ export const DatePick = ({
   setOpen,
 }: DatePickProps): JSX.Element => (
   <DesktopDatePicker
-    format="MM/DD/YYYY"
     value={column.getFilterValue()}
     onChange={(date) => column.setFilterValue(date)}
     open={openDate}
     onClose={() => setOpenDate(false)}
-    slots={(params: any) => (
+    renderInput={(params) => (
       <TextField
         {...params}
         size="small"
@@ -122,32 +121,28 @@ export const DatePick = ({
  * @param {object} props.column - The column instance provided by react-table.
  * @returns {JSX.Element} The DateFilter component.
  */
-const  DateFilter =({ table, column }: any) : JSX.Element=>{
-    const { columnFilterFns } = table.getState()
-    const [openDate, setOpenDate] = useState(false)
-    const [open, setOpen] = useState(false)
-    const [children, setChildren] = useState(null)
-    const ref = useRef()
-    return (
-        <Box ref={ref} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Menu
-                anchorEl={ref.current}
-                open={open}
-                onClose={() => setOpen(false)}
-            >
-                {children}
-            </Menu>
-            <DatePick
-                table={table}
-                column={column}
-                columnFilterFns={columnFilterFns}
-                openDate={openDate}
-                setOpenDate={setOpenDate}
-                setChildren={setChildren}
-                setOpen={setOpen}
-            />
-        </Box>
-    )
-}
+const DateFilter = ({ table, column }: any): JSX.Element => {
+  const { columnFilterFns } = table.getState();
+  const [openDate, setOpenDate] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [children, setChildren] = useState(null);
+  const ref = useRef();
+  return (
+    <Box ref={ref} sx={{ display: "flex", alignItems: "center" }}>
+      <Menu anchorEl={ref.current} open={open} onClose={() => setOpen(false)}>
+        {children}
+      </Menu>
+      <DatePick
+        table={table}
+        column={column}
+        columnFilterFns={columnFilterFns}
+        openDate={openDate}
+        setOpenDate={setOpenDate}
+        setChildren={setChildren}
+        setOpen={setOpen}
+      />
+    </Box>
+  );
+};
 
-export default DateFilter
+export default DateFilter;
