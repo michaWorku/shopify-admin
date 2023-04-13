@@ -1,14 +1,14 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import MaterialReactTable from "material-react-table";
 import useParams from "~/src/hooks/useParams";
 import CustomToolbar from "./CustomToolbar";
+import { separateAndCapitalize } from "~/utils/format";
 
 /**
  * Customized table component that wraps MaterialReactTable and adds custom features
  * @param {Object} props - The component props
  * @param {Array<Object>} props.columns - The table columns
  * @param {Object} props.data - The table data
- * @param {number} props.page - The current page number
  * @param {boolean} [props.enableExport=true] - Whether to enable export functionality
  * @param {string} [props.exportFileName] - The export file name
  * @param {boolean} props.loading - Whether the table data is loading
@@ -19,12 +19,12 @@ import CustomToolbar from "./CustomToolbar";
 const CustomizedTable = ({
   columns,
   data,
-  page,
   enableExport = true,
   exportFileName,
   loading,
   height,
   customAction,
+  enableDetailPanel = false,
 }: any): JSX.Element => {
   const {
     pagination,
@@ -119,7 +119,6 @@ const CustomizedTable = ({
                         .columnPinning?.left?.some((el) => el === column.id)
                     ? "7px 0px 10px -1.7px lightgray"
                     : "none",
-                
               },
               "& .MuiButtonBase-root": {
                 "& .PrivateSwitchBase-input": {
@@ -145,10 +144,59 @@ const CustomizedTable = ({
             },
           };
         }}
-        // muiTableBodyRowProps={({ row }) => ({
-        //   onClick: row.getToggleSelectedHandler(),
-        //   sx: { cursor: 'pointer', background: 'lightgray' },
-        // })}
+        displayColumnDefOptions={{
+          "mrt-row-expand": {
+            muiTableHeadCellProps: {
+              align: "left",
+            },
+            muiTableBodyCellProps: {
+              align: "left",
+            },
+          },
+        }}
+        positionExpandColumn="first"
+        renderDetailPanel={
+          enableDetailPanel
+            ? ({ row }) => {
+                return (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      margin: "auto",
+                      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr 1fr" },
+                      width: "100%",
+                      gap: 2,
+                      bgcolor: "#fAfAfA",
+                      p: 3,
+                    }}
+                  >
+                    {Object.keys((row?.original as any)?.data).map(
+                      (rowData: any) => (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "start",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle2"
+                            sx={{ color: "#828282", fontWeight: 700 }}
+                          >
+                            {separateAndCapitalize(rowData)}
+                          </Typography>
+                          <Typography variant="body2">
+                            {(row?.original as any)?.data[rowData] || "--"}
+                          </Typography>
+                        </Box>
+                      )
+                    )}
+                  </Box>
+                );
+              }
+            : undefined
+        }
       />
     </Box>
   );
