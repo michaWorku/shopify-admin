@@ -4,8 +4,8 @@ import SideBar from "./SideBar";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Box sx={{ height: "100vh", width: "100vw", display: 'flex' }}>
-      <Box sx={{ width: '15%' }}>
+    <Box sx={{ height: "100vh", minWidth: '100vw', minHeight: '100vh', width: "100vw", display: 'flex' }}>
+      <Box sx={{ width: '15%', height: '100%' }}>
         <SideBar/>
       </Box>
       <Box sx={{width: '85%'}}>
