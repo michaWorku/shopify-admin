@@ -1,6 +1,5 @@
 import { Box, Button } from "@mui/material";
-import MaterialReactTable from "material-react-table";
-import { DynamicForm, DynamicFormField, Status } from "@prisma/client";
+import { DynamicFormField, Status } from "@prisma/client";
 import { ActionFunction, LoaderFunction, json } from "@remix-run/node";
 import {
   useFetcher,
@@ -28,16 +27,14 @@ import { formHandler } from "~/utils/formHandler";
 import { toast } from "react-toastify";
 import DeleteAlert, { DeleteDialogType } from "~/src/components/DeleteAlert";
 import {
-  createForm,
-  deleteDynamicForm,
   deleteDynamicFormField,
+  getAllFormFields,
   getDynamicFormByField,
   updateDynamicFormField,
 } from "~/services/Form/Form.server";
 import { DynamicFormField as AddDynamicFormField } from "~/src/components/Forms";
 import {
   dynamicFormFieldSchema,
-  dynamicFormSchema,
 } from "~/utils/schema/dynamicFormSchema";
 
 /**
@@ -64,14 +61,12 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     )) as any;
 
     // Get dynamic form with formId
-    let dynamicForm;
-    dynamicForm = (await getDynamicFormByField(params.formId as string)) as any;
+    let dynamicFormField;
+    dynamicFormField = (await getAllFormFields(request,params.formId as string)) as any;
 
-    console.dir({ before: dynamicForm }, { depth: null });
+    console.dir({ before: dynamicFormField }, { depth: null });
 
-    if (dynamicForm?.status === 404) {
-      // const test = await dynamicForms.json()
-      // console.log({ data: test });
+    if (dynamicFormField?.status === 404) {
       return json(
         Response({
           data: {
@@ -80,21 +75,17 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           },
           error: {
             error: {
-              message: "No dynamic forms found",
+              message: "No dynamic form fields found",
             },
           },
         })
       );
     }
-    console.log({ dynamicForm });
+    console.log({ dynamicFormField });
     return json(
       Response({
         data: {
-          data: dynamicForm?.data?.fields.map((field: any) => ({
-            ...field,
-            canEdit: true,
-            canDelete: true,
-          })),
+          ...dynamicFormField,
           canCreate: canCreate?.status === 200,
           user,
         },
@@ -279,7 +270,7 @@ const FormFields = () => {
             row={row}
             viewDetail={false}
             moreDetails={false}
-            page="clients"
+            page="fields"
             handleDelete={handleDelete}
             handleEdit={handleModal}
           />
@@ -323,121 +314,35 @@ const FormFields = () => {
   };
 
   return (
-    <Box m={2}>
-      <MaterialReactTable
+    <Box m={2} >
+      <CustomizedTable
         columns={columns}
         data={loaderData?.data?.data}
-        enableColumnFilterModes
-        enableColumnResizing
-        enableStickyHeader
-        enableColumnOrdering
-        enableRowSelection
-        muiLinearProgressProps={({ isTopToolbar }: any) => ({
-          sx: {
-            display: isTopToolbar ? "block" : "none",
-          },
-        })}
-        state={{
-          showAlertBanner: loaderData?.error,
-          showProgressBars: navigation.state === "loading" ? true : false,
-        }}
-        initialState={{
-          columnPinning: {
-            right: ["status", "actions"],
-          },
-        }}
-        muiToolbarAlertBannerProps={
-          loaderData?.error
-            ? {
-                color: "error",
-                children: loaderData?.error?.error.message || "Network Error!",
-              }
-            : undefined
-        }
-        renderTopToolbarCustomActions={({ table }) =>
-          loaderData?.data?.canCreate && (
-            <Button
-              variant="add"
-              onClick={() =>
-                handleModal({
-                  id: "",
-                  name: "",
-                  label: "",
-                  type: "TEXT",
-                  defaultValue: "",
-                  required: true,
-                  placeholder: "",
-                  description: "",
-                  order: (loaderData?.data?.data.length + 1) as number,
-                  options: [],
-                })
-              }
-            >
-              Add Field
-            </Button>
-          )
-        }
-        // renderToolbarInternalActions={({ table }) => (
-        //   <CustomToolbar
-        //     table={table}
-        //     data={loaderData?.data?[0]?.fields}
-        //     enableExport={enableExport}
-        //     exportType={exportType}
-        //     setExportType={setExportType}
-        //     exportFileName={exportFileName}
-        //   />
-        // )}
-        muiTableHeadCellProps={({ table, column }) => {
-          return {
-            sx: {
-              "& .MuiTableCell-root": {
-                boxShadow:
-                  table.getState().columnPinning?.right?.[0] === column?.id
-                    ? "-7px 0px 10px -1.7px lightgray"
-                    : table
-                        .getState()
-                        .columnPinning?.left?.some((el) => el === column.id)
-                    ? "7px 0px 10px -1.7px lightgray"
-                    : "none",
-              },
-              "& .MuiButtonBase-root": {
-                "& .PrivateSwitchBase-input": {
-                  backgroundColor: "red",
-                },
-              },
-            },
-          };
-        }}
-        muiTableBodyCellProps={({ table, column }) => {
-          return {
-            sx: {
-              "& .MuiTableCell-root": {
-                boxShadow:
-                  table.getState().columnPinning?.right?.[0] === column?.id
-                    ? "-7px 0px 10px -1.7px lightgray"
-                    : table
-                        .getState()
-                        .columnPinning?.left?.some((el) => el === column.id)
-                    ? "7px 0px 10px -1.7px lightgray"
-                    : "none",
-              },
-            },
-          };
-        }}
-      />
-      {/* <CustomizedTable
-        columns={columns}
-        data={loaderData?.data?.data[0]?.fields}
-        page="Client"
-        exportFileName="Forms"
-        enableExport={true}
+        exportFileName="Fields"
+        enableExport={false}
         loading={navigation.state === "loading" ? true : false}
         customAction={(table: any) => (
-          <Button variant="add" onClick={()=>handleModal(undefined)}>
+          <Button
+            variant="add"
+            onClick={() =>
+              handleModal({
+                id: "",
+                name: "",
+                label: "",
+                type: "TEXT",
+                defaultValue: "",
+                required: true,
+                placeholder: "",
+                description: "",
+                order: (loaderData?.data?.data.length + 1) as number,
+                options: [],
+              })
+            }
+          >
             Add Field
           </Button>
         )}
-      /> */}
+      />
       <AddDynamicFormField
         openModal={openModal}
         actionData={actionData}
