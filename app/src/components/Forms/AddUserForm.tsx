@@ -332,6 +332,7 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                                         label="Birthdate"
                                         value={birthDate}
                                         onChange={handleBirthDateChange}
+                                        //@ts-ignore
                                         renderInput={(params: any) => (
                                             <TextField
                                                 {...params}

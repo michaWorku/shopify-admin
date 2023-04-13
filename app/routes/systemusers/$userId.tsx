@@ -42,7 +42,8 @@ import { getUserById } from '~/services/User/users.server'
 import { getUserCreatedRole } from '~/services/Role/role.server'
 import { DesktopDatePicker } from '@mui/x-date-pickers'
 import { toast } from 'react-toastify'
-import { getUserEntities } from '~/services/Entities/Entity.server'
+import { getUserEntities } from '~/services/Entities/entity.server'
+// import { getUserEntities } from '~/services/Entities/entity.server'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
     try {
@@ -138,11 +139,12 @@ const SystemUsers = () => {
                 toast.error(actionData?.error?.error?.message)
             }
             if (actionData?.data?.message) {
-                toast.success(actionData?.data?.message)
-                onclose()
+                // toast.success(actionData?.data?.message)
+                navigate(-1)
             }
         }
     }, [actionData])
+
     const [values, setValues] = useState({}) as any
     const handleRoleChange = (
         event: SyntheticEvent<Element, Event>,
@@ -152,12 +154,6 @@ const SystemUsers = () => {
         const roleIds = value.map((item: any) => item.id)
         values.roleId = JSON.stringify(roleIds)
     }
-
-    useEffect(() => {
-        if (status) {
-            navigate('/systemusers')
-        }
-    })
 
     const [birthDate, setBirthdate] = useState<Dayjs | null>(
         dayjs(loaderData?.data?.birthDate)

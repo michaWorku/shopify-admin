@@ -9,7 +9,7 @@ import customErr, { errorHandler } from '~/utils/handler.server'
 import { canEditUser } from '~/utils/casl/canEditUser'
 import { canDeleteUser } from '~/utils/casl/canDeleteUser'
 import { roleChange } from '../Role/role.server'
-import { getUserEntities } from '../Entities/Entity.server'
+import { getUserEntities } from '../Entities/entity.server'
 // import { getUserEntities } from "../entity.server";
 
 export const getSystemUsers = async (
@@ -57,7 +57,6 @@ export const getSystemUsers = async (
                         data = canEditUser(userId, user?.id, clientId).then(
                             (res) => {
                                 user.canEdit = res
-                                console.log({ res })
                             }
                         )
                         data = canDeleteUser(userId, user?.id, clientId).then(
@@ -255,7 +254,7 @@ export const createSystemUser = async (
             if (isClientUser?.status === 200) {
                 // create user
                 const response = await createSystemUserDb(data, clientId)
-                console.log({ isClientUser })
+
                 return json(response, { status: 200 })
             } else {
                 return isClientUser
@@ -337,7 +336,6 @@ export const createSystemUserDb = async (data: any, clientId?: string) => {
             },
         })
     } catch (err) {
-        console.log({ err })
         throw err
     }
 }
@@ -383,7 +381,6 @@ export const updateSystemUser = async (
                     )
                 }
             } else {
-                console.log({ isClientUser })
                 return isClientUser
             }
         } else {
