@@ -5,6 +5,7 @@ import { json } from '@remix-run/node'
 import {
     Link,
     useActionData,
+    useFetcher,
     useLoaderData,
     useNavigate,
     useNavigation,
@@ -34,6 +35,8 @@ import DateFilter from '~/src/components/Table/DatePicker'
 import StatusUpdate from '~/src/components/Table/StatusUpdate'
 import RowActions from '~/src/components/Table/RowActions'
 import { getEntities } from '~/services/Entities/entity.server'
+import { DeleteAlert } from '~/src/components'
+import { DeleteDialogType } from '~/src/components/DeleteAlert'
 
 /**
  * Loader function to fetch role and permisions.
@@ -147,14 +150,24 @@ export const handle = {
     ),
 }
 
+export const DefaultDialogInfo = {
+    open: false,
+    id: '',
+    title: 'Remove a Role',
+    contentText: 'Are you sure you want to remove this Role?',
+    action: 'role',
+}
 export default function ViewRole() {
     const loaderData = useLoaderData()
     const actionData = useActionData()
     const navigate = useNavigate()
+    const fetcher = useFetcher()
     const navigation = useNavigation()
     const [loading, setLoading] = useState(false)
     const [openModal, setOpenModal] = useState(false)
     const [loadingEdit, setLoadingEdit] = useState<boolean>(false)
+    const [deleteDialog, setDeleteDialog] =
+        useState<DeleteDialogType>(DefaultDialogInfo)
 
     useEffect(() => {
         if (navigation.state === 'idle' && loading) {
@@ -166,6 +179,28 @@ export default function ViewRole() {
     }, [navigation.state])
     function handleEdit(row: any) {
         navigate(`${row}`)
+    }
+
+    useEffect(() => {
+        if (!!fetcher?.data?.error?.error?.message) {
+            toast.error(fetcher?.data?.error?.error?.message)
+        }
+        if (!!fetcher?.data?.message) {
+            toast.success(fetcher?.data?.message)
+            setOpenModal(false)
+            setDeleteDialog(DefaultDialogInfo)
+        }
+    }, [fetcher?.data])
+
+    const handleDelete = (id: string) => {
+        console.log({ id })
+        setDeleteDialog({
+            open: true,
+            id: id,
+            title: 'Remove a Role',
+            contentText: 'Are you sure you want to remove this Role?',
+            action: `role/${id}`,
+        })
     }
     const columns = useMemo<MRT_ColumnDef<Role>[]>(
         () => [
@@ -213,7 +248,8 @@ export default function ViewRole() {
                         row={row}
                         page="role"
                         handleEdit={() => handleEdit(row?.original?.id)}
-                        deleteCol={false}
+                        handleDelete={handleDelete}
+                        deleteCol={true}
                     />
                 ),
             },
@@ -249,7 +285,6 @@ export default function ViewRole() {
                 loading={
                     loading || navigation.state === 'loading' ? true : false
                 }
-                enableExport={true}
                 customAction={(table: any) => (
                     <Button
                         variant="add"
@@ -284,6 +319,11 @@ export default function ViewRole() {
                     </Slide>
                 </Modal>
             </Box>
+            <DeleteAlert
+                deleteDialog={deleteDialog}
+                setDeleteDialog={setDeleteDialog}
+                fetcher={fetcher}
+            />
             <Outlet />
         </Box>
     )
