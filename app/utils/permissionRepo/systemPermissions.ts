@@ -11,6 +11,16 @@ export default function systemPermissions() {
             category: 'User',
         },
         {
+            action: 'create',
+            subject: 'SystemUser',
+            conditions: {},
+            fields: [],
+            name: 'Create System User',
+            description:
+                'With this permission the user can create users for the system',
+            category: 'User',
+        },
+        {
             action: 'read',
             subject: 'User',
             conditions: {},
@@ -26,6 +36,16 @@ export default function systemPermissions() {
             conditions: { edit_full: false },
             fields: [],
             name: 'edit Users',
+            description:
+                "With this permission the user can edit all users who doesm't have the same edit user permission",
+            category: 'User',
+        },
+        {
+            action: 'update',
+            subject: 'SystemUser',
+            conditions: { edit_full: false },
+            fields: [],
+            name: 'edit System Users',
             description:
                 "With this permission the user can edit all users who doesm't have the same edit user permission",
             category: 'User',
@@ -111,8 +131,7 @@ export default function systemPermissions() {
             conditions: {},
             fields: [],
             name: 'Create Bulk Task',
-            description:
-                'With this permission the user can create Bulk Taks',
+            description: 'With this permission the user can create Bulk Taks',
             category: 'BulkTask',
         },
         {
@@ -131,8 +150,7 @@ export default function systemPermissions() {
             conditions: {},
             fields: [],
             name: 'Edit Bulk Task',
-            description:
-                "With this permission the user can edit Bulk Task",
+            description: 'With this permission the user can edit Bulk Task',
             category: 'BulkTask',
         },
         {
@@ -141,8 +159,7 @@ export default function systemPermissions() {
             conditions: {},
             fields: [],
             name: 'Delete Bulk Task',
-            description:
-                'With this permission the user can create Bulk Task',
+            description: 'With this permission the user can create Bulk Task',
             category: 'BulkTask',
         },
         {
