@@ -1,6 +1,7 @@
 import {
     Outlet,
     useActionData,
+    useFetcher,
     useLoaderData,
     useNavigate,
     useNavigation,
@@ -31,7 +32,10 @@ import canUser, { AbilityType } from '~/utils/casl/ability'
 import { validate } from '~/utils/validators/validate'
 import { systemUserSchema } from '~/utils/schema/systemUserSchema'
 import { toast } from 'react-toastify'
-import { getUserEntities } from '~/services/Entities/Entity.server'
+// import { getUserEntities } from '~/services/Entities/Entity.server'
+import { DeleteAlert } from '~/src/components'
+import { DeleteDialogType } from '~/src/components/DeleteAlert'
+import { getUserEntities } from '~/services/Entities/entity.server'
 
 export const loader: LoaderFunction = async ({ request }) => {
     try {
@@ -127,15 +131,23 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
 }
 
+export const DefaultDialogInfo = {
+    open: false,
+    id: '',
+    title: 'Remove a System User',
+    contentText: 'Are you sure you want to remove this User?',
+    action: 'systemusers',
+}
 const SystemUsers = () => {
     const loaderData = useLoaderData()
     const actionData = useActionData()
     const navigate = useNavigate()
+    const fetcher = useFetcher()
     const navigation = useNavigation()
+    const [deleteDialog, setDeleteDialog] =
+        useState<DeleteDialogType>(DefaultDialogInfo)
     const [loading, setLoading] = useState(false)
     const [openModal, setOpenModal] = useState(false)
-
-    console.log({ loaderData, actionData })
 
     function handleEdit(row: any) {
         navigate(`${row}`)
@@ -188,6 +200,7 @@ const SystemUsers = () => {
             {
                 accessorKey: 'status',
                 header: 'Status',
+                size: 220,
                 filterSelectOptions: Object.keys(Status).map((status) => {
                     return {
                         text: status,
@@ -215,6 +228,7 @@ const SystemUsers = () => {
                         page="system users"
                         handleEdit={() => handleEdit(row?.original?.id)}
                         deleteCol={false}
+                        handleDelete={handleDelete}
                     />
                 ),
             },
@@ -227,15 +241,26 @@ const SystemUsers = () => {
     const handleCloseModal = () => {
         setOpenModal(false)
     }
-
+    const handleDelete = (clientId: any) => {
+        setDeleteDialog({
+            open: true,
+            id: clientId,
+            title: 'Remove a Client',
+            contentText: 'Are you sure you want to remove this client?',
+            action: `systemusers/${clientId}`,
+        })
+    }
     useEffect(() => {
-        if (actionData?.data?.message) {
-            toast.success(actionData?.data?.message)
-            setOpenModal(false)
-        }
-        if (actionData?.error) {
-            toast.error(actionData?.error?.error?.message)
-            setLoading(false)
+        if (actionData) {
+            if (actionData?.data?.message) {
+                toast.success(actionData?.data?.message)
+                setLoading(false)
+                setOpenModal(false)
+            }
+            if (actionData?.error) {
+                toast.error(actionData?.error?.error?.message)
+                setLoading(false)
+            }
         }
     }, [actionData])
 
@@ -262,6 +287,11 @@ const SystemUsers = () => {
                     closeModal={handleCloseModal}
                 />
             </Box>
+            <DeleteAlert
+                deleteDialog={deleteDialog}
+                setDeleteDialog={setDeleteDialog}
+                fetcher={fetcher}
+            />
             <Outlet />
         </Box>
     )
