@@ -278,7 +278,7 @@
         },
         "isRewareded": {
           "type": "boolean",
-          "default": true
+          "default": false
         },
         "isSystemUser": {
           "type": "boolean",
@@ -399,10 +399,8 @@
           ]
         },
         "rewardTaken": {
-          "type": [
-            "integer",
-            "null"
-          ]
+          "type": "integer",
+          "default": 0
         },
         "rewardGiven": {
           "type": "integer"
@@ -449,6 +447,12 @@
             "ACTIVE",
             "INACTIVE"
           ]
+        },
+        "submissions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DynamicFormSubmission"
+          }
         },
         "client": {
           "$ref": "#/definitions/Client"
@@ -510,12 +514,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/DynamicFormField"
-          }
-        },
-        "submissions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/DynamicFormSubmission"
           }
         },
         "reward": {
@@ -629,9 +627,6 @@
             "null"
           ]
         },
-        "formId": {
-          "type": "string"
-        },
         "submittedById": {
           "type": "string"
         },
@@ -659,8 +654,11 @@
             "INACTIVE"
           ]
         },
-        "form": {
-          "$ref": "#/definitions/DynamicForm"
+        "rewardId": {
+          "type": "string"
+        },
+        "reward": {
+          "$ref": "#/definitions/Reward"
         },
         "submittedBy": {
           "$ref": "#/definitions/User"

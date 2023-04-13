@@ -40,7 +40,7 @@ import customErr, {
   badRequest,
   errorHandler,
   ResponseType,
-} from "~/utils/utils-server";
+} from "~/utils/handler.server";
 import { createOTP, verifyOTP } from "~/services/otp.server";
 import { checkUserExists, updatePassword } from "~/services/User/users.server";
 import { toast } from "react-toastify";

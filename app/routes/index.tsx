@@ -1,26 +1,16 @@
-import * as React from 'react'
-import type { MetaFunction } from 'remix'
-import { Link } from 'remix'
-import Typography from '@mui/material/Typography'
-
-// https://remix.run/api/conventions#meta
-export const meta: MetaFunction = () => {
-    return {
-        title: 'Remix Starter',
-        description: 'Welcome to remix!',
-    }
-}
-
-// https://remix.run/guides/routing#index-routes
-export default function Index() {
-    return (
-        <React.Fragment>
-            <Typography variant="h4" component="h1" gutterBottom>
-                Material UI Remix in TypeScript example
-            </Typography>
-            <Link to="/about" color="secondary">
-                Go to the about page
-            </Link>
-        </React.Fragment>
-    )
+import { LoaderFunction } from '@remix-run/node'
+import { authenticator } from '~/services/auth.server'
+/**
+ * Loader function to redirect logged in user to prefered route
+ * or redirect to login.
+ * @async function loader
+ * @param request The incoming HTTP request.
+ * @param params The URL params for the current route.
+ * @returns redirect to clients or login.
+ */
+export const loader: LoaderFunction = async ({ request }) => {
+    return await authenticator.isAuthenticated(request, {
+        failureRedirect: '/login',
+        successRedirect: '/clients',
+    })
 }

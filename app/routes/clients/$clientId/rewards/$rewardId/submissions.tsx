@@ -1,31 +1,25 @@
-import { Box} from "@mui/material";
-import { Reward, User } from "@prisma/client";
+import { Box } from "@mui/material";
+import { DynamicFormSubmission, Reward, Status, User } from "@prisma/client";
 import { LoaderFunction, json } from "@remix-run/node";
 import {
-  useFetcher,
   useLoaderData,
-  useLocation,
   useNavigation,
 } from "@remix-run/react";
 import { MRT_ColumnDef } from "material-react-table";
 import moment from "moment-timezone";
-import { useEffect, useMemo, useState } from "react";
-import customErr, { Response } from "~/utils/handler.server";
+import { useEffect, useMemo } from "react";
+import  { Response } from "~/utils/handler.server";
 import { authenticator } from "~/services/auth.server";
-import {
-  CustomizedTable,
-} from "~/src/components/Table";
+import { CustomizedTable } from "~/src/components/Table";
 import FilterModes from "~/src/components/Table/CustomFilter";
 import DateFilter from "~/src/components/Table/DatePicker";
 import canUser from "~/utils/casl/ability";
 import { errorHandler } from "~/utils/handler.server";
 import { toast } from "react-toastify";
-import {
-  getRewardUsers,
-} from "~/services/Reward/Reward.server";
+import { getClientSubmissions, getRewardSubmissions } from "~/services/DynamicFormSubmission/DynamicFormSubmission.server";
 
 /**
- * Loader function to fetch users of a reward.
+ * Loader function to fetch submissions of a reward.
  * @async function loader
  * @param request The incoming HTTP request.
  * @param params The URL params for the current route.
@@ -39,24 +33,21 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     });
 
     console.log({ user, params });
-    // Check if the user can read a reward users
-    const canRead = (await canUser(user?.id, "read", "User", {
+    // Check if the user can read all reward submissions
+    const canRead = (await canUser(user?.id, "read", "DynamicFormSubmission", {
       clientId: params?.clientId,
     })) as any;
 
-    // Get all all users that get a reward
-    let rewardUsers;
-    rewardUsers = (await getRewardUsers(
+    // Get all all users that get reward submission
+    let clientSubmissions;
+    clientSubmissions = (await getRewardSubmissions(
       request,
-      params?.clientId as string,
       params?.rewardId as string
     )) as any;
 
-    console.dir({ form: rewardUsers?.data });
+    console.dir({ form: clientSubmissions?.data });
 
-    if (rewardUsers?.status === 404) {
-      // const test = await dynamicForms.json()
-      // console.log({ data: test });
+    if (clientSubmissions?.status === 404) {
       return json(
         Response({
           data: {
@@ -65,7 +56,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           },
           error: {
             error: {
-              message: "No users found",
+              message: "No submissions found",
             },
           },
         })
@@ -75,58 +66,82 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     return json(
       Response({
         data: {
-          ...rewardUsers,
+          ...clientSubmissions,
           canRead: canRead?.status === 200,
           user,
         },
       })
     );
   } catch (error) {
-    console.log("Error occured loading reward users");
+    console.log("Error occured loading client submission users");
     console.dir(error, { depth: null });
     return errorHandler(error);
   }
 };
 
 /**
- * Renders the Reward User component.
- * @returns {JSX.Element} JSX element containing the rewards table.
+ * Renders the Reward Submission component.
+ * @returns {JSX.Element} JSX element containing the client users table.
  */
-const RewardUsers = () => {
+const RewardSubmissions = () => {
   const loaderData = useLoaderData<typeof loader>();
   const navigation = useNavigation();
-  const columns = useMemo<MRT_ColumnDef<User>[]>(
+  const columns = useMemo<
+    MRT_ColumnDef<
+      DynamicFormSubmission & {
+        submittedBy: User;
+        reward: Reward;
+      }
+    >[]
+  >(
     () => [
       {
+        accessorKey: "id",
+        header: "ID",
+        renderColumnFilterModeMenuItems: FilterModes,
+      },
+      {
         accessorFn: (originalRow) =>
-          (originalRow.firstName || " ") +
+          (originalRow?.submittedBy?.firstName || " ") +
           " " +
-          (originalRow.middleName || " ") +
+          (originalRow?.submittedBy?.middleName || " ") +
           " " +
-          (originalRow.lastName || " "),
-        id: "name",
-        header: "Name",
+          (originalRow?.submittedBy?.lastName || " "),
+        id: "submittedBy",
+        header: "Submitted By",
         renderColumnFilterModeMenuItems: FilterModes,
       },
       {
-        accessorKey: "phone",
-        header: "Phone",
+        accessorFn: (originalRow) => originalRow?.reward?.id,
+        accessorKey: "rewardId",
+        header: "Reward Id",
         renderColumnFilterModeMenuItems: FilterModes,
       },
       {
-        accessorKey: "email",
-        header: "Email",
+        accessorKey: "status",
+        header: "Status",
+        filterVariant: "multi-select",
         renderColumnFilterModeMenuItems: FilterModes,
-      },
-      {
-        accessorKey: "gender",
-        header: "Gender",
-        renderColumnFilterModeMenuItems: FilterModes,
-      },
-      {
-        accessorKey: "birthDate",
-        header: "Plan",
-        renderColumnFilterModeMenuItems: FilterModes,
+        filterSelectOptions: Object.keys(Status).map((status) => {
+          return {
+            text: status,
+            value: status,
+          };
+        }),
+        Cell: ({ cell }) => (
+          <span
+            style={{
+              color:
+                cell.getValue<string>() === "INACTIVE"
+                  ? "#CC2727"
+                  : cell.getValue<string>() === "PENDING"
+                  ? "#CC2727"
+                  : "#54D62C",
+            }}
+          >
+            {cell.getValue<string>()}
+          </span>
+        ),
       },
       {
         accessorFn: (originalRow) =>
@@ -147,31 +162,29 @@ const RewardUsers = () => {
         filterVariant: "date" as any,
         renderColumnFilterModeMenuItems: FilterModes,
         Filter: (props) => <DateFilter {...props} />,
-      }
+      },
     ],
     []
   );
 
-
   useEffect(() => {
-    console.log({ loaderData });
     if (!!loaderData?.data?.error?.error?.message) {
       toast.error(loaderData?.data?.error?.error?.message);
     }
   }, [loaderData]);
-
 
   return (
     <Box m={2}>
       <CustomizedTable
         columns={columns}
         data={loaderData}
-        exportFileName="Rewards Users"
+        exportFileName="Reward Submissions"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
+        enableDetailPanel={true}
       />
     </Box>
   );
 };
 
-export default RewardUsers;
+export default RewardSubmissions;

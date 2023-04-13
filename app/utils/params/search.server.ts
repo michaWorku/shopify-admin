@@ -1,3 +1,5 @@
+import { Status } from '@prisma/client'
+
 /**
  * Create filters to allow a particular search word to be used to search across all available column names.
  * @param {string} search - The search term to lookfor.
@@ -5,7 +7,7 @@
  */
 export const searchCombinedColumn = (
     filterItem: any,
-    columnNames: string[],
+    columnNames?: string[],
     type?: string
 ) => {
     let operator: string
@@ -24,7 +26,7 @@ export const searchCombinedColumn = (
             {
                 ...(searchArray.length === 1
                     ? {
-                          OR: columnNames.map((columnName) => ({
+                          OR: columnNames?.map((columnName) => ({
                               [columnName]: {
                                   [operator]: searchArray[0],
                                   mode: 'insensitive',
@@ -37,7 +39,7 @@ export const searchCombinedColumn = (
                           AND: [
                               {
                                   OR: columnNames
-                                      .slice(0, 2)
+                                      ?.slice(0, 2)
                                       .map((columnName) => ({
                                           [columnName]: {
                                               [operator]: searchArray[0],
@@ -47,7 +49,7 @@ export const searchCombinedColumn = (
                               },
                               {
                                   OR: columnNames
-                                      .slice(1)
+                                      ?.slice(1)
                                       .map((columnName) => ({
                                           [columnName]: {
                                               [operator]: searchArray[1],
@@ -60,7 +62,7 @@ export const searchCombinedColumn = (
                     : {}),
                 ...(searchArray.length === 3
                     ? {
-                          AND: columnNames.map((columnName, index) => ({
+                          AND: columnNames?.map((columnName, index) => ({
                               [columnName]: {
                                   [operator]: searchArray[index],
                                   mode: 'insensitive',
@@ -102,8 +104,18 @@ export const searchFunction = (
     if (search) {
         const searchParams = {
             OR: Object.keys(modelSchema)?.map((item) => {
-                if (modelSchema[item]?.originalType === 'String') {
-                    if (schema === 'User' && !!searchColumns) {
+                console.log({
+                    schema: modelSchema[item],
+                    item,
+                    typeLength: modelSchema[item]?.type?.length,
+                })
+
+                if (
+                    modelSchema[item]?.type === 'string' &&
+                    modelSchema[item]?.format !== 'date-time' &&
+                    !modelSchema[item]?.enum?.length
+                ) {
+                    if (schema === 'User' && !!searchColumns?.length) {
                         /**
                          * The search filter object for combined columns.
                          * @type {object}
@@ -116,7 +128,10 @@ export const searchFunction = (
 
                         return searchFilter
                     } else {
-                        if (search.split(' ').length && !!searchColumns)
+                        if (
+                            search.split(' ').length > 1 &&
+                            !!searchColumns?.length
+                        )
                             return searchCombinedColumn(
                                 search,
                                 searchColumns,
@@ -129,9 +144,31 @@ export const searchFunction = (
                             },
                         }
                     }
-                } else {
-                    return {}
                 }
+                // else if (modelSchema[item]?.format === "date-time" && !!search) {
+                //     const date = new Date(search)
+
+                //     if (!isNaN(date.getTime())) {
+                //         console.log({ date, search })
+                //         return {
+                //             [item]: {
+                //                 equals: date.toISOString()
+                //             },
+                //         };
+                //     }
+                //     return {}
+
+                // }
+                if (
+                    modelSchema[item]?.enum?.length &&
+                    !!search &&
+                    Object.keys(Status)?.some((status) => status === search)
+                ) {
+                    return {
+                        [item]: search,
+                    }
+                }
+                return {}
             }),
         }
 

@@ -22,6 +22,7 @@ export const dynamicFormFieldSchema = z.object({
     placeholder: z.string().trim().min(2, { message: "Too short" }),
     order: z.number(),
     required: z.boolean(),
+    options: z.array(z.string()).optional(),
     defaultValue: z.any().optional(),
 });
 
@@ -42,6 +43,7 @@ export const updateDynamicFormFieldSchema = z.object({
       ]).optional(),
     description: z.string().trim().min(2, { message: "Too short" }).optional(),
     placeholder: z.string().trim().min(2, { message: "Too short" }).optional(),
+    options: z.array(z.string()).optional(),
     order: z.number().optional(),
     required: z.boolean().optional(),
     defaultValue: z.any().optional(),
