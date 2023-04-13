@@ -221,7 +221,7 @@ export const updateDynamicFormById = async (formId: string, data: DynamicForm, u
                             },
                         })),
                     createMany: {
-                        data: data?.fields?.filter((field: any)=> !field?.id).map((field: any) => ({
+                        data: data?.fields?.filter((field: any) => !field?.id).map((field: any) => ({
                             name: field?.name,
                             label: field?.label,
                             type: field?.type,
@@ -472,4 +472,80 @@ const setDynamicFormPermissions = async (userId: string, dynamicForms: any[], cl
         };
     });
     await Promise.all(promises);
+};
+
+/**
+ * Retrieves all dynamic form fields for the specified form based on the specified request parameters.
+ * @async function getAllFormFields
+ * @param {Request} request - The HTTP request object containing the request parameters.
+ * @param {string} formId - The ID of the form associated with the dynamic form fields.
+ * @returns {Promise<Response>} - The HTTP response containing the dynamic forms fiedlds and their metadata.
+ * @throws {customErr} - An error indicating that no dynamic form fields were found.
+ * @throws {Error} - An error indicating that an unexpected error occurred.
+ */
+export const getAllFormFields = async (request: Request, formId: string): Promise<any> => {
+    if (!formId) {
+        throw new customErr('Custom_Error', 'Form ID is required', 404);
+    }
+    try {
+        const { sortType, sortField, skip, take, pageNo, search, filter, exportType } = getParams(request);
+
+        const searchParams = searchFunction(search, 'DynamicFormField', ['name', 'label', 'description']);
+        const filterParams = filterFunction(filter, 'DynamicFormField');
+
+        const dynamicFormFieldsWhere: Prisma.DynamicFormFieldWhereInput = {
+            deletedAt: null,
+            formId,
+            ...searchParams,
+            ...filterParams,
+        };
+
+        const dynamicFormFieldsCount = await db.dynamicFormField.count({ where: dynamicFormFieldsWhere });
+
+        if (dynamicFormFieldsCount === 0) {
+            throw new customErr('Custom_Error', 'No dynamic form fields found', 404);
+        }
+
+        const dynamicFormFields = await db.dynamicFormField.findMany({
+            take,
+            skip,
+            orderBy: [{ [sortField]: sortType }],
+            where: dynamicFormFieldsWhere,
+        });
+
+        let exportData;
+
+        if (exportType === 'page') {
+            exportData = dynamicFormFields;
+        } else if (exportType === 'filtered') {
+            exportData = await db.dynamicFormField.findMany({
+                orderBy: [{ [sortField]: sortType }],
+                where: dynamicFormFieldsWhere,
+            });
+        } else {
+            exportData = await db.dynamicFormField.findMany({});
+        }
+
+        return Response({
+            data: dynamicFormFields.map((field: any) => ({
+                ...field,
+                canEdit: true,
+                canDelete: true,
+            })),
+            metaData: {
+                page: pageNo,
+                pageSize: take,
+                total: dynamicFormFieldsCount,
+                sort: [sortField, sortType],
+                searchVal: search,
+                filter,
+                exportType,
+                exportData,
+            },
+        })
+    } catch (error) {
+        console.log('Error occurred loading dynamic form fields.');
+        console.dir(error, { depth: null });
+        return errorHandler(error);
+    }
 };
