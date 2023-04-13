@@ -1,7 +1,12 @@
 import { Box, Button } from '@mui/material'
 import { Client, Status } from '@prisma/client'
 import { ActionFunction, LoaderFunction, json } from '@remix-run/node'
-import { useFetcher, useLoaderData, useNavigation } from '@remix-run/react'
+import {
+    Link,
+    useFetcher,
+    useLoaderData,
+    useNavigation,
+} from '@remix-run/react'
 import { MRT_ColumnDef } from 'material-react-table'
 import moment from 'moment-timezone'
 import { useEffect, useMemo, useState } from 'react'
@@ -157,6 +162,13 @@ export const action: ActionFunction = async ({ request }) => {
     }
 }
 
+export const handle = {
+    BreadCrumb: () => (
+        <Link style={{ textDecoration: 'none', color: 'white' }} to="/clients">
+            Clients
+        </Link>
+    ),
+}
 export const DefaultDialogInfo = {
     open: false,
     id: '',
@@ -280,6 +292,11 @@ const Clients = () => {
                                 ability: row?.original?.canViewSubmissions,
                                 route: 'submissions',
                                 menuItem: 'Submissions',
+                            },
+                            {
+                                ability: row?.original?.canViewSystemUsers,
+                                route: 'systemusers',
+                                menuItem: 'System Users',
                             },
                         ]}
                     />
