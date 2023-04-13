@@ -306,6 +306,16 @@ const Reward = () => {
                 route: "/",
                 menuItem: "Users",
               },
+              {
+                ability: row?.original?.canViewUsers,
+                route: "submissions",
+                menuItem: "Submissions",
+              },
+              {
+                ability: row?.original?.canViewUsers,
+                route: "submit",
+                menuItem: "Submit",
+              },
             ]}
           />
         ),
@@ -352,7 +362,6 @@ const Reward = () => {
       <CustomizedTable
         columns={columns}
         data={loaderData}
-        page="reards"
         exportFileName="Rewards"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
