@@ -237,21 +237,6 @@ export const getUserRoles = async (userId: string) => {
 }
 
 /**
- * Retrieve all roles
- * @async
- * @function getAllRoles
- * @throws {Error} Throws an error if it fails to retrieve roles.
- */
-export const getAllRoless = async () => {
-    try {
-        return await db.role.findMany()
-    } catch (error) {
-        return errorHandler(error)
-    }
-}
-
-/**
-
 Retrieves all roles created by a specific user based on the given userId.
 @async
 @function getAllRoles
@@ -260,10 +245,18 @@ Retrieves all roles created by a specific user based on the given userId.
 @returns {Promise<Object>} - The response object containing the retrieved roles data and metadata.
 @throws {Error} - Throws an error if the retrieval of the roles data fails.
 */
+
 export const getAllRoles = async (request: Request, userId: string) => {
     try {
         if (!userId) {
             throw new customErr('Custom_Error', 'User ID is required', 404)
+        }
+        let id = {}
+        const able = await canUser(userId, 'manage', 'all', {})
+        if (able?.status != 200) {
+            id = {
+                createdBy: userId,
+            }
         }
 
         const { sortType, sortField, skip, take, pageNo, search, filter } =
@@ -280,10 +273,10 @@ export const getAllRoles = async (request: Request, userId: string) => {
             where: {
                 ...searchParams,
                 ...filterParams,
-                createdBy: userId,
+                ...id,
+                deletedAt: null,
             },
         })
-        console.log({ roleCount })
         if (!!roleCount) {
             roles = await db.role.findMany({
                 take,
@@ -294,12 +287,15 @@ export const getAllRoles = async (request: Request, userId: string) => {
                     },
                 ],
                 where: {
-                    createdBy: userId,
+                    ...id,
                     ...searchParams,
                     ...filterParams,
+                    deletedAt: null,
                 },
             })
-
+            roles?.map((e: any) => {
+                ;(e.canEdit = true), (e.canDelete = true)
+            })
             return {
                 data: roles,
                 metaData: {
@@ -675,59 +671,12 @@ export const getUserCreatedRole = async (
 }
 
 /**
- * Removes permissions from selected permission list based on the specified entity and its values.
- *
- * @function removePermissions
- * @param state - The entity permission state.
- * @param selectedPermission - The list of selected permissions to remove from.
- * @param value - The entity values to use to determine which permissions to remove.
- * @param name - The name of the entity.
- * @returns An object containing the new permission list and the original entity permission state.
- */
-/**
- * Maps the new entity permissions with the old entity permissions and returns the updated EntityPermission object.
- * function permissionAllocator
- * @param newEntityPermissions - The new entity permissions object to map.
- * @param oldEntityPermissions - The old entity permissions object to update.
- * @param entity - The name of the entity.
- * @returns The updated EntityPermission object.
- */
-
-/**
- * Formats entity permissions based on the entity name.
- * @function formatEntityPermissions
- * @param permissions The permissions to format.
- * @param entityType The type of the entity.
- * @returns The formatted entity permissions.
- */
-export const formatEntityPermissions = (
-    permissions: any,
-    entityType: string
-): EntityPermission => {
-    const formatted: EntityPermission = {
-        clients: [],
-    }
-
-    const entityProperty = propertyNames[entityType]
-
-    permissions.map((item: any) => {
-        formatted[entityType].push({
-            [entityProperty]: item.entity,
-            permissions: item.entityPermissions,
-        })
-    })
-
-    return formatted
-}
-
-/**
  * Categorizes an array of permissions by their category.
  * @function categorizePermissions
  * @param rawPermissions - The array of permissions to categorize.
  * @returns An object containing the permissions categorized by their category.
  */
 export const categorizePermissions = (rawPermissions: []) => {
-    console.log({ rawPermissions })
     const permissions = rawPermissions?.reduce(function (
         permissions: any,
         permission: any
@@ -755,4 +704,61 @@ export const roleChange = (oldPermissions: any[], newPermissions: string[]) => {
     )
 
     return { connect, disconnect }
+}
+
+export const deleteRole = async (
+    roleId: string,
+    userId: string,
+    clientId?: string
+) => {
+    try {
+        if (!clientId) {
+            const ability = await canUser(userId, 'delete', 'Role', {})
+            if (ability.status === 200) {
+                await db.role.update({
+                    where: {
+                        id: roleId,
+                    },
+                    data: {
+                        deletedAt: new Date(),
+                    },
+                })
+                return json(
+                    Response({
+                        data: {
+                            message: 'Role successfuly Deleted',
+                        },
+                    }),
+                    { status: 200 }
+                )
+            } else return ability
+        } else {
+            const clientAbility = await canUser(userId, 'delete', 'Role', {
+                clientId: clientId,
+            })
+            if (clientAbility?.status == 200) {
+                await db.role.update({
+                    where: {
+                        id: roleId,
+                    },
+                    data: {
+                        deletedAt: new Date(),
+                    },
+                })
+                return json(
+                    Response({
+                        data: {
+                            message: 'Role successfuly Deleted',
+                        },
+                    }),
+                    { status: 200 }
+                )
+            } else {
+                return clientAbility
+            }
+        }
+    } catch (err) {
+        console.log('INSIDE CATCH', { err })
+        return errorHandler(err)
+    }
 }
