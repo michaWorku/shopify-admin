@@ -261,6 +261,74 @@ export default function systemPermissions() {
                 'With this permission the user can view sent Notifications',
             category: 'Notification',
         },
+        {
+            action: 'read',
+            subject: 'Reward',
+            conditions: { clientId: { $in: '${user.clientIds}' } },
+            fields: [],
+            name: 'View reward',
+            description: 'With this permission the client can view reward',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'DynamicForm',
+            conditions: {},
+            fields: [],
+            name: 'View form',
+            description: 'With this permission the client can view form',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'DynamicFormSubmission',
+            conditions: {},
+            fields: [],
+            name: 'View User form submisions',
+            description:
+                'With this permission the client can view user form submissions',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'Client',
+            conditions: {},
+            fields: [],
+            name: 'View this client',
+            description:
+                'With this permission the user can view the clients basic informations',
+            category: 'Client',
+        },
+        {
+            action: 'create',
+            subject: 'Client',
+            conditions: {},
+            fields: [],
+            name: 'create the client',
+            description:
+                'With this permission the user can create the clients basic informations',
+            category: 'Client',
+        },
+        {
+            action: 'update',
+            subject: 'Client',
+            conditions: {},
+            fields: [],
+            name: 'update the client',
+            description:
+                'With this permission the user can update the clients basic informations',
+            category: 'Client',
+        },
+        {
+            action: 'delete',
+            subject: 'Client',
+            conditions: {},
+            fields: [],
+            name: 'Delete the client',
+            description:
+                'With this permission the user can delete the clients basic informations',
+            category: 'Client',
+        },
     ]
     return systemPermissionsRepo
 }
