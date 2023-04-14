@@ -145,6 +145,13 @@
           "type": "string",
           "format": "date-time"
         },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
         "status": {
           "type": "string",
           "default": "ACTIVE",
@@ -219,6 +226,13 @@
           "type": "string",
           "format": "date-time"
         },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
         "status": {
           "type": "string",
           "default": "ACTIVE",
@@ -250,6 +264,21 @@
         },
         "user": {
           "$ref": "#/definitions/User"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
         }
       }
     },
@@ -267,6 +296,21 @@
         },
         "role": {
           "$ref": "#/definitions/Role"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
         }
       }
     },
@@ -276,7 +320,7 @@
         "userId": {
           "type": "string"
         },
-        "isRewareded": {
+        "isRewarded": {
           "type": "boolean",
           "default": false
         },
@@ -292,6 +336,21 @@
         },
         "user": {
           "$ref": "#/definitions/User"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
         }
       }
     },
@@ -380,6 +439,21 @@
         },
         "users": {
           "$ref": "#/definitions/User"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deletedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
         }
       }
     },

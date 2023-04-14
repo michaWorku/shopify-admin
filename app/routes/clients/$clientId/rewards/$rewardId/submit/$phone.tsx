@@ -31,10 +31,7 @@ import {
 } from "~/services/Reward/Reward.server";
 import { SubmissionForm } from "~/src/components/Forms/";
 import { requestFormHandler } from "~/utils/formHandler";
-import customErr, {
-  Response,
-  errorHandler,
-} from "~/utils/handler.server";
+import customErr, { Response, errorHandler } from "~/utils/handler.server";
 import { verifyOTP } from "~/services/otp.server";
 import { destroySession, getSession } from "~/services/session.server";
 import { SewasewLogo } from "public/assets";
@@ -336,7 +333,7 @@ const SubmitForm = () => {
             size="large"
             endIcon={<SendIcon />}
             loading={
-              fetcher.state === "submitting" || fetcher.state === "loading"
+              fetcher.state === "submitting" || navigation.state === "loading"
             }
             loadingPosition="end"
             variant="contained"
@@ -349,7 +346,7 @@ const SubmitForm = () => {
               background: "#601E1D",
             }}
           >
-            {!state.sendOTP && fetcher.state === "submitting"
+            {!state.sendOTP && navigation.state === "submitting"
               ? "Sending..."
               : "Send OTP"}
           </LoadingButton>
@@ -483,7 +480,7 @@ const SubmitForm = () => {
                 borderRadius: "8px",
                 margin: "0 2px",
               }}
-              inputFocusStyle={{ borderColor: "#4E0D0E" }}
+              // inputFocusStyle={{ borderColor: "#4E0D0E" }}
               ref={(p) => (pin = p)}
               onComplete={(value: string, index: number) => {
                 handleOTPCheck(value);
@@ -523,7 +520,7 @@ const SubmitForm = () => {
             endIcon={<SendIcon />}
             loading={
               state.sendOTP &&
-              (fetcher.state === "submitting" || fetcher.state === "loading")
+              (fetcher.state === "submitting" || navigation.state === "loading")
             }
             loadingPosition="end"
             variant="text"
@@ -548,7 +545,7 @@ const SubmitForm = () => {
             }}
           >
             {state.sendOTP &&
-            (fetcher.state === "submitting" || fetcher.state === "loading")
+            (fetcher.state === "submitting" || navigation.state === "loading")
               ? "Verifying"
               : "Verify"}
           </LoadingButton>
@@ -708,7 +705,25 @@ const SubmitForm = () => {
           justifyContent: "center",
         }}
       >
-        {state.sendOTP ? (
+        {!!loaderData?.data?.rewarded || !!fetcher?.data?.data?.rewarded ? (
+          <Box 
+            sx={{
+              position: "absolute" as "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "100%", sm: "70%" },
+              background: "#FFFFFF",
+              boxShadow: "0px 3px 6px #00000029",
+              borderRadius: "10px",
+              textAlign: "end",
+              color: "primary.main",
+              zIndex: 999,
+            }}
+          >
+            {Reward}
+          </Box>
+        ) : !state.sendOTP ? (
           SendOTP
         ) : !!loaderData?.data?.submit || !!fetcher?.data?.data?.submit ? (
           <Box
@@ -730,25 +745,8 @@ const SubmitForm = () => {
                   ? loaderData?.data
                   : fetcher?.data?.data?.data
               }
+              navigation={navigation}
             />
-          </Box>
-        ) : !!loaderData?.data?.rewarded || !!fetcher?.data?.data?.rewarded ? (
-          <Box
-            sx={{
-              position: "absolute" as "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: { xs: "100%", sm: "70%" },
-              background: "#FFFFFF",
-              boxShadow: "0px 3px 6px #00000029",
-              borderRadius: "10px",
-              textAlign: "end",
-              color: "primary.main",
-              zIndex: 999,
-            }}
-          >
-            {Reward}
           </Box>
         ) : (
           Verify

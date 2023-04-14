@@ -56,7 +56,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     const canCreate = (await canUser(
       user?.id,
       "create",
-      "DynamicFormField",
+      "DynamicForm",
       {}
     )) as any;
 

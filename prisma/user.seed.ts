@@ -18,7 +18,7 @@ async function main() {
             lastName: 'Admin',
             email: 'admin@sewasewmultimedia.com',
             gender: 'MALE',
-            phone: '0911111111',
+            phone: '251911111111',
             password: await hashPassword('password'),
             isVerified: true,
             status: 'ACTIVE',

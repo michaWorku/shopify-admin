@@ -167,7 +167,7 @@ const DynamicFormInput = ({
     case DynamicFormFieldType.RADIO:
       return (
         <Controller
-          name={field.name}
+          name={field?.name}
           control={control}
           rules={{ required: field.required }}
           defaultValue={submitedData[field?.name] || field.defaultValue || ""}
@@ -291,12 +291,14 @@ const DynamicFormInput = ({
  * @param {Object} props.actionData - Data related to the form submission action.
  * @param {Object} props.fetcher - An object for fetching data.
  * @param {Object} props.loaderData - Data related to loading the form.
+ * @params {Object} props.navigation - The route navigation data
  * @returns {JSX.Element} - The rendered component.
  */
 const SubmissionForm: React.FC<any> = ({
   actionData,
   fetcher,
   loaderData,
+  navigation,
 }) => {
   const {
     control,
@@ -356,7 +358,10 @@ const SubmissionForm: React.FC<any> = ({
                   control={control}
                   register={register}
                   errors={errors[field?.name]?.message}
-                  submitedData={fetcher?.data?.submitedData}
+                  submitedData={
+                    fetcher?.data?.submitedData ||
+                    fetcher?.data?.data?.submitedData
+                  }
                   actionData={
                     actionData?.error?.fieldError?.fieldErrors[field?.name]
                   }
@@ -369,13 +374,17 @@ const SubmissionForm: React.FC<any> = ({
           size="large"
           endIcon={<SendIcon sx={{ visibility: "hidden" }} />}
           loading={
-            fetcher.state === "submitting" || fetcher.state === "loading"
+            fetcher.state === "submitting" || navigation.state === "loading"
           }
           loadingPosition="end"
           type="submit"
           variant="add"
           {...register("submit")}
-          value={fetcher?.data?.data?.submissionId || "1"}
+          value={
+            !!fetcher?.data?.data?.submissionId
+              ? fetcher?.data?.data?.submissionId
+              : "1"
+          }
           sx={{
             my: 2,
             background: "#601E1D",
@@ -390,7 +399,7 @@ const SubmissionForm: React.FC<any> = ({
             },
           }}
         >
-          {fetcher.state === "submitting" || fetcher.state === "loading"
+          {fetcher.state === "submitting" || navigation.state === "loading"
             ? "Submitting..."
             : "Submit"}
         </LoadingButton>

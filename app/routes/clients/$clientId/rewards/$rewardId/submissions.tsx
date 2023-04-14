@@ -16,7 +16,7 @@ import DateFilter from "~/src/components/Table/DatePicker";
 import canUser from "~/utils/casl/ability";
 import { errorHandler } from "~/utils/handler.server";
 import { toast } from "react-toastify";
-import { getClientSubmissions, getRewardSubmissions } from "~/services/DynamicFormSubmission/DynamicFormSubmission.server";
+import { getRewardSubmissions } from "~/services/DynamicFormSubmission/DynamicFormSubmission.server";
 
 /**
  * Loader function to fetch submissions of a reward.

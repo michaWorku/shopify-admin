@@ -479,7 +479,7 @@ export const getClientUsers = async (
             deletedAt: null,
             clients: {
                 some: {
-                    isRewareded: true,
+                    isRewarded: true,
                     client: {
                         id: clientId,
                     },

@@ -1,7 +1,7 @@
 import { json } from "@remix-run/node";
 import customErr, { Response, errorHandler } from "~/utils/handler.server";
 import { db } from "../db.server";
-import { DynamicFormSubmission, PLAN, Prisma, Reward, Status } from "@prisma/client";
+import { Prisma, Status } from "@prisma/client";
 import getParams from "~/utils/params/getParams.server";
 import { searchFunction } from "~/utils/params/search.server";
 import { filterFunction } from "~/utils/params/filter.server";
@@ -142,7 +142,17 @@ import { rewardUser } from "../Reward/Reward.server";
             message: 'Submiting data in progress'
         })
     } catch (err) {
-        return errorHandler(err);
+        return json(Response({
+            error: {
+                error: {
+                    message: "Failed to submit data, Please try again!"
+                }
+            },
+            data: {
+                submitedData,
+                submit: true
+            }
+        }))
     }
 }
 
@@ -350,7 +360,7 @@ export const getRewardSubmissions = async (request: Request, rewardId: string): 
 export const handleDynamicFormSubmission = async (rewardId: string, clientId: string, submitedData: any, phone: string) => {
     try {
         // create dynamic form submission
-        const submission = await createDynamicFormSubmission(rewardId, clientId, submitedData, phone)
+        const submission = await createDynamicFormSubmission(rewardId, clientId, submitedData, phone) as any
         console.log({submission})
         if (submission?.data?.status === 'INPROGRESS' && !!submission?.data?.reward && !!submission.data?.submission) {
             // sewasew reward
@@ -364,7 +374,7 @@ export const handleDynamicFormSubmission = async (rewardId: string, clientId: st
             console.log({sewasewRewardResp})
             // reward user
             if (sewasewRewardResp?.status === 200 && !!sewasewRewardResp?.data?.ok) {
-                const reward = await rewardUser(submission?.data?.reward, submission?.data?.submission)
+                const reward = await rewardUser(submission?.data?.reward, submission?.data?.submission, submitedData)
                 console.log({userReward: reward})
                 return reward
             } else if (sewasewRewardResp?.status === 409) {
@@ -387,7 +397,7 @@ export const handleDynamicFormSubmission = async (rewardId: string, clientId: st
                         }
                     },
                     data: {
-                        rewareded: true
+                        rewarded: true
                     }
                 }))
             }

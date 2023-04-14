@@ -23,7 +23,7 @@ interface DynamicForm {
 */
 export const createForm = async (formData: DynamicForm, userId: string, clientId: string): Promise<any> => {
     try {
-        const canCreate = await canUser(userId, 'create', 'Form', {})
+        const canCreate = await canUser(userId, 'create', 'DynamicForm', {})
         if (canCreate?.status !== 200) {
             return canCreate
         }
@@ -274,7 +274,7 @@ export const updateDynamicFormField = async (
         );
     }
 
-    const canUpdate = await canUser(userId, "update", "DynamicFormField", {
+    const canUpdate = await canUser(userId, "update", "DynamicForm", {
         clientId,
     });
 
@@ -343,7 +343,7 @@ export const deleteDynamicFormField = async (
         throw new customErr('Custom_Error', 'Dynamic form field ID is required', 404);
     }
 
-    const canDelete = await canUser(userId, 'delete', 'DynamicFormField', {
+    const canDelete = await canUser(userId, 'delete', 'DynamicForm', {
         clientId,
     });
 
@@ -462,7 +462,7 @@ export const getDynamicForms = async (request: Request, userId: string, clientId
 const setDynamicFormPermissions = async (userId: string, dynamicForms: any[], clientId: string): Promise<void> => {
     const promises = dynamicForms.map(async (dynamicFormData: any, index: number) => {
         const canEdit = await canPerformAction(userId, 'update', 'DynamicForm', { clientId });
-        const canViewFormFields = await canPerformAction(userId, 'read', 'DynamicFormField', { clientId });
+        const canViewFormFields = await canPerformAction(userId, 'read', 'DynamicForm', { clientId });
         const canDelete = await canPerformAction(userId, 'delete', 'DynamicForm', { clientId });
         dynamicForms[index] = {
             ...dynamicFormData,
