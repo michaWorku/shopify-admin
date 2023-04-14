@@ -1,13 +1,7 @@
 import { json } from '@remix-run/node'
 import { db } from '../db.server'
 import customErr, { Response, errorHandler } from '~/utils/handler.server'
-import {
-    Client,
-    Permission,
-    Role,
-    RolePermission,
-    Status,
-} from '@prisma/client'
+import { Permission, Role, Status } from '@prisma/client'
 import getParams from '~/utils/params/getParams.server'
 import { searchCombinedColumn } from '~/utils/params/search.server'
 import { filterFunction } from '~/utils/params/filter.server'
@@ -61,7 +55,7 @@ export const createRole = async (userId: string, roleData: any) => {
         const canCreateRole = await canUser(userId, 'create', 'Role', {
             clientId: roleData.clientId,
         })
-        if (!canCreateRole) {
+        if (!canCreateRole?.ok) {
             return json(
                 Response({
                     error: {
@@ -126,7 +120,11 @@ export const getRoleById = async (roleId: string) => {
                 id: roleId,
             },
             include: {
-                permissions: true,
+                permissions: {
+                    include: {
+                        permission: true,
+                    },
+                },
             },
         })
 
@@ -251,10 +249,10 @@ export const getAllRoles = async (request: Request, userId: string) => {
         if (!userId) {
             throw new customErr('Custom_Error', 'User ID is required', 404)
         }
-        let id = {}
+        let userCreated = {}
         const able = await canUser(userId, 'manage', 'all', {})
         if (able?.status != 200) {
-            id = {
+            userCreated = {
                 createdBy: userId,
             }
         }
@@ -273,8 +271,15 @@ export const getAllRoles = async (request: Request, userId: string) => {
             where: {
                 ...searchParams,
                 ...filterParams,
-                ...id,
+                ...userCreated,
                 deletedAt: null,
+                users: {
+                    every: {
+                        userId: {
+                            not: userId,
+                        },
+                    },
+                },
             },
         })
         if (!!roleCount) {
@@ -287,10 +292,17 @@ export const getAllRoles = async (request: Request, userId: string) => {
                     },
                 ],
                 where: {
-                    ...id,
+                    ...userCreated,
                     ...searchParams,
                     ...filterParams,
                     deletedAt: null,
+                    users: {
+                        every: {
+                            userId: {
+                                not: userId,
+                            },
+                        },
+                    },
                 },
             })
             roles?.map((e: any) => {
@@ -310,8 +322,6 @@ export const getAllRoles = async (request: Request, userId: string) => {
         }
         throw new customErr('Custom_Error', 'Role not found', 404)
     } catch (err) {
-        console.error('Error occurred getting all roles')
-        console.dir(err, { depth: null })
         return errorHandler(err)
     }
 }
@@ -406,7 +416,6 @@ export const updateRolePermissions = async (
             }
         )
     } catch (error) {
-        console.log(error)
         return errorHandler(error)
     }
 }
@@ -430,7 +439,6 @@ export const updateRoleStatus = async (roleId: string, status: Status) => {
             }
         )
     } catch (error) {
-        console.log(error)
         return errorHandler(error)
     }
 }
@@ -460,9 +468,8 @@ export const editRole = async (userId: string, roleId: string, data: any) => {
             updatedRole = await updateRoleStatus(roleId, data?.status)
         } else {
             const { rolePermissions } = await getRolePermissions(userId, roleId)
-            let filtered = rolePermissions?.filter((e: any) => e.selected)
-            console.log({ filtered, old: data?.permissions })
-
+            let filtered = rolePermissions?.filter((e: any) => e?.selected)
+            console.log({ filtered })
             const { connect, disconnect } = permissionChange(
                 filtered,
                 data?.permissions
@@ -495,11 +502,11 @@ export const editRole = async (userId: string, roleId: string, data: any) => {
  * @returns {object} An object with the permissions to connect and disconnect.
  */
 export const permissionChange = (oldRoles: string[], newRoles: string[]) => {
-    // const oldPermissionIds = oldRoles.map(permission => permission.id)
+    const oldPermissionIds = oldRoles.map((permission) => permission?.id)
 
-    const disconnect = oldRoles.filter((id) => !newRoles.includes(id))
+    const disconnect = oldPermissionIds.filter((id) => !newRoles.includes(id))
 
-    const connect = newRoles.filter((id) => !oldRoles.includes(id))
+    const connect = newRoles.filter((id) => !oldPermissionIds.includes(id))
 
     return { connect, disconnect }
 }
@@ -518,9 +525,8 @@ export async function getRolePermissions(userId: string, roleId: string) {
     try {
         const role = await getRoleById(roleId)
         const userAllPermissions = await allUserPermissions(userId)
-
         const rolePermissionIds = role?.permissions?.map(
-            (p: any) => p.permissionId
+            (p: any) => p.permission?.id || p?.permissionId
         )
         const rolePermissions = userAllPermissions.map((p: any) => {
             if (rolePermissionIds.includes(p.id)) {
@@ -538,11 +544,12 @@ export async function getRoleClientPermissions(userId: string, roleId: string) {
     try {
         const role = await getRoleById(roleId)
         const userAllPermissions = await allUserPermissions(userId, 'client')
-        const rolePermissionIds = role.permissions.map(
-            (p: any) => p.permission.id
+        const rolePermissionIds = role?.permissions?.map(
+            (p: any) => p?.permission?.id || p?.permissionId
         )
+
         const rolePermissions = userAllPermissions.map((p: any) => {
-            if (rolePermissionIds.includes(p.id)) {
+            if (rolePermissionIds?.some((e: any) => e === p.id)) {
                 p.selected = true
             }
             return p
@@ -557,20 +564,20 @@ export async function getRoleSystemPermissions(userId: string, roleId: string) {
         const role = await getRoleById(roleId)
         const userAllPermissions = await allUserPermissions(userId, 'system')
 
-        const rolePermissionIds = role.permissions.map(
-            (p: any) => p.permission.id
+        const rolePermissionIds = role?.permissions.map(
+            (p: any) => p.permission?.id
         )
         const rolePermissions = userAllPermissions.map((p: any) => {
             if (
-                rolePermissionIds.includes(p.id) &&
+                rolePermissionIds?.includes(p.id) &&
                 !Object.keys(p.conditions).length
             ) {
                 p.selected = true
             }
+            return p
         })
         return { role, rolePermissions }
     } catch (err) {
-        console.log({ err })
         return errorHandler(err)
     }
 }
@@ -758,7 +765,6 @@ export const deleteRole = async (
             }
         }
     } catch (err) {
-        console.log('INSIDE CATCH', { err })
         return errorHandler(err)
     }
 }
