@@ -1,39 +1,33 @@
-import {
-    Outlet,
-    useActionData,
-    useFetcher,
-    useLoaderData,
-    useLocation,
-    useNavigate,
-    useNavigation,
-} from '@remix-run/react'
-import { MRT_ColumnDef } from 'material-react-table'
-import { useEffect, useMemo, useState } from 'react'
-import { User, Gender, Status } from '@prisma/client'
-import {
-    CustomizedTable,
-    RowActions,
-    StatusUpdate,
-} from '~/src/components/Table'
-import moment from 'moment'
-import DateFilter from '~/src/components/Table/DatePicker'
-import { Box, Button, Card, Modal, Slide } from '@mui/material'
-import FilterModes from '~/src/components/Table/CustomFilter'
+import { useActionData, useNavigate } from '@remix-run/react'
+import { useEffect } from 'react'
 import { LoaderFunction, ActionFunction, json } from '@remix-run/server-runtime'
 import { authenticator } from '~/services/auth.server'
-import {
-    createSystemUser,
-    getSystemUsers,
-} from '~/services/User/systemuser.server'
+import { createSystemUser } from '~/services/User/systemuser.server'
 import { Response, errorHandler } from '~/utils/handler.server'
 import AddUserForm from '~/src/components/Forms/AddUserForm'
-import { getUserCreatedRole } from '~/services/Role/role.server'
-import canUser, { AbilityType } from '~/utils/casl/ability'
 import { validate } from '~/utils/validators/validate'
 import { systemUserSchema } from '~/utils/schema/systemUserSchema'
 import { toast } from 'react-toastify'
-import { DeleteAlert } from '~/src/components'
-import { DeleteDialogType } from '~/src/components/DeleteAlert'
+import { getUserById } from '~/services/User/users.server'
+import { getUserCreatedRole } from '~/services/Role/role.server'
+
+export const loader: LoaderFunction = async ({ request, params }) => {
+    try {
+        const user = await authenticator.isAuthenticated(request, {
+            failureRedirect: '/login',
+        })
+        const userData = (await getUserById(user?.id)) as any
+        const { roles } = await getUserCreatedRole(user?.id)
+        userData.userRoles = roles
+        return json(
+            Response({
+                data: userData,
+            })
+        )
+    } catch (err) {
+        return errorHandler(err)
+    }
+}
 
 export const action: ActionFunction = async ({ request, params }) => {
     // Authenticate the user
@@ -76,18 +70,15 @@ export const action: ActionFunction = async ({ request, params }) => {
 }
 export default function Users() {
     const actionData = useActionData<typeof action>()
-    const [loading, setLoading] = useState(false)
-    const [openModal, setOpenModal] = useState(false)
     const navigate = useNavigate()
 
     useEffect(() => {
         if (actionData?.data?.message) {
             toast.success(actionData?.data?.message)
-            setOpenModal(false)
+            navigate(-1)
         }
         if (actionData?.error) {
             toast.error(actionData?.error?.error?.message)
-            setLoading(false)
         }
     }, [actionData])
 
