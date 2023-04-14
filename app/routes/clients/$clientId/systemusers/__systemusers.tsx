@@ -20,7 +20,12 @@ import moment from 'moment'
 import DateFilter from '~/src/components/Table/DatePicker'
 import { Box, Button, Card, Modal, Slide } from '@mui/material'
 import FilterModes from '~/src/components/Table/CustomFilter'
-import { LoaderFunction, ActionFunction, json } from '@remix-run/server-runtime'
+import {
+    LoaderFunction,
+    ActionFunction,
+    json,
+    redirect,
+} from '@remix-run/server-runtime'
 import { authenticator } from '~/services/auth.server'
 import {
     createSystemUser,
@@ -199,7 +204,7 @@ const SystemUsers = () => {
                         row={row}
                         page="system users"
                         handleEdit={() => handleEdit(row?.original?.id)}
-                        deleteCol={false}
+                        deleteCol={true}
                         handleDelete={handleDelete}
                     />
                 ),
@@ -226,10 +231,11 @@ const SystemUsers = () => {
                 columns={columns}
                 data={loaderData}
                 page="System Users"
+                exportFileName="SystemUsers"
+                enableExport={true}
                 loading={
                     loading || navigation.state === 'loading' ? true : false
                 }
-                enableExport={true}
                 customAction={(table: any) => (
                     <Button variant="add" onClick={handleOpenModal}>
                         Add User
@@ -241,6 +247,7 @@ const SystemUsers = () => {
                 setDeleteDialog={setDeleteDialog}
                 fetcher={fetcher}
             />
+            <Outlet />
         </Box>
     )
 }
