@@ -21,24 +21,13 @@ import {
     Tooltip,
 } from '@mui/material'
 import { Response, errorHandler } from '~/utils/handler.server'
-import {
-    useCatch,
-    useNavigate,
-    useNavigation,
-    useSearchParams,
-} from '@remix-run/react'
+import { useNavigate, useNavigation, useSearchParams } from '@remix-run/react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CloseIcon from '@mui/icons-material/Close'
 import type { ActionFunction, LoaderFunction } from '@remix-run/node'
-import { json, redirect } from '@remix-run/node'
+import { json } from '@remix-run/node'
 import { useEffect, useRef, useState } from 'react'
-import {
-    Form,
-    useActionData,
-    useSubmit,
-    useLoaderData,
-    useTransition,
-} from '@remix-run/react'
+import { Form, useActionData, useSubmit, useLoaderData } from '@remix-run/react'
 
 import { validate } from '~/utils/validators/validate'
 
@@ -273,11 +262,17 @@ export default function PagePage() {
             }
             if (loaderData?.data?.clientPermissions) {
                 setClientPermissions(loaderData?.data?.clientPermissions)
-                setSelectedPermissions(
-                    loaderData?.data?.clientPermissions?.filter(
-                        (e: any) => e.selected
-                    )
-                )
+                let newPermission = selectedPermissions
+                loaderData?.data?.clientPermissions.map((e: any) => {
+                    if (
+                        e.selected &&
+                        !selectedPermissions?.filter((item) => item.id === e.id)
+                            .length
+                    ) {
+                        newPermission?.push(e)
+                    }
+                })
+                setSelectedPermissions(newPermission)
             }
             if (loaderData?.data?.systemPermissions) {
                 setSystemPermissions(loaderData?.data?.systemPermissions)
@@ -332,7 +327,6 @@ export default function PagePage() {
         })
     }
     const categorizePermissions = (rawPermissions: []) => {
-        console.log({ rawPermissions })
         const permissions = rawPermissions?.reduce(function (
             permissions: any,
             permission: any
