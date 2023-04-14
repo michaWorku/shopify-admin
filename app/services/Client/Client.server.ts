@@ -7,12 +7,11 @@ import customErr, {
     errorHandler,
 } from '~/utils/handler.server'
 import { db } from '../db.server'
-import clientPermissions from '~/utils/permissionRepo/clientPermissions'
-import interpolate from '~/utils/casl/interpolate'
 import getParams from '~/utils/params/getParams.server'
 import { filterFunction } from '~/utils/params/filter.server'
 import { searchFunction } from '~/utils/params/search.server'
 import { canPerformAction } from '~/utils/casl/canPerformAction'
+import { getAllEntityPermissions } from '../Role/Permissions/permission.server'
 
 /**
  * Creates a new client with the provided data.
@@ -36,25 +35,19 @@ export const createClient = async (
                 const newClient = await tx.client.create({
                     data: clientData,
                 })
-
-                const clientId = newClient?.id
-                const clientPermission = clientPermissions()
-                const parsedPermissions = interpolate(
-                    JSON.stringify(clientPermission),
-                    {
-                        clientId,
-                    }
-                )
+                const clientPermission = await getAllEntityPermissions()
 
                 await tx.role.create({
                     data: {
                         name: `${newClient?.name}`,
                         permissions: {
-                            create: parsedPermissions.map(
+                            create: clientPermission?.data?.map(
                                 (item: Partial<Permission>) => {
                                     return {
                                         permission: {
-                                            create: item,
+                                            connect: {
+                                                id: item?.id,
+                                            },
                                         },
                                     }
                                 }
