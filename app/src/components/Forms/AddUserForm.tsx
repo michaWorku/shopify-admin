@@ -419,7 +419,7 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                                             handleRoleChange(event, newValue)
                                         }
                                         filterSelectedOptions
-                                        options={data?.data?.roles || []}
+                                        options={data?.data?.userRoles || []}
                                         getOptionLabel={(option: any) =>
                                             option?.name
                                         }
@@ -465,7 +465,7 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                             >
                                 <Button
                                     type="submit"
-                                    variant="contained"
+                                    variant="add"
                                     color="success"
                                 >
                                     {transition.formAction ? (
