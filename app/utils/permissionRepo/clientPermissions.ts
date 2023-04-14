@@ -3,7 +3,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'User',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Create client user',
             description:
@@ -13,7 +13,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'User',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'View client users',
             description:
@@ -23,7 +23,7 @@ export default function clientPermissions() {
         {
             action: 'update',
             subject: 'User',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Edit client users',
             description:
@@ -33,7 +33,7 @@ export default function clientPermissions() {
         {
             action: 'delete',
             subject: 'User',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Delete client users',
             description:
@@ -42,78 +42,71 @@ export default function clientPermissions() {
         },
         {
             action: 'create',
-            subject: 'Form',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            subject: 'DynamicForm',
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Create form',
-            description:
-                'With this permission the client can create form',
+            description: 'With this permission the client can create form',
             category: 'Client',
         },
         {
             action: 'read',
-            subject: 'Form',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            subject: 'DynamicForm',
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'View form',
-            description:
-                'With this permission the client can view form',
+            description: 'With this permission the client can view form',
             category: 'Client',
         },
         {
             action: 'update',
-            subject: 'Form',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            subject: 'DynamicForm',
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Update form',
-            description:
-                'With this permission the client can update form',
+            description: 'With this permission the client can update form',
             category: 'Client',
         },
         {
             action: 'create',
             subject: 'Reward',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Create reward',
-            description:
-                'With this permission the client can create reward',
+            description: 'With this permission the client can create reward',
             category: 'Client',
         },
         {
             action: 'create',
             subject: 'Reward',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Create reward',
-            description:
-                'With this permission the client can create reward',
+            description: 'With this permission the client can create reward',
             category: 'Client',
         },
         {
             action: 'read',
             subject: 'Reward',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'View reward',
-            description:
-                'With this permission the client can view reward',
+            description: 'With this permission the client can view reward',
             category: 'Client',
         },
         {
             action: 'update',
             subject: 'Reward',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Update reward',
-            description:
-                'With this permission the client can update reward',
+            description: 'With this permission the client can update reward',
             category: 'Client',
         },
         {
             action: 'read',
-            subject: 'Submission',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            subject: 'DynamicFormSubmission',
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'View User form submisions',
             description:
@@ -123,7 +116,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'Role',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Create client role',
             description:
@@ -133,7 +126,7 @@ export default function clientPermissions() {
         {
             action: 'update',
             subject: 'Role',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Edit client role ',
             description:
@@ -143,7 +136,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Payment',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'View client payments',
             description:
@@ -153,7 +146,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Client',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'View this client',
             description:
@@ -163,7 +156,7 @@ export default function clientPermissions() {
         {
             action: 'create',
             subject: 'UsageReport',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: "Create client's usage report",
             description:
@@ -173,7 +166,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'UsageReport',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: "View client's Usage Report",
             description:
@@ -183,7 +176,7 @@ export default function clientPermissions() {
         {
             action: 'request',
             subject: 'Invoice',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: 'Requset client invoice',
             description:
@@ -193,7 +186,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Invoice',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: "View client's invoice",
             description:
@@ -203,7 +196,7 @@ export default function clientPermissions() {
         {
             action: 'read',
             subject: 'Notification',
-            conditions: {"clientId":{"$in":"${user.clientIds}"}},
+            conditions: { clientId: { $in: '${user.clientIds}' } },
             fields: [],
             name: "View client's Notifications",
             description:
