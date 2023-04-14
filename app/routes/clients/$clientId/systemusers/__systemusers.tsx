@@ -115,15 +115,15 @@ const SystemUsers = () => {
         navigate(`${row}`)
     }
     useEffect(() => {
-        if (actionData?.data?.message) {
-            toast.success(actionData?.data?.message)
+        if (!!fetcher?.data?.error?.error?.message) {
+            toast.error(fetcher?.data?.error?.error?.message)
+        }
+        if (!!fetcher?.data?.message) {
+            toast.success(fetcher?.data?.message)
             setOpenModal(false)
+            setDeleteDialog(DefaultDialogInfo)
         }
-        if (actionData?.error) {
-            toast.error(actionData?.error?.error?.message)
-            setLoading(false)
-        }
-    }, [actionData])
+    }, [fetcher?.data])
 
     const columns = useMemo<MRT_ColumnDef<User>[]>(
         () => [
@@ -210,13 +210,13 @@ const SystemUsers = () => {
     const handleOpenModal = () => {
         navigate('addNew')
     }
-    const handleDelete = (clientId: any) => {
+    const handleDelete = (userId: any) => {
         setDeleteDialog({
             open: true,
-            id: clientId,
-            title: 'Remove a Client',
-            contentText: 'Are you sure you want to remove this client?',
-            action: `systemusers/${clientId}`,
+            id: userId,
+            title: 'Remove a System User',
+            contentText: 'Are you sure you want to remove this System User?',
+            action: `systemusers/${userId}`,
         })
     }
 
