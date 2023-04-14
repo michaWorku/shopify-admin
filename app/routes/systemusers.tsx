@@ -43,13 +43,6 @@ export const loader: LoaderFunction = async ({ request }) => {
         const user = await authenticator.isAuthenticated(request, {
             failureRedirect: '/login',
         })
-
-        // // Get the user's session
-        const session = await getSession(request.headers.get('Cookie'))
-
-        // // Get the message from the session, if any
-        const message = session.get('message') || null
-        session.unset('message')
         let canCreate: any
         const clients = (await getUserEntities(user?.id)) as any
         const systemUsers = await getSystemUsers(
@@ -227,7 +220,7 @@ const SystemUsers = () => {
                         row={row}
                         page="system users"
                         handleEdit={() => handleEdit(row?.original?.id)}
-                        deleteCol={false}
+                        deleteCol={true}
                         handleDelete={handleDelete}
                     />
                 ),
