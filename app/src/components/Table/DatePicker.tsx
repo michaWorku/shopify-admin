@@ -1,23 +1,23 @@
-import { Clear, FilterList, InsertInvitation } from "@mui/icons-material";
+import { Clear, FilterList, InsertInvitation } from '@mui/icons-material'
 import {
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  TextField,
-  Tooltip,
-} from "@mui/material";
-import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { useRef, useState } from "react";
+    Box,
+    IconButton,
+    Menu,
+    MenuItem,
+    TextField,
+    Tooltip,
+} from '@mui/material'
+import { DesktopDatePicker } from '@mui/x-date-pickers'
+import { useRef, useState } from 'react'
 
 interface DatePickProps {
-  table: any;
-  column: any;
-  columnFilterFns: Record<string, string>;
-  openDate: boolean;
-  setOpenDate: React.Dispatch<React.SetStateAction<boolean>>;
-  setChildren: React.Dispatch<React.SetStateAction<null>>;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    table: any
+    column: any
+    columnFilterFns: Record<string, string>
+    openDate: boolean
+    setOpenDate: React.Dispatch<React.SetStateAction<boolean>>
+    setChildren: React.Dispatch<React.SetStateAction<null>>
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 /**
  * Date picker component.
@@ -32,85 +32,94 @@ interface DatePickProps {
  * @returns {JSX.Element} Date picker component.
  */
 export const DatePick = ({
-  table,
-  column,
-  columnFilterFns,
-  openDate,
-  setOpenDate,
-  setChildren,
-  setOpen,
+    table,
+    column,
+    columnFilterFns,
+    openDate,
+    setOpenDate,
+    setChildren,
+    setOpen,
 }: DatePickProps): JSX.Element => (
-  <DesktopDatePicker
-    value={column.getFilterValue()}
-    onChange={(date) => column.setFilterValue(date)}
-    open={openDate}
-    onClose={() => setOpenDate(false)}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        size="small"
-        variant="standard"
-        helperText={`Filter Mode: ${columnFilterFns[column.id]}`}
-        InputProps={{
-          startAdornment: (
-            <IconButton
-              size="small"
-              onClick={() => {
-                setChildren(
-                  column.columnDef.renderColumnFilterModeMenuItems({
-                    column,
-                    onSelectFilterMode: (filterMode: any) => {
-                      table.setColumnFilterFns({
-                        ...columnFilterFns,
-                        [column.id]: filterMode,
-                      });
-                      setOpen(false);
-                    },
-                  })
-                );
-                setOpen(true);
-              }}
-              sx={{
-                "&:hover": {
-                  cursor: "pointer",
-                },
-              }}
-            >
-              <FilterList />
-            </IconButton>
-          ),
+    <DesktopDatePicker
+        value={column.getFilterValue()}
+        onChange={(date: any) => column.setFilterValue(date)}
+        open={openDate}
+        onClose={() => setOpenDate(false)}
+        //@ts-ignore
+        renderInput={(params) => (
+            <TextField
+                {...params}
+                size="small"
+                variant="standard"
+                helperText={`Filter Mode: ${columnFilterFns[column.id]}`}
+                InputProps={{
+                    startAdornment: (
+                        <IconButton
+                            size="small"
+                            onClick={() => {
+                                setChildren(
+                                    column.columnDef.renderColumnFilterModeMenuItems(
+                                        {
+                                            column,
+                                            onSelectFilterMode: (
+                                                filterMode: any
+                                            ) => {
+                                                table.setColumnFilterFns({
+                                                    ...columnFilterFns,
+                                                    [column.id]: filterMode,
+                                                })
+                                                setOpen(false)
+                                            },
+                                        }
+                                    )
+                                )
+                                setOpen(true)
+                            }}
+                            sx={{
+                                '&:hover': {
+                                    cursor: 'pointer',
+                                },
+                            }}
+                        >
+                            <FilterList />
+                        </IconButton>
+                    ),
 
-          endAdornment: (
-            <Box sx={{ display: "flex" }}>
-              <Tooltip arrow placement="bottom" title="Pick date">
-                <IconButton
-                  onClick={() => setOpenDate(!openDate)}
-                  sx={{
-                    m: 0,
-                    p: 0,
-                    "&:hover": {
-                      cursor: "pointer",
-                    },
-                  }}
-                >
-                  <InsertInvitation />
-                </IconButton>
-              </Tooltip>
-              <Tooltip arrow placement="right" title="Clear filter">
-                <IconButton
-                  onClick={() => column.setFilterValue(null)}
-                  sx={{ m: 0, p: 0 }}
-                >
-                  <Clear />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          ),
-        }}
-      />
-    )}
-  />
-);
+                    endAdornment: (
+                        <Box sx={{ display: 'flex' }}>
+                            <Tooltip arrow placement="bottom" title="Pick date">
+                                <IconButton
+                                    onClick={() => setOpenDate(!openDate)}
+                                    sx={{
+                                        m: 0,
+                                        p: 0,
+                                        '&:hover': {
+                                            cursor: 'pointer',
+                                        },
+                                    }}
+                                >
+                                    <InsertInvitation />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip
+                                arrow
+                                placement="right"
+                                title="Clear filter"
+                            >
+                                <IconButton
+                                    onClick={() => column.setFilterValue(null)}
+                                    sx={{ m: 0, p: 0 }}
+                                >
+                                    <Clear />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                    ),
+                }}
+            />
+        )}
+    />
+)
 
 /**
  * Component DateFilter
@@ -122,27 +131,31 @@ export const DatePick = ({
  * @returns {JSX.Element} The DateFilter component.
  */
 const DateFilter = ({ table, column }: any): JSX.Element => {
-  const { columnFilterFns } = table.getState();
-  const [openDate, setOpenDate] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [children, setChildren] = useState(null);
-  const ref = useRef();
-  return (
-    <Box ref={ref} sx={{ display: "flex", alignItems: "center" }}>
-      <Menu anchorEl={ref.current} open={open} onClose={() => setOpen(false)}>
-        {children}
-      </Menu>
-      <DatePick
-        table={table}
-        column={column}
-        columnFilterFns={columnFilterFns}
-        openDate={openDate}
-        setOpenDate={setOpenDate}
-        setChildren={setChildren}
-        setOpen={setOpen}
-      />
-    </Box>
-  );
-};
+    const { columnFilterFns } = table.getState()
+    const [openDate, setOpenDate] = useState(false)
+    const [open, setOpen] = useState(false)
+    const [children, setChildren] = useState(null)
+    const ref = useRef()
+    return (
+        <Box ref={ref} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Menu
+                anchorEl={ref.current}
+                open={open}
+                onClose={() => setOpen(false)}
+            >
+                {children}
+            </Menu>
+            <DatePick
+                table={table}
+                column={column}
+                columnFilterFns={columnFilterFns}
+                openDate={openDate}
+                setOpenDate={setOpenDate}
+                setChildren={setChildren}
+                setOpen={setOpen}
+            />
+        </Box>
+    )
+}
 
-export default DateFilter;
+export default DateFilter

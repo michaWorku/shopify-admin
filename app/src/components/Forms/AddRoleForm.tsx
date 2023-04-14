@@ -2,7 +2,6 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
-    Autocomplete,
     Box,
     Button,
     Checkbox,
@@ -18,13 +17,7 @@ import {
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import {
-    Form,
-    useActionData,
-    useLoaderData,
-    useSubmit,
-    useTransition,
-} from '@remix-run/react'
+import { Form, useSubmit, useTransition } from '@remix-run/react'
 import { useEffect, useState } from 'react'
 
 export default function AddRoleForm({
@@ -43,7 +36,7 @@ export default function AddRoleForm({
     const [name, setName] = useState('')
     const [permissionIds, setPermissionIds] = useState([]) as any
 
-    const systemPermission = loaderData?.data?.entities?.departments?.data
+    const systemPermission = loaderData?.data?.systemPermissions?.data
     const clients = loaderData?.data?.entities?.clients?.entities?.data
     const entityPermissions =
         loaderData?.data?.entities?.clients?.entityPermissions.data
@@ -83,8 +76,6 @@ export default function AddRoleForm({
     if (entityPermissions) {
         clientPermissions = categorizePermissions(entityPermissions)
     }
-
-    console.log({ clientPermissions, entityPermissions, permissionIds })
 
     return (
         <Form>
@@ -132,16 +123,16 @@ export default function AddRoleForm({
                                 onChange={(e) => setName(e.target.value)}
                                 helperText={
                                     actionData?.error?.fieldError &&
-                                    actionData?.error?.fieldError[0].fieldErrors
-                                        ?.name
+                                    actionData?.error?.fieldError[0]
+                                        ?.fieldErrors?.name
                                         ? actionData?.error?.fieldError[0]
                                               .fieldErrors?.name[0]
                                         : undefined
                                 }
                                 error={
                                     actionData?.error?.fieldError &&
-                                    actionData?.error?.fieldError[0].fieldErrors
-                                        .name
+                                    actionData?.error?.fieldError[0]
+                                        ?.fieldErrors.name
                                 }
                             />
                             <Box

@@ -18,25 +18,30 @@ import { Status } from '@prisma/client'
 import type { Role } from '@prisma/client'
 import { toast } from 'react-toastify'
 import { useMemo } from 'react'
-import { Response, errorHandler } from '~/utils/handler.server'
+import { Response, errorHandler } from '../utils/handler.server'
 import moment from 'moment'
-import { CustomizedTable } from '~/src/components/Table'
-import AddRoleForm from '~/src/components/Forms/AddRoleForm'
-import { authenticator } from '~/services/auth.server'
-import { commitSession, getSession } from '~/services/session.server'
-import { createRole, getAllRoles } from '~/services/Role/role.server'
-import { getSystemPermissions } from '~/services/Role/Permissions/permission.server'
+import { CustomizedTable } from '../src/components/Table'
+import AddRoleForm from '../src/components/Forms/AddRoleForm'
+import { authenticator } from '../services/auth.server'
+import { commitSession, getSession } from '../services/session.server'
+import { createRole, getAllRoles } from '../services/Role/role.server'
+import { getSystemPermissions } from '../services/Role/Permissions/permission.server'
 
-import canUser, { AbilityType } from '~/utils/casl/ability'
-import { validate } from '~/utils/validators/validate'
-import { roleSchema } from '~/utils/schema/roleSchema'
-import FilterModes from '~/src/components/Table/CustomFilter'
-import DateFilter from '~/src/components/Table/DatePicker'
-import StatusUpdate from '~/src/components/Table/StatusUpdate'
-import RowActions from '~/src/components/Table/RowActions'
-import { getEntities } from '~/services/Entities/entity.server'
-import { DeleteAlert } from '~/src/components'
-import { DeleteDialogType } from '~/src/components/DeleteAlert'
+import canUser, { AbilityType } from '../utils/casl/ability'
+import { validate } from '../utils/validators/validate'
+import { roleSchema } from '../utils/schema/roleSchema'
+import FilterModes from '../src/components/Table/CustomFilter'
+// import {DateFilter} from '../src/components/Table/DatePicker'
+import StatusUpdate from '../src/components/Table/StatusUpdate'
+import RowActions from '../src/components/Table/RowActions'
+import {
+    getEntities,
+    getUserEntities,
+} from '../services/Entities/entity.server'
+import { DeleteAlert } from '../src/components'
+import { DeleteDialogType } from '../src/components/DeleteAlert'
+import DateFilter from '../src/components/Table/DatePicker'
+import React from 'react'
 
 /**
  * Loader function to fetch role and permisions.
@@ -65,7 +70,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
         // Get all clients for the user
         const clients = await getEntities(user.id)
-
         // Check if the user can create a new role
         const able = (await canUser(
             user.id,
@@ -74,7 +78,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
             {},
             AbilityType.BOTH
         )) as any
-
+        console.log({ able })
         let systemPermissions
         if (systemPermission?.data) {
             systemPermissions = systemPermission?.data
@@ -117,11 +121,26 @@ export const action: ActionFunction = async ({ request }) => {
         const fields = Object.fromEntries(formData) as any
         const permissions: any = fields?.permissions
         fields.permissions = JSON.parse(permissions)
-        const { success } = await validate(fields, roleSchema)
+        const { success, data, fieldErrors } = await validate(
+            fields,
+            roleSchema
+        )
+        console.log({ data, success })
         if (success) {
-            const role = await createRole(user.id, fields)
+            const clients = (await getUserEntities(user?.id)) as any
+            data.clientId = clients?.data?.id
+            const role = await createRole(user.id, data)
             return role
         }
+
+        return json(
+            Response({
+                error: {
+                    error: { message: 'Validation error' },
+                },
+            }),
+            { status: 422 }
+        )
     } catch (error: any) {
         if (!error?.success) {
             return json(
@@ -287,8 +306,8 @@ export default function ViewRole() {
                 }
                 customAction={(table: any) => (
                     <Button
-                        variant="add"
                         onClick={handleOpenModal}
+                        variant="contained"
                         // sx={{ color: "#FFF", px: 2, py: 0.5 }}
                     >
                         Add Role
