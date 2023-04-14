@@ -100,7 +100,9 @@ const getAllSystemUsers = async (request: any, userId: string) => {
                         permissions: {
                             some: {
                                 permission: {
-                                    conditions: {},
+                                    conditions: {
+                                        equals: {},
+                                    },
                                 },
                             },
                         },
