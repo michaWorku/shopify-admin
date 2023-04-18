@@ -16,6 +16,7 @@ export const roleSchema = z.object({
     .string()
     .trim()
     .min(1, { message: 'Role name is required' })
-    .min(3, { message: 'Role name is too short' }),
-  permissions: z.array(z.string().trim().uuid()),
+    .min(3, { message: 'Role name is too short' }).optional(),
+  permissions: z.array(z.string().trim().uuid()).optional(),
+  status: z.string().trim().min(1).optional()
 });

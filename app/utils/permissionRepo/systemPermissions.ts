@@ -11,6 +11,16 @@ export default function systemPermissions() {
             category: 'User',
         },
         {
+            action: 'create',
+            subject: 'SystemUser',
+            conditions: {},
+            fields: [],
+            name: 'Create System User',
+            description:
+                'With this permission the user can create users for the system',
+            category: 'User',
+        },
+        {
             action: 'read',
             subject: 'User',
             conditions: {},
@@ -26,6 +36,16 @@ export default function systemPermissions() {
             conditions: { edit_full: false },
             fields: [],
             name: 'edit Users',
+            description:
+                "With this permission the user can edit all users who doesm't have the same edit user permission",
+            category: 'User',
+        },
+        {
+            action: 'update',
+            subject: 'SystemUser',
+            conditions: { edit_full: false },
+            fields: [],
+            name: 'edit System Users',
             description:
                 "With this permission the user can edit all users who doesm't have the same edit user permission",
             category: 'User',
@@ -111,8 +131,7 @@ export default function systemPermissions() {
             conditions: {},
             fields: [],
             name: 'Create Bulk Task',
-            description:
-                'With this permission the user can create Bulk Taks',
+            description: 'With this permission the user can create Bulk Taks',
             category: 'BulkTask',
         },
         {
@@ -131,8 +150,7 @@ export default function systemPermissions() {
             conditions: {},
             fields: [],
             name: 'Edit Bulk Task',
-            description:
-                "With this permission the user can edit Bulk Task",
+            description: 'With this permission the user can edit Bulk Task',
             category: 'BulkTask',
         },
         {
@@ -141,8 +159,7 @@ export default function systemPermissions() {
             conditions: {},
             fields: [],
             name: 'Delete Bulk Task',
-            description:
-                'With this permission the user can create Bulk Task',
+            description: 'With this permission the user can create Bulk Task',
             category: 'BulkTask',
         },
         {
@@ -243,6 +260,74 @@ export default function systemPermissions() {
             description:
                 'With this permission the user can view sent Notifications',
             category: 'Notification',
+        },
+        {
+            action: 'read',
+            subject: 'Reward',
+            conditions: { clientId: { $in: '${user.clientIds}' } },
+            fields: [],
+            name: 'View reward',
+            description: 'With this permission the client can view reward',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'DynamicForm',
+            conditions: {},
+            fields: [],
+            name: 'View form',
+            description: 'With this permission the client can view form',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'DynamicFormSubmission',
+            conditions: {},
+            fields: [],
+            name: 'View User form submisions',
+            description:
+                'With this permission the client can view user form submissions',
+            category: 'Client',
+        },
+        {
+            action: 'read',
+            subject: 'Client',
+            conditions: {},
+            fields: [],
+            name: 'View this client',
+            description:
+                'With this permission the user can view the clients basic informations',
+            category: 'Client',
+        },
+        {
+            action: 'create',
+            subject: 'Client',
+            conditions: {},
+            fields: [],
+            name: 'create the client',
+            description:
+                'With this permission the user can create the clients basic informations',
+            category: 'Client',
+        },
+        {
+            action: 'update',
+            subject: 'Client',
+            conditions: {},
+            fields: [],
+            name: 'update the client',
+            description:
+                'With this permission the user can update the clients basic informations',
+            category: 'Client',
+        },
+        {
+            action: 'delete',
+            subject: 'Client',
+            conditions: {},
+            fields: [],
+            name: 'Delete the client',
+            description:
+                'With this permission the user can delete the clients basic informations',
+            category: 'Client',
         },
     ]
     return systemPermissionsRepo

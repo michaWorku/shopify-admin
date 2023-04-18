@@ -11,13 +11,9 @@ import { getAllEntityPermissions, getUserEntityPermissions } from "../Role/Permi
  * @returns {Promise} A Promise that resolves to the data for the specified model.
  * @throws {Error} If an invalid model is provided.
  */
-export const getAllEntities = async (model: string): Promise<object> => {
+export const getAllEntities = async (): Promise<object> => {
     try {
-        if (!model) {
-            throw new Error("Invalid model provided");
-        }
-
-        const data = await (db as any)[model].findMany();
+        const data = await db.client.findMany();
         const responseData = {
             data,
         };
@@ -35,26 +31,29 @@ export const getAllEntities = async (model: string): Promise<object> => {
  * @returns {Promise<object>} - The response data containing the found users.
  * @throws {Error} - If an invalid model is provided.
  */
-export const getUserEntities = async (model: string, userId: string): Promise<object> => {
+export const getUserEntities = async (userId: string): Promise<object> => {
     try {
-        if (!model) {
-            throw new Error("Invalid model provided");
+
+        if (!userId) {
+            throw new Error("Invalid userId provided");
         }
 
-        const data = await (db as any)[model].findMany({
+        const data = await db.client.findMany({
             where: {
-                Users: {
+                users: {
                     some: {
-                        User: {
-                            id: userId,
+                        user: {
+                          id: userId,
                         },
+                        isSystemUser: true
                     },
                 },
             },
         });
         const responseData = {
-            data,
+            data: data[0],
         };
+
         return Response(responseData);
     } catch (e) {
         return errorHandler(e);
@@ -68,30 +67,31 @@ export const getUserEntities = async (model: string, userId: string): Promise<ob
  * @returns {Promise<object>} - An object containing the retrieved entities.
  * @throws {Error} - If an invalid model is provided.
  */
-export const getEntities = async (userId: string, entity: string): Promise<object> => {
+export const getEntities = async (userId: string): Promise<any> => {
     try {
         // Check if a valid entity name is provided.
-        if (!entity) {
-            throw new Error("Invalid model provided");
+        if (!userId) {
+            throw new Error("Invalid userId");
         }
 
         // Check if the user has permission to view all entities.
         const iCanViewAll = await canUser(userId, 'read', 'Permission', {});
 
         let entities: any;
+        let entityPermissions: any
 
         if (iCanViewAll?.status === 200) {
+          entityPermissions = await getAllEntityPermissions()
             // Retrieve all entities if the user has permission to view all.
-            entities = await getAllEntities(entity);
         } else if (iCanViewAll?.status === 403) {
             // Retrieve only the entities that the user has permission to view.
-            entities = await getUserEntities(userId, entity);
+            entities = await getUserEntities(userId);
+            entityPermissions = await getUserEntityPermissions(userId)
         } else {
             // Return the permission error response.
             return iCanViewAll;
         }
-
-        return entities;
+        return {entities, entityPermissions};
     } catch (e) {
         return errorHandler(e);
     }
@@ -116,10 +116,7 @@ export const getEntities = async (userId: string, entity: string): Promise<objec
       if (iCanViewAll?.status === 200) {
         await Promise.all(
           entities?.map(async (item: any) => {
-            const permission: any = await getAllEntityPermissions(
-              entityKey,
-              item?.id
-            );
+            const permission: any = await getAllEntityPermissions();
             if (permission?.data && permission?.data?.length) {
               permissions[item.name] = permission;
             } else {
@@ -130,11 +127,7 @@ export const getEntities = async (userId: string, entity: string): Promise<objec
       } else if (iCanViewAll?.status === 403) {
         await Promise.all(
           entities?.map(async (item: any) => {
-            const permission: any = await getUserEntityPermissions(
-              userId,
-              entityKey,
-              item?.id
-            );
+            const permission: any = await getUserEntityPermissions(userId);
             if (permission?.data && permission?.data?.length) {
               permissions[item.name] = permission;
             } else {

@@ -1,41 +1,114 @@
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
-const permissions = [
+const clientPermissionsRepo = [
     {
         action: 'create',
-        subject: 'Client',
-        conditions: {},
+        subject: 'User',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
         fields: [],
-        name: 'Create Client',
+        name: 'Create client user',
         description:
-            'With this permission the user can create a client',
+            'With this permission the user can create a user for this client',
+        category: 'User',
+    },
+    {
+        action: 'read',
+        subject: 'User',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'View client users',
+        description:
+            'With this permission the user can view the users of this client',
+        category: 'User',
+    },
+    {
+        action: 'update',
+        subject: 'User',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'Edit client users',
+        description:
+            "With this permission the user can edit the users of this client who doesn't have edit user permissions",
+        category: 'User',
+    },
+    {
+        action: 'delete',
+        subject: 'User',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'Delete client users',
+        description:
+            "With this permission the user can delete the users of this client who doesn't have delete user permissions",
         category: 'User',
     },
     {
         action: 'create',
-        subject: 'Form',
-        conditions: { clientId: '$clientId' },
+        subject: 'DynamicForm',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
         fields: [],
         name: 'Create form',
-        description:
-            'With this permission the client can create form',
+        description: 'With this permission the client can create form',
+        category: 'Client',
+    },
+    {
+        action: 'read',
+        subject: 'DynamicForm',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'View form',
+        description: 'With this permission the client can view form',
+        category: 'Client',
+    },
+    {
+        action: 'update',
+        subject: 'DynamicForm',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'Update form',
+        description: 'With this permission the client can update form',
         category: 'Client',
     },
     {
         action: 'create',
         subject: 'Reward',
-        conditions: { clientId: '$clientId' },
+        conditions: { clientId: { $in: '${user.clientIds}' } },
         fields: [],
         name: 'Create reward',
-        description:
-            'With this permission the client can create reward',
+        description: 'With this permission the client can create reward',
+        category: 'Client',
+    },
+    {
+        action: 'create',
+        subject: 'Reward',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'Create reward',
+        description: 'With this permission the client can create reward',
         category: 'Client',
     },
     {
         action: 'read',
-        subject: 'Submission',
-        conditions: { clientId: '$clientId' },
+        subject: 'Reward',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'View reward',
+        description: 'With this permission the client can view reward',
+        category: 'Client',
+    },
+    {
+        action: 'update',
+        subject: 'Reward',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'Update reward',
+        description: 'With this permission the client can update reward',
+        category: 'Client',
+    },
+    {
+        action: 'read',
+        subject: 'DynamicFormSubmission',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
         fields: [],
         name: 'View User form submisions',
         description:
@@ -43,24 +116,94 @@ const permissions = [
         category: 'Client',
     },
     {
-        action: 'Read',
-        subject: 'User',
-        conditions: {clientId: '$clientId' },
+        action: 'create',
+        subject: 'Role',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
         fields: [],
-        name: 'Read User',
+        name: 'Create client role',
         description:
-            'With this permission the client can read a user',
+            'With this permission the user can create Role using the permissions given by this client',
+        category: 'Role',
+    },
+    {
+        action: 'update',
+        subject: 'Role',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'Edit client role ',
+        description:
+            'With this permission the user can edit Role with permissions given by this client',
+        category: 'Role',
+    },
+    {
+        action: 'read',
+        subject: 'Payment',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'View client payments',
+        description:
+            'With this permission the user can view payments made by this client',
+        category: 'Payment',
+    },
+    {
+        action: 'read',
+        subject: 'Client',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'View this client',
+        description:
+            'With this permission the user can view the clients basic informations',
         category: 'Client',
     },
     {
         action: 'create',
-        subject: 'Role',
-        conditions: {},
+        subject: 'UsageReport',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
         fields: [],
-        name: 'Create a Role',
+        name: "Create client's usage report",
         description:
-            'With this permission the user can create role for system users',
-        category: 'Role',
+            'With this permission the user can create usage report for this client',
+        category: 'Usage Report',
+    },
+    {
+        action: 'read',
+        subject: 'UsageReport',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: "View client's Usage Report",
+        description:
+            'With this permission the user can view usage reports of this client',
+        category: 'Usage Report',
+    },
+    {
+        action: 'request',
+        subject: 'Invoice',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'Requset client invoice',
+        description:
+            'With this permission the user can send a generate invoice request for this client',
+        category: 'Invoice',
+    },
+    {
+        action: 'read',
+        subject: 'Invoice',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: "View client's invoice",
+        description:
+            'With this permission the user can view invoices generated for this client',
+        category: 'Invoice',
+    },
+    {
+        action: 'read',
+        subject: 'Notification',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: "View client's Notifications",
+        description:
+            'With this permission the user can see notifications sent for this client',
+        category: 'Notification',
     },
     {
         action: 'create',
@@ -69,8 +212,123 @@ const permissions = [
         fields: [],
         name: 'Create User',
         description:
-            'With this permission the user can create system users',
+            'With this permission the user can create users for the system',
         category: 'User',
+    },
+    {
+        action: 'create',
+        subject: 'SystemUser',
+        conditions: {},
+        fields: [],
+        name: 'Create System User',
+        description:
+            'With this permission the user can create users for the system',
+        category: 'User',
+    },
+    {
+        action: 'read',
+        subject: 'User',
+        conditions: {},
+        fields: [],
+        name: 'View Users',
+        description:
+            'With this permission the user can view all users on the system',
+        category: 'User',
+    },
+    {
+        action: 'update',
+        subject: 'User',
+        conditions: {},
+        fields: [],
+        name: 'edit Users',
+        description:
+            "With this permission the user can edit all users who doesm't have the same edit user permission",
+        category: 'User',
+    },
+    {
+        action: 'update',
+        subject: 'SystemUser',
+        conditions: {},
+        fields: [],
+        name: 'edit System Users',
+        description:
+            "With this permission the user can edit all users who doesm't have the same edit user permission",
+        category: 'User',
+    },
+    {
+        action: 'delete',
+        subject: 'User',
+        conditions: {},
+        fields: [],
+        name: 'delete Users',
+        description:
+            "With this permission the user can delete all users who doesm't have the same delete user permission",
+        category: 'User',
+    },
+    {
+        action: 'create',
+        subject: 'Role',
+        conditions: {},
+        fields: [],
+        name: 'Create Role',
+        description:
+            'With this permission the user can create a role with all permissions',
+        category: 'Role',
+    },
+    {
+        action: 'read',
+        subject: 'Role',
+        conditions: {},
+        fields: [],
+        name: 'View Roles',
+        description: 'With this permission the user can view all roles',
+        category: 'Role',
+    },
+    {
+        action: 'update',
+        subject: 'Role',
+        conditions: {},
+        fields: [],
+        name: 'Edit Roles',
+        description: 'With this permission the user can update all roles',
+        category: 'Role',
+    },
+    {
+        action: 'create',
+        subject: 'Client',
+        conditions: {},
+        fields: [],
+        name: 'Create Client',
+        description: 'With this permission the user can create clients',
+        category: 'Client',
+    },
+    {
+        action: 'read',
+        subject: 'Client',
+        conditions: {},
+        fields: [],
+        name: 'View Clients',
+        description: 'With this permission the user can view all clients',
+        category: 'Client',
+    },
+    {
+        action: 'update',
+        subject: 'Client',
+        conditions: {},
+        fields: [],
+        name: 'Edit Client',
+        description:
+            "With this permission the user can edit client's informations",
+        category: 'Client',
+    },
+    {
+        action: 'delete',
+        subject: 'Client',
+        conditions: {},
+        fields: [],
+        name: 'Delete Client',
+        description: 'With this permission the user can create clients',
+        category: 'Client',
     },
     {
         action: 'create',
@@ -78,26 +336,210 @@ const permissions = [
         conditions: {},
         fields: [],
         name: 'Create Bulk Task',
+        description: 'With this permission the user can create Bulk Taks',
+        category: 'BulkTask',
+    },
+    {
+        action: 'read',
+        subject: 'BulkTask',
+        conditions: {},
+        fields: [],
+        name: 'View Bulk Tasks',
+        description: 'With this permission the user can view all Bulk Tasks',
+        category: 'BulkTask',
+    },
+    {
+        action: 'update',
+        subject: 'BulkTask',
+        conditions: {},
+        fields: [],
+        name: 'Edit Bulk Task',
+        description: 'With this permission the user can edit Bulk Task',
+        category: 'BulkTask',
+    },
+    {
+        action: 'delete',
+        subject: 'BulkTask',
+        conditions: {},
+        fields: [],
+        name: 'Delete Bulk Task',
+        description: 'With this permission the user can create Bulk Task',
+        category: 'BulkTask',
+    },
+    {
+        action: 'create',
+        subject: 'Configuration',
+        conditions: {},
+        fields: [],
+        name: 'Create Configuration',
+        description: 'With this permission the user can create Configuration',
+        category: 'Configuration',
+    },
+    {
+        action: 'read',
+        subject: 'Configuration',
+        conditions: {},
+        fields: [],
+        name: 'View Configurations',
         description:
-            'With this permission the user can create bulk tasks',
-        category: 'User',
+            'With this permission the user can view all Configurations',
+        category: 'Configuration',
+    },
+    {
+        action: 'update',
+        subject: 'Configuration',
+        conditions: {},
+        fields: [],
+        name: 'Edit Configuration',
+        description: 'With this permission the user can edit Configuration',
+        category: 'Configuration',
+    },
+    {
+        action: 'delete',
+        subject: 'Configuration',
+        conditions: {},
+        fields: [],
+        name: 'Delete Configuration',
+        description: 'With this permission the user can delete Configuration',
+        category: 'Configuration',
+    },
+    {
+        action: 'read',
+        subject: 'UsageReport',
+        conditions: {},
+        fields: [],
+        name: 'View Usage Reports',
+        description: 'With this permission the user can view all Usage reports',
+        category: 'Usage Report',
+    },
+    {
+        action: 'create',
+        subject: 'UsageReport',
+        conditions: {},
+        fields: [],
+        name: 'Create Usage Report',
+        description: 'With this permission the user can create Usage report',
+        category: 'Usage Report',
+    },
+    {
+        action: 'read',
+        subject: 'Activitylog',
+        conditions: {},
+        fields: [],
+        name: 'view activity log',
+        description:
+            "With this permission the user can view user's activity log",
+        category: 'Activitylog',
+    },
+    {
+        action: 'read',
+        subject: 'Permissions',
+        conditions: {},
+        fields: [],
+        name: 'view all permissions',
+        description: 'With this permission the user can view all permissions',
+        category: 'Permission',
+    },
+    {
+        action: 'create',
+        subject: 'Notification',
+        conditions: {},
+        fields: [],
+        name: 'create Notification',
+        description: 'With this permission the user can create Notification',
+        category: 'Notification',
+    },
+    {
+        action: 'read',
+        subject: 'Notification',
+        conditions: {},
+        fields: [],
+        name: 'View sent notifications',
+        description:
+            'With this permission the user can view sent Notifications',
+        category: 'Notification',
+    },
+    {
+        action: 'read',
+        subject: 'Reward',
+        conditions: { clientId: { $in: '${user.clientIds}' } },
+        fields: [],
+        name: 'View reward',
+        description: 'With this permission the client can view reward',
+        category: 'Client',
+    },
+    {
+        action: 'read',
+        subject: 'DynamicForm',
+        conditions: {},
+        fields: [],
+        name: 'View form',
+        description: 'With this permission the client can view form',
+        category: 'Client',
+    },
+    {
+        action: 'read',
+        subject: 'DynamicFormSubmission',
+        conditions: {},
+        fields: [],
+        name: 'View User form submisions',
+        description:
+            'With this permission the client can view user form submissions',
+        category: 'Client',
+    },
+    {
+        action: 'read',
+        subject: 'Client',
+        conditions: {},
+        fields: [],
+        name: 'View this client',
+        description:
+            'With this permission the user can view the clients basic informations',
+        category: 'Client',
+    },
+    {
+        action: 'create',
+        subject: 'Client',
+        conditions: {},
+        fields: [],
+        name: 'create the client',
+        description:
+            'With this permission the user can create the clients basic informations',
+        category: 'Client',
+    },
+    {
+        action: 'update',
+        subject: 'Client',
+        conditions: {},
+        fields: [],
+        name: 'update the client',
+        description:
+            'With this permission the user can update the clients basic informations',
+        category: 'Client',
+    },
+    {
+        action: 'delete',
+        subject: 'Client',
+        conditions: {},
+        fields: [],
+        name: 'Delete the client',
+        description:
+            'With this permission the user can delete the clients basic informations',
+        category: 'Client',
     },
 ]
 
 async function main() {
     await prisma.$connect()
-
-    await prisma.permission.createMany({
-        data: permissions
-    })
+    await prisma.permission.createMany({ data: clientPermissionsRepo })
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+    .then(async () => {
+        await prisma.$disconnect()
+    })
+    .catch(async (e) => {
+        console.error(e)
+        await prisma.$disconnect()
+        process.exit(1)
+    })

@@ -1,11 +1,15 @@
-import { Status } from "@prisma/client"
+import { Status } from '@prisma/client'
 
 /**
  * Create filters to allow a particular search word to be used to search across all available column names.
  * @param {string} search - The search term to lookfor.
  * @returns {obj} filter object.
  */
-export const searchCombinedColumn = (filterItem: any, columnNames?: string[], type?: string) => {
+export const searchCombinedColumn = (
+    filterItem: any,
+    columnNames?: string[],
+    type?: string
+) => {
     let operator: string
     let searchArray: any
 
@@ -22,50 +26,54 @@ export const searchCombinedColumn = (filterItem: any, columnNames?: string[], ty
             {
                 ...(searchArray.length === 1
                     ? {
-                        OR: columnNames?.map(columnName => ({
-                            [columnName]: {
-                                [operator]: searchArray[0],
-                                mode: 'insensitive',
-                            },
-                        })),
-                    }
+                          OR: columnNames?.map((columnName) => ({
+                              [columnName]: {
+                                  [operator]: searchArray[0],
+                                  mode: 'insensitive',
+                              },
+                          })),
+                      }
                     : {}),
                 ...(searchArray.length === 2
                     ? {
-                        AND: [
-                            {
-                                OR: columnNames?.slice(0, 2).map(columnName => ({
-                                    [columnName]: {
-                                        [operator]: searchArray[0],
-                                        mode: 'insensitive',
-                                    },
-                                })),
-                            },
-                            {
-                                OR: columnNames?.slice(1).map(columnName => ({
-                                    [columnName]: {
-                                        [operator]: searchArray[1],
-                                        mode: 'insensitive',
-                                    },
-                                })),
-                            },
-                        ],
-                    }
+                          AND: [
+                              {
+                                  OR: columnNames
+                                      ?.slice(0, 2)
+                                      .map((columnName) => ({
+                                          [columnName]: {
+                                              [operator]: searchArray[0],
+                                              mode: 'insensitive',
+                                          },
+                                      })),
+                              },
+                              {
+                                  OR: columnNames
+                                      ?.slice(1)
+                                      .map((columnName) => ({
+                                          [columnName]: {
+                                              [operator]: searchArray[1],
+                                              mode: 'insensitive',
+                                          },
+                                      })),
+                              },
+                          ],
+                      }
                     : {}),
                 ...(searchArray.length === 3
                     ? {
-                        AND: columnNames?.map((columnName, index) => ({
-                            [columnName]: {
-                                [operator]: searchArray[index],
-                                mode: 'insensitive',
-                            },
-                        })),
-                    }
+                          AND: columnNames?.map((columnName, index) => ({
+                              [columnName]: {
+                                  [operator]: searchArray[index],
+                                  mode: 'insensitive',
+                              },
+                          })),
+                      }
                     : {}),
             },
         ],
     }
-    console.dir(filter, { depth: null })
+    // console.dir(filter, { depth: null })
     return filter
 }
 
@@ -76,47 +84,70 @@ export const searchCombinedColumn = (filterItem: any, columnNames?: string[], ty
  * @param {string[]} searchColumns - The list of columns to search on.
  * @returns {object} The search filter object.
  */
-export const searchFunction = (search: string, schema: string, searchColumns?: string[]): object => {
+export const searchFunction = (
+    search: string,
+    schema: string,
+    searchColumns?: string[]
+): object => {
     /**
      * The JSON schema object.
      * @type {object}
      */
-    const jsonSchema = require('../../../prisma/json-schema/json-schema.json');
+    const jsonSchema = require('../../../prisma/json-schema/json-schema.json')
 
     /**
      * The model schema object.
      * @type {object}
      */
-    const modelSchema = jsonSchema?.definitions?.[schema]?.properties;
+    const modelSchema = jsonSchema?.definitions?.[schema]?.properties
 
     if (search) {
         const searchParams = {
             OR: Object.keys(modelSchema)?.map((item) => {
-                console.log({ schema: modelSchema[item], item, typeLength: modelSchema[item]?.type?.length })
+                console.log({
+                    schema: modelSchema[item],
+                    item,
+                    typeLength: modelSchema[item]?.type?.length,
+                })
 
-                if (modelSchema[item]?.type === 'string' && modelSchema[item]?.format !== "date-time" && !modelSchema[item]?.enum?.length) {
+                if (
+                    modelSchema[item]?.type === 'string' &&
+                    modelSchema[item]?.format !== 'date-time' &&
+                    !modelSchema[item]?.enum?.length
+                ) {
                     if (schema === 'User' && !!searchColumns?.length) {
                         /**
                          * The search filter object for combined columns.
                          * @type {object}
                          */
-                        const searchFilter = searchCombinedColumn(search, searchColumns, 'search');
+                        const searchFilter = searchCombinedColumn(
+                            search,
+                            searchColumns,
+                            'search'
+                        )
 
-                        return searchFilter;
-                    }
-                    else {
-                        if (search.split(' ').length > 1 && !!searchColumns?.length) return searchCombinedColumn(search, searchColumns, 'search')
+                        return searchFilter
+                    } else {
+                        if (
+                            search.split(' ').length > 1 &&
+                            !!searchColumns?.length
+                        )
+                            return searchCombinedColumn(
+                                search,
+                                searchColumns,
+                                'search'
+                            )
                         return {
                             [item]: {
                                 contains: search,
                                 mode: 'insensitive',
                             },
-                        };
+                        }
                     }
                 }
                 // else if (modelSchema[item]?.format === "date-time" && !!search) {
                 //     const date = new Date(search)
-                   
+
                 //     if (!isNaN(date.getTime())) {
                 //         console.log({ date, search })
                 //         return {
@@ -128,18 +159,21 @@ export const searchFunction = (search: string, schema: string, searchColumns?: s
                 //     return {}
 
                 // }
-                if (modelSchema[item]?.enum?.length && !!search && Object.keys(Status)?.some(status => status === search)) {
+                if (
+                    modelSchema[item]?.enum?.length &&
+                    !!search &&
+                    Object.keys(Status)?.some((status) => status === search)
+                ) {
                     return {
-                        [item]: search
-                    };
+                        [item]: search,
+                    }
                 }
-                return {};
-
+                return {}
             }),
-        };
+        }
 
-        return searchParams;
+        return searchParams
     } else {
-        return {};
+        return {}
     }
-};
+}

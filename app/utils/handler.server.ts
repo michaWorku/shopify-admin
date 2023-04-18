@@ -12,7 +12,7 @@ import { formatFileSize } from './format'
 /**
  *
  * @description Custom Bad Request Error
- * @returns custom error response response 
+ * @returns custom error response response
  * @params data : TActionData
  * @params status : Status code
  */
@@ -49,16 +49,11 @@ export default class customErr {
 }
 
 export const errorHandler = async (err: any) => {
-    console.log('error handler')
-    console.log({isInstance: err instanceof PrismaClientKnownRequestError})
-    console.dir(err, { depth: null })
     if (err.status === 302) {
         console.log('error status is 302')
         return err
     }
     if (err instanceof PrismaClientKnownRequestError) {
-        console.log('error type PrismaClientKnownRequestError')
-        console.dir(err, { depth: null })
         if (err.code === 'P2002') {
             console.dir(err, { depth: null })
             return json(
@@ -88,15 +83,13 @@ export const errorHandler = async (err: any) => {
                 { status: 422 }
             )
         }
-        if (
-            err.code === 'P2025'
-        ) {
+        if (err.code === 'P2025') {
             console.log({ code: err.errorCode })
             return json(
                 Response({
                     error: {
                         error: {
-                            message: err?.meta?.cause
+                            message: err?.meta?.cause,
                         },
                     },
                 }),
@@ -184,7 +177,7 @@ export const errorHandler = async (err: any) => {
             Response({
                 error: {
                     error: {
-                        message: newMessage,
+                        message: 'You are not authorized',
                     },
                 },
             }),
@@ -257,7 +250,6 @@ export const errorHandler = async (err: any) => {
 
     if (err.name === 'casl_Bad_Request') {
         if (err.code === 'P2002') {
-            console.log({ err })
             return json(
                 Response({
                     error: {
