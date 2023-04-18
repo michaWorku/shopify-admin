@@ -72,16 +72,19 @@ const CustomToolbar: React.FC<CustomToolbarProps> = ({
     showLabels: true,
     useBom: true,
     useKeysAsHeaders: false,
-    title: `CNCM-${exportFileName}`,
-    filename: `CNCM-${exportFileName}`,
+    title: `Sewasew-Reward-${exportFileName}`,
+    filename: `Sewasew-Reward-${exportFileName}`,
   };
 
   const csvExporter = new ExportToCsv(csvOptions);
 
   useEffect(() => {
-    if (exportType && exportType === data?.metaData?.exportType) {
-      csvExporter.generateCsv(data?.metaData?.exportData);
-      handleExportData(data?.metaData?.exportData, `Sewasew-Reward-${exportFileName}`, `Sewasew-Reward-${exportFileName}`)
+    console.log({data,exportData: data?.exportData, exportType})
+    
+    if (exportType && exportType === data?.exportType) {
+      // csvExporter.generateCsv(data?.exportData);
+      
+      handleExportData(data?.exportData, `Sewasew-Reward-${exportFileName}`, `Sewasew-Reward-${exportFileName}`)
       setExportType("");
     }
   }, [exportType, data]);
