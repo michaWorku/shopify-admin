@@ -102,7 +102,7 @@ const CustomizedTable = ({
         renderToolbarInternalActions={({ table }) => (
           <CustomToolbar
             table={table}
-            data={data}
+            data={data?.data?.data || data?.data || data}
             enableExport={enableExport}
             exportType={exportType}
             setExportType={setExportType}
