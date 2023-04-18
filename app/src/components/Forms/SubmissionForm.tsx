@@ -106,6 +106,7 @@ const DynamicFormInput = ({
             required: field?.required,
           })}
           select
+          
           label={field?.label}
           placeholder={field?.placeholder}
           defaultValue={submitedData[field?.name] || field?.defaultValue}
@@ -115,14 +116,18 @@ const DynamicFormInput = ({
             errors ? errors : actionData ? actionData.join(" ") : null
           }
           sx={{
+            position: 'relative',
+            top: -8,
             width: {
               xs: "18rem",
               sm: "14rem",
-              md:
-                field?.type === DynamicFormFieldType.TEXTAREA ? "100%" : "80%",
+              md: "80%",
             },
             "& legend": { display: "none" },
             "& fieldset": { top: 0 },
+            "& .MuiInputLabel-root":{
+              color: 'primary.main'
+            },
             "& .MuiSelect-select": {
               font: "normal normal normal 16px/39px Roboto",
               pl: 1.5,
