@@ -16,5 +16,7 @@ COPY --from=builder /app/build /app/build
 COPY --from=builder /app/public /app/public
 COPY --from=builder /app/package.json /app/package.json
 COPY --from=builder /app/prisma /app/prisma
-
+COPY --from=builder /app/remix.config.js /app/
+COPY --from=builder /app/remix.env.d.ts /app/
+COPY --from=builder /app/tsconfig.json /app/
 CMD ["npm","run", "start"]
