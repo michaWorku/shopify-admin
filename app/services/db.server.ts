@@ -7,7 +7,7 @@ declare global {
 
 if (process.env.NODE_ENV === "production") {
   db = new PrismaClient({
-    // log: ['query', 'info', 'warn', 'error'],
+    log: ['query', 'info', 'warn', 'error'],
   });
 } else {
   if (!global.__db) {
