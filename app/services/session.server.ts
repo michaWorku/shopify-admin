@@ -8,7 +8,7 @@ const {getSession, commitSession, destroySession} = createCookieSessionStorage({
     // all of these are optional
     domain:
       process.env.NODE_ENV === 'production'
-        ? 'sewasew-support.vercel.app'
+        ? 'https://rewards.a2p.et'
         : undefined,
     expires: new Date(Date.now() + 60_000000),
     httpOnly: true,
