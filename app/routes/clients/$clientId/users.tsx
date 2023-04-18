@@ -21,7 +21,7 @@ import canUser from '~/utils/casl/ability'
 import { errorHandler } from '~/utils/handler.server'
 import { toast } from 'react-toastify'
 import { getRewardUsers } from '~/services/Reward/Reward.server'
-import { getClientUsers } from '~/services/Client/client.server'
+import { getClientUsers } from '~/services/Client/Client.server'
 
 /**
  * Loader function to fetch users of a client.

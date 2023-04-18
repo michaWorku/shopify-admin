@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import type { ActionFunction, LoaderFunction} from "@remix-run/node";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   Form,
@@ -697,6 +697,9 @@ const SubmitForm = () => {
         background:
           "transparent linear-gradient(180deg, #642525 0%, #240101 100%)",
         boxShadow: "3px 3px 6px #00000014",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <Box
@@ -704,10 +707,12 @@ const SubmitForm = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          bgcolor: "red",
+          minWidth: { xs: "100%", sm: "90%", md: "80%" },
         }}
       >
         {!!loaderData?.data?.rewarded || !!fetcher?.data?.data?.rewarded ? (
-          <Box 
+          <Box
             sx={{
               position: "absolute" as "absolute",
               top: "50%",
@@ -729,7 +734,7 @@ const SubmitForm = () => {
         ) : !!loaderData?.data?.submit || !!fetcher?.data?.data?.submit ? (
           <Box
             sx={{
-              width: { xs: "100%", sm: "90%", md: "80%" },
+              width: "100%",
               background: "#FFFFFF",
               boxShadow: "0px 3px 6px #00000029",
               borderRadius: { xs: 0, sm: "8px" },

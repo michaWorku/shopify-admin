@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { ExportToCsv } from "export-to-csv";
+import { handleExportData } from "~/utils/export";
 
 interface CustomToolbarProps {
   table: any;
@@ -80,6 +81,7 @@ const CustomToolbar: React.FC<CustomToolbarProps> = ({
   useEffect(() => {
     if (exportType && exportType === data?.metaData?.exportType) {
       csvExporter.generateCsv(data?.metaData?.exportData);
+      handleExportData(data?.metaData?.exportData, `Sewasew-Reward-${exportFileName}`, `Sewasew-Reward-${exportFileName}`)
       setExportType("");
     }
   }, [exportType, data]);

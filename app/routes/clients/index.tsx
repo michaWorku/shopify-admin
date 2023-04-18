@@ -43,7 +43,7 @@ import {
     deleteClient,
     getClients,
     updateClientById,
-} from '~/services/Client/client.server'
+} from '~/services/Client/Client.server'
 // import {
 //     createClient,
 //     deleteClient,

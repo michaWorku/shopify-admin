@@ -46,7 +46,12 @@ const CustomizedTable = ({
       <MaterialReactTable
         columns={columns}
         data={data?.data?.data || data?.data || data || []}
-        rowCount={data?.metaData?.total || 0}
+        rowCount={
+          data?.data?.data?.metaData?.total ||
+          data?.data?.metaData?.total ||
+          data?.metaData?.total ||
+          0
+        }
         enableColumnFilterModes
         enableColumnResizing
         enableStickyHeader
@@ -97,7 +102,7 @@ const CustomizedTable = ({
         renderToolbarInternalActions={({ table }) => (
           <CustomToolbar
             table={table}
-            data={data}
+            data={data?.data?.data || data?.data || data}
             enableExport={enableExport}
             exportType={exportType}
             setExportType={setExportType}
