@@ -4,7 +4,7 @@ import getParams from "~/utils/params/getParams.server";
 import { searchFunction } from "~/utils/params/search.server";
 import { db } from "../db.server";
 import { json } from '@remix-run/node'
-import type { ResponseType} from "~/utils/handler.server";
+import type { ResponseType } from "~/utils/handler.server";
 import customErr, { Response, badRequest, errorHandler } from "~/utils/handler.server";
 import canUser, { AbilityType } from "~/utils/casl/ability";
 import { canPerformAction } from "~/utils/casl/canPerformAction";
@@ -748,3 +748,42 @@ export const rewardUser = async (rewardData: RewardInteface, submissionData: Sub
         }))
     }
 }
+
+/**
+ * Retrieves all rewards to submit a form
+ * @async function getAllClientRewards
+ * @param {Request} request - The HTTP request object containing the request parameters.
+ * @returns {Promise<Response>} - The HTTP response containing the rewards.
+ * @throws {customErr} - An error indicating that no rewards were found.
+ * @throws {Error} - An error indicating that an unexpected error occurred.
+ */
+export const getAllRewards = async (request: Request): Promise<any> => {
+    try {
+
+        const rewardsWhere: Prisma.RewardWhereInput = {
+            deletedAt: null,
+            status: 'ACTIVE'
+        };
+
+        const rewardsCount = await db.reward.count({ where: rewardsWhere });
+
+        if (rewardsCount === 0) {
+            throw new customErr('Custom_Error', 'No reward found', 404);
+        }
+
+        const rewards = await db.reward.findMany({
+            where: rewardsWhere,
+            include: {
+                client: true
+            }
+        });
+
+        return Response({
+            data: rewards,
+        })
+    } catch (error) {
+        console.log('Error occurred loading rewards.');
+        console.dir(error, { depth: null });
+        return errorHandler(error);
+    }
+};

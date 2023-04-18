@@ -55,7 +55,7 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async ({  request  }) => {
   await authenticator.isAuthenticated(request, {
-    successRedirect: "/users",
+    successRedirect: "/clients",
   });
   let session = await getSession(request.headers.get("cookie"));
   let error = session.get(authenticator.sessionErrorKey) as Error[] | Error;
