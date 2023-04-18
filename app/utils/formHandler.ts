@@ -1,7 +1,7 @@
 import { json } from '@remix-run/node'
 import { validate } from "./validators/validate";
 import { Response } from './handler.server';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 /**
  * Parses a multipart form data and validates it against the specified schema.

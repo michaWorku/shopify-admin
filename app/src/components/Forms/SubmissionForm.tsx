@@ -76,7 +76,7 @@ const DynamicFormInput = ({
           minRows={field?.type === DynamicFormFieldType.TEXTAREA ? 3 : 1}
           error={!!errors || !!actionData}
           helperText={
-            !!errors ? errors : !!actionData ? actionData.join(" ") : null
+            errors ? errors : actionData ? actionData.join(" ") : null
           }
           sx={{
             width: {
@@ -112,7 +112,7 @@ const DynamicFormInput = ({
           variant="standard"
           error={!!errors || !!actionData}
           helperText={
-            !!errors ? errors : !!actionData ? actionData.join(" ") : null
+            errors ? errors : actionData ? actionData.join(" ") : null
           }
           sx={{
             width: {
@@ -159,7 +159,7 @@ const DynamicFormInput = ({
           />
           {(!!errors || !!actionData) && (
             <FormHelperText>
-              {!!errors ? errors : !!actionData ? actionData.join(" ") : null}
+              {errors ? errors : actionData ? actionData.join(" ") : null}
             </FormHelperText>
           )}
         </FormControl>
@@ -237,9 +237,9 @@ const DynamicFormInput = ({
                     InputLabelProps={{ shrink: false }}
                     error={!!errors || !!actionData}
                     helperText={
-                      !!errors
+                      errors
                         ? errors
-                        : !!actionData
+                        : actionData
                         ? actionData.join(" ")
                         : null
                     }
@@ -381,7 +381,7 @@ const SubmissionForm: React.FC<any> = ({
           variant="add"
           {...register("submit")}
           value={
-            !!fetcher?.data?.data?.submissionId
+            fetcher?.data?.data?.submissionId
               ? fetcher?.data?.data?.submissionId
               : "1"
           }

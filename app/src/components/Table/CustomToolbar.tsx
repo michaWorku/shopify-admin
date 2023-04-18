@@ -6,13 +6,14 @@ import {
   MRT_ToggleFiltersButton,
   MRT_ToggleGlobalFilterButton,
 } from "material-react-table";
+import type {
+  Theme} from "@mui/material";
 import {
   Box,
   Button,
   IconButton,
   Menu,
   MenuItem,
-  Theme,
   Tooltip,
   Typography,
 } from "@mui/material";

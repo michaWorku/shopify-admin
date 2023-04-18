@@ -1,4 +1,4 @@
-import { DynamicFormField, Prisma } from "@prisma/client"
+import type { DynamicFormField, Prisma } from "@prisma/client"
 import canUser, { AbilityType } from "~/utils/casl/ability"
 import { db } from "../db.server"
 import { json } from '@remix-run/node'

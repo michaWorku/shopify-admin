@@ -19,16 +19,18 @@ import {
 import { EthiopianMusicStreamingAppForAll } from "public/assets";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import {
+import type {
   ActionFunction,
-  json,
   LoaderFunction,
-  MetaFunction,
+  MetaFunction} from "@remix-run/node";
+import {
+  json,
   redirect,
 } from "@remix-run/node";
-import { TypeOf } from "zod";
+import type { TypeOf } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import type { SubmitHandler} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useEffect, useRef, useState } from "react";
 import { signinSchema } from "~/utils/validations";
 import { USER_LOGIN, authenticator } from "~/services/auth.server";
@@ -73,9 +75,9 @@ export const loader: LoaderFunction = async ({  request  }) => {
       }
     );
   } else {
-    return {};;
+    return {};
   }
-};;
+};
 
 export const meta: MetaFunction = () => {
   return {

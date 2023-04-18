@@ -1,11 +1,13 @@
 import { Box } from "@mui/material";
-import { DynamicFormSubmission, Reward, Status, User } from "@prisma/client";
-import { LoaderFunction, json } from "@remix-run/node";
+import type { DynamicFormSubmission, Reward, User } from "@prisma/client";
+import { Status } from "@prisma/client";
+import type { LoaderFunction} from "@remix-run/node";
+import { json } from "@remix-run/node";
 import {
   useLoaderData,
   useNavigation,
 } from "@remix-run/react";
-import { MRT_ColumnDef } from "material-react-table";
+import type { MRT_ColumnDef } from "material-react-table";
 import moment from "moment-timezone";
 import { useEffect, useMemo } from "react";
 import  { Response } from "~/utils/handler.server";
@@ -168,7 +170,7 @@ const ClientSubmissions = () => {
   );
 
   useEffect(() => {
-    if (!!loaderData?.data?.error?.error?.message) {
+    if (loaderData?.data?.error?.error?.message) {
       toast.error(loaderData?.data?.error?.error?.message);
     }
   }, [loaderData]);

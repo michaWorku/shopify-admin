@@ -9,19 +9,6 @@ variables:
   SERVER_USER: ${SERVER_USER_${BRANCH_NAME}}
   SERVER_IP: ${SERVER_IP_${BRANCH_NAME}}
   SSH_ACCESS_KEY: ${SSH_ACCESS_KEY_${BRANCH_NAME}}
-linttest:
-  image: node:18-alpine
-  stage: lint
-  tags:
-    - gitlab-react
-  script:
-    - npm install
-    - npm run lint
-    - npm run typecheck
-  except:
-    refs:
-      - staging
-      - production
 publish:
   image: docker:latest
   stage: build

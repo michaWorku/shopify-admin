@@ -6,9 +6,10 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
-import { TransitionProps } from "@mui/material/transitions";
+import type { TransitionProps } from "@mui/material/transitions";
 import { useFetcher } from "@remix-run/react";
-import { Dispatch, FC, forwardRef, SetStateAction } from "react";
+import type { Dispatch, FC, SetStateAction } from "react";
+import { forwardRef } from "react";
 import palette from "../theme/palette";
 
 const Transition = forwardRef(function Transition(

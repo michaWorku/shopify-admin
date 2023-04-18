@@ -6,9 +6,10 @@ import {
     useNavigate,
     useNavigation,
 } from '@remix-run/react'
-import { MRT_ColumnDef } from 'material-react-table'
+import type { MRT_ColumnDef } from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
-import { User, Gender, Status } from '@prisma/client'
+import type { User} from '@prisma/client';
+import { Gender, Status } from '@prisma/client'
 import {
     CustomizedTable,
     RowActions,
@@ -18,7 +19,8 @@ import moment from 'moment'
 import DateFilter from '~/src/components/Table/DatePicker'
 import { Box, Button, Card, Modal, Slide } from '@mui/material'
 import FilterModes from '~/src/components/Table/CustomFilter'
-import { LoaderFunction, ActionFunction, json } from '@remix-run/server-runtime'
+import type { LoaderFunction, ActionFunction} from '@remix-run/server-runtime';
+import { json } from '@remix-run/server-runtime'
 import { authenticator } from '~/services/auth.server'
 import { getSession } from '~/services/session.server'
 import {
@@ -34,7 +36,7 @@ import { systemUserSchema } from '~/utils/schema/systemUserSchema'
 import { toast } from 'react-toastify'
 // import { getUserEntities } from '~/services/Entities/Entity.server'
 import { DeleteAlert } from '~/src/components'
-import { DeleteDialogType } from '~/src/components/DeleteAlert'
+import type { DeleteDialogType } from '~/src/components/DeleteAlert'
 import { getUserEntities } from '~/services/Entities/entity.server'
 
 export const loader: LoaderFunction = async ({ request }) => {

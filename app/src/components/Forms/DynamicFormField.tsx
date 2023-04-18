@@ -1,6 +1,8 @@
-import { FC, useEffect } from "react";
-import { useForm, Control } from "react-hook-form";
-import { z } from "zod";
+import type { FC} from "react";
+import { useEffect } from "react";
+import type { Control } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
 import SendIcon from "@mui/icons-material/Send";
 import ClearIcon from "@mui/icons-material/Clear";
 import CloseIcon from "@mui/icons-material/Close";
@@ -335,7 +337,7 @@ const DynamicFormField: React.FC<any> = ({
       "defaultValue",
       "options",
     ].forEach((field: any) => {
-      if (!!editData)
+      if (editData)
         setValue(field, editData[field as keyof DynamicFormField]);
     });
   }, [editData]);

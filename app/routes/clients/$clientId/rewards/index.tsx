@@ -1,13 +1,14 @@
 import { Box, Button } from "@mui/material";
 import { Reward, Status } from "@prisma/client";
-import { ActionFunction, LoaderFunction, json } from "@remix-run/node";
+import type { ActionFunction, LoaderFunction} from "@remix-run/node";
+import { json } from "@remix-run/node";
 import {
   useFetcher,
   useLoaderData,
   useLocation,
   useNavigation,
 } from "@remix-run/react";
-import { MRT_ColumnDef } from "material-react-table";
+import type { MRT_ColumnDef } from "material-react-table";
 import moment from "moment-timezone";
 import { useEffect, useMemo, useState } from "react";
 import customErr, { Response } from "~/utils/handler.server";
@@ -23,7 +24,8 @@ import canUser from "~/utils/casl/ability";
 import { errorHandler } from "~/utils/handler.server";
 import { formHandler } from "~/utils/formHandler";
 import { toast } from "react-toastify";
-import DeleteAlert, { DeleteDialogType } from "~/src/components/DeleteAlert";
+import type { DeleteDialogType } from "~/src/components/DeleteAlert";
+import DeleteAlert from "~/src/components/DeleteAlert";
 import {
   getDynamicForms,
 } from "~/services/Form/Form.server";
@@ -330,16 +332,16 @@ const Reward = () => {
 
   useEffect(() => {
     console.log({ fetcher });
-    if (!!fetcher?.data?.error?.error?.message) {
+    if (fetcher?.data?.error?.error?.message) {
       toast.error(fetcher?.data?.error?.error?.message);
     }
-    if (!!fetcher?.data?.message) {
+    if (fetcher?.data?.message) {
       toast.success(fetcher?.data?.message);
       setOpenModal(false);
       setEditData(undefined);
       setDeleteDialog(DefaultDialogInfo);
     }
-    if (!!fetcher?.data) setActionData(fetcher?.data);
+    if (fetcher?.data) setActionData(fetcher?.data);
   }, [fetcher?.data]);
 
   const handleModal = (row:any) => {

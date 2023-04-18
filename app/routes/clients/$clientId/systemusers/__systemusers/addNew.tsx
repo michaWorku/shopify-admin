@@ -1,6 +1,7 @@
 import { useActionData, useNavigate } from '@remix-run/react'
 import { useEffect } from 'react'
-import { LoaderFunction, ActionFunction, json } from '@remix-run/server-runtime'
+import type { LoaderFunction, ActionFunction} from '@remix-run/server-runtime';
+import { json } from '@remix-run/server-runtime'
 import { authenticator } from '~/services/auth.server'
 import { createSystemUser } from '~/services/User/systemuser.server'
 import { Response, errorHandler } from '~/utils/handler.server'

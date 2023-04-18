@@ -1,6 +1,7 @@
 import { redirect } from 'react-router'
-import { Client, ClientUser, Prisma, User } from '@prisma/client'
-import { z } from 'zod'
+import type { ClientUser, Prisma, User } from '@prisma/client';
+import { Client } from '@prisma/client'
+import type { z } from 'zod'
 import moment from 'moment-timezone'
 import customErr, { badRequest } from '~/utils/handler.server'
 import { hashPassword, verifyPassword } from '~/utils/auth'
@@ -52,7 +53,7 @@ export const userFormHandler = async (
     let phone = form.get('phone') as string
     const role = form.get('role')
     const password = form.get('password')
-    if (!!phone) {
+    if (phone) {
         const parsedPhone = phone.startsWith('+') ? phone.slice(1) : phone
         phone = `251${
             parsedPhone.startsWith('0')
@@ -228,15 +229,15 @@ export const getUsers = async (request: Request) => {
         const take = perPage ? parseInt(perPage) : 5
         const count = await db.user.count({
             where: {
-                ...(!!search ? searchCombinedColumn(search, fields) : {}),
-                ...(!!filters?.length ? multipleFilter(filters, 'User') : {}),
+                ...(search ? searchCombinedColumn(search, fields) : {}),
+                ...(filters?.length ? multipleFilter(filters, 'User') : {}),
             },
         })
 
         const users = await db.user.findMany({
             where: {
                 ...(search !== '' ? searchCombinedColumn(search, fields) : {}),
-                ...(!!filters?.length ? multipleFilter(filters, 'User') : {}),
+                ...(filters?.length ? multipleFilter(filters, 'User') : {}),
             },
             orderBy: sort?.length
                 ? sort?.map((item: any) => {
@@ -262,7 +263,7 @@ export const getUsers = async (request: Request) => {
                     updatedAt: moment(new Date(user?.updatedAt), format)
                         .tz('Africa/Addis_Ababa')
                         .format(format),
-                    deletedAt: !!user?.deltedAt
+                    deletedAt: user?.deltedAt
                         ? moment(new Date(user?.deletedAt), format)
                               .tz('Africa/Addis_Ababa')
                               .format(format)

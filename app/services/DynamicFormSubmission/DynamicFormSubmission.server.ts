@@ -1,7 +1,7 @@
 import { json } from "@remix-run/node";
 import customErr, { Response, errorHandler } from "~/utils/handler.server";
 import { db } from "../db.server";
-import { Prisma, Status } from "@prisma/client";
+import type { Prisma, Status } from "@prisma/client";
 import getParams from "~/utils/params/getParams.server";
 import { searchFunction } from "~/utils/params/search.server";
 import { filterFunction } from "~/utils/params/filter.server";

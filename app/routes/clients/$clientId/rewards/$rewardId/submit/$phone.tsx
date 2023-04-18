@@ -8,7 +8,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { ActionFunction, LoaderFunction, json } from "@remix-run/node";
+import type { ActionFunction, LoaderFunction} from "@remix-run/node";
+import { json } from "@remix-run/node";
 import {
   Form,
   useFetcher,
@@ -225,13 +226,13 @@ const SubmitForm = () => {
 
   useEffect(() => {
     console.log({ fetcher });
-    if (!!fetcher?.data?.error?.error?.message) {
+    if (fetcher?.data?.error?.error?.message) {
       toast.error(fetcher?.data?.error?.error?.message);
     }
-    if (!!fetcher?.data?.message) {
+    if (fetcher?.data?.message) {
       toast.success(fetcher?.data?.message);
     }
-    if (!!fetcher?.data) setActionData(fetcher?.data);
+    if (fetcher?.data) setActionData(fetcher?.data);
     if (fetcher?.data?.data?.sendOTP) {
       setState((prev) => ({ ...prev, sendOTP: true }));
     }

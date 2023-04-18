@@ -1,12 +1,8 @@
-import { Permission } from '@prisma/client'
-import { db } from '~/services/db.server'
-import customErr, {
-    Response,
-    ResponseType,
-    errorHandler,
-} from '../../../utils/handler.server'
 import { json } from '@remix-run/node'
 import canUser from '~/utils/casl/ability'
+import customErr, { Response, errorHandler } from '~/utils/handler.server'
+import type { Permission } from '@prisma/client'
+import { db } from '~/services/db.server'
 
 /**
  * Get user permissions for which the role is active
@@ -52,7 +48,7 @@ export const getUserPermissions = async (
                     }
                 })
             )
-            if (!!filtered) {
+            if (Object.keys(filtered).length) {
                 filteredPermissions.push(filtered)
             }
         })

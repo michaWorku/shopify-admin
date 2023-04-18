@@ -1,5 +1,6 @@
 import { TextField } from "@mui/material";
-import { Control, Controller } from "react-hook-form";
+import type { Control} from "react-hook-form";
+import { Controller } from "react-hook-form";
 
 type ControlledTextFieldProps = {
   type?: string;
@@ -66,7 +67,7 @@ type ControlledTextFieldProps = {
             variant="outlined"
             error={!!errors || !!actionData}
             helperText={
-              !!errors ? errors : !!actionData ? actionData.join(" ") : null
+              errors ? errors : actionData ? actionData.join(" ") : null
             }
             {...props}
             sx={{

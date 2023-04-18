@@ -20,18 +20,20 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff'
 // import { getUserId, createUserSession } from "~/session.server";
 // import { createUser, getUserByEmail } from "~/models/user.server";
 // import { safeRedirect, validateEmail } from "~/utils/user";
-import {
+import type {
     ActionFunction,
+    MetaFunction} from '@remix-run/node';
+import {
     json,
     LoaderFunction,
-    MetaFunction,
     redirect,
 } from '@remix-run/node'
 import { badRequest } from '~/utils/utils-server'
 import { addUserSchema, signupSchema } from '~/utils/validations'
 import { checkUserExists, createUser } from '~/services/User/users.server'
-import { SubmitHandler, useForm } from 'react-hook-form'
-import { TypeOf } from 'zod'
+import type { SubmitHandler} from 'react-hook-form';
+import { useForm } from 'react-hook-form'
+import type { TypeOf } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef, useState } from 'react'
 import { authenticator } from '~/services/auth.server'

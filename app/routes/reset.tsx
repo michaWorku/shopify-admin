@@ -21,25 +21,28 @@ import SendIcon from "@mui/icons-material/Send";
 import { EthiopianMusicStreamingAppForAll } from "public/assets";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import {
+import type {
   ActionFunction,
-  json,
   LoaderFunction,
-  MetaFunction,
+  MetaFunction} from "@remix-run/node";
+import {
+  json,
   redirect,
 } from "@remix-run/node";
-import { TypeOf } from "zod";
+import type { TypeOf } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SubmitHandler, useForm } from "react-hook-form";
+import type { SubmitHandler} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { resetSchema } from "~/utils/validations";
 import PinInput from "react-pin-input";
 import Countdown from "react-countdown-now";
 import { LoadingButton } from "@mui/lab";
+import type {
+  ResponseType} from "~/utils/handler.server";
 import customErr, {
   badRequest,
-  errorHandler,
-  ResponseType,
+  errorHandler
 } from "~/utils/handler.server";
 import { createOTP, verifyOTP } from "~/services/otp.server";
 import { checkUserExists, updatePassword } from "~/services/User/users.server";
@@ -106,7 +109,7 @@ export const action: ActionFunction = async ({ request }) => {
           const fullHash = await createOTP(phone);
           console.log({ phone, fullHash });
           
-          if (!!fullHash?.data){
+          if (fullHash?.data){
             session.set("hash", fullHash?.data?.fullHash);
             return json<ResponseType>(
               { data:{phone: fullHash?.data?.phone} },

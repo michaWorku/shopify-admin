@@ -1,5 +1,7 @@
-import { FC, useEffect } from "react";
-import { useForm, Control } from "react-hook-form";
+import type { FC} from "react";
+import { useEffect } from "react";
+import type { Control } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
@@ -110,7 +112,7 @@ const Reward: FC<RewardProps> = ({
                     actionData?.error?.fieldError?.fieldErrors?.["formId"]
                   }
                   helperText={
-                    !!errors["formId"]
+                    errors["formId"]
                       ? errors["formId"]?.message
                       : actionData?.error?.fieldError?.fieldErrors?.["formId"]
                       ? actionData?.error?.fieldError?.fieldErrors?.[
@@ -263,7 +265,7 @@ const ControlledTextField: React.FC<ControlledTextFieldProps> = ({
             variant="outlined"
             error={!!errors || !!actionData}
             helperText={
-              !!errors ? errors : !!actionData ? actionData.join(" ") : null
+              errors ? errors : actionData ? actionData.join(" ") : null
             }
             {...props}
             sx={{
@@ -336,7 +338,7 @@ const RewardForm: React.FC<any> = ({
     console.log({ editData });
     ["name", "formId", "description", "plan", "rewardGiven"].forEach(
       (field: any) => {
-        if (!!editData) setValue(field, editData[field as keyof Reward]);
+        if (editData) setValue(field, editData[field as keyof Reward]);
       }
     );
   }, [editData]);

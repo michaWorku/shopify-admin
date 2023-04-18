@@ -23,10 +23,11 @@ import {
     useNavigation,
     useSubmit,
 } from '@remix-run/react'
-import { ChangeEvent, SyntheticEvent, useState } from 'react'
+import type { ChangeEvent, SyntheticEvent} from 'react';
+import { useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import { DesktopDatePicker } from '@mui/x-date-pickers'
-import { Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs'
 import moment from 'moment'
 export const GenderValue = ['MALE', 'FEMALE'] as const
 

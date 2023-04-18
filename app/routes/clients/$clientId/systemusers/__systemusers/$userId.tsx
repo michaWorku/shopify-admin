@@ -16,9 +16,12 @@ import {
     IconButton,
 } from '@mui/material'
 import { pink, blue } from '@mui/material/colors'
-import { ActionFunction, LoaderFunction, json } from '@remix-run/server-runtime'
-import dayjs, { Dayjs } from 'dayjs'
-import { useState, SyntheticEvent, ChangeEvent, useEffect } from 'react'
+import type { ActionFunction, LoaderFunction} from '@remix-run/server-runtime';
+import { json } from '@remix-run/server-runtime'
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs'
+import type { SyntheticEvent, ChangeEvent} from 'react';
+import { useState, useEffect } from 'react'
 import {
     Form,
     useActionData,

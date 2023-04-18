@@ -1,4 +1,4 @@
-import * as z from 'zod'
+import type * as z from 'zod'
 
 /**
  * Validates a field against a Zod schema

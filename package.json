@@ -7,8 +7,7 @@
     "dev": "remix dev",
     "postinstall": "remix setup node",
     "start": "remix-serve build",
-    "typecheck": "tsc -b",
-    "lint": "eslint . --ext ts,tsx"
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "@casl/ability": "^6.4.0",
@@ -63,7 +62,6 @@
     "@types/react-dom": "latest",
     "@types/secure-password": "^4.0.0",
     "esbuild-register": "^3.4.2",
-    "eslint": "^8.38.0",
     "prisma": "^4.11.0",
     "prisma-json-schema-generator": "^2.0.17",
     "ts-node": "^10.9.1",

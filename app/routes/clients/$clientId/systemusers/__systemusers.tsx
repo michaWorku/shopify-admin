@@ -8,9 +8,10 @@ import {
     useNavigate,
     useNavigation,
 } from '@remix-run/react'
-import { MRT_ColumnDef } from 'material-react-table'
+import type { MRT_ColumnDef } from 'material-react-table'
 import { useEffect, useMemo, useState } from 'react'
-import { User, Gender, Status } from '@prisma/client'
+import type { User} from '@prisma/client';
+import { Gender, Status } from '@prisma/client'
 import {
     CustomizedTable,
     RowActions,
@@ -20,8 +21,9 @@ import moment from 'moment'
 import DateFilter from '~/src/components/Table/DatePicker'
 import { Box, Button, Card, Modal, Slide } from '@mui/material'
 import FilterModes from '~/src/components/Table/CustomFilter'
+import type {
+    LoaderFunction} from '@remix-run/server-runtime';
 import {
-    LoaderFunction,
     ActionFunction,
     json,
     redirect,
@@ -39,7 +41,7 @@ import { validate } from '~/utils/validators/validate'
 import { systemUserSchema } from '~/utils/schema/systemUserSchema'
 import { toast } from 'react-toastify'
 import { DeleteAlert } from '~/src/components'
-import { DeleteDialogType } from '~/src/components/DeleteAlert'
+import type { DeleteDialogType } from '~/src/components/DeleteAlert'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
     try {
@@ -120,10 +122,10 @@ const SystemUsers = () => {
         navigate(`${row}`)
     }
     useEffect(() => {
-        if (!!fetcher?.data?.error?.error?.message) {
+        if (fetcher?.data?.error?.error?.message) {
             toast.error(fetcher?.data?.error?.error?.message)
         }
-        if (!!fetcher?.data?.message) {
+        if (fetcher?.data?.message) {
             toast.success(fetcher?.data?.message)
             setOpenModal(false)
             setDeleteDialog(DefaultDialogInfo)

@@ -8,7 +8,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import { Form } from "@remix-run/react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Profile as ProfilePic } from "public/assets";

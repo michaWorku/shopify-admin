@@ -120,7 +120,7 @@ const getAllSystemUsers = async (request: any, userId: string) => {
             where: _where,
         })
 
-        if (!!userCount) {
+        if (userCount) {
             users = await db.user.findMany({
                 take,
                 skip,
@@ -202,7 +202,7 @@ const getAllClientSystemUsers = async (
             },
         })
 
-        if (!!userCount) {
+        if (userCount) {
             users = await db.user.findMany({
                 take,
                 skip,

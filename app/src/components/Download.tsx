@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import { UserAgentProvider, UserAgent } from "@quentin-sommer/react-useragent";
 import Link from "@mui/material/Link";
 import { AppStoreIcon, GooglePlayStoreIcon } from "public/assets";

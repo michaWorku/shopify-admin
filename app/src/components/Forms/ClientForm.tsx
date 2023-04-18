@@ -11,11 +11,12 @@ import SendIcon from "@mui/icons-material/Send";
 import { Form } from "@remix-run/react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect } from "react";
-import { TypeOf } from "zod";
+import type { TypeOf } from "zod";
 import { clientSchema } from "~/utils/schema/clientSchema";
-import { SubmitHandler, useForm } from "react-hook-form";
+import type { SubmitHandler} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Client } from "@prisma/client";
+import type { Client } from "@prisma/client";
 import { LoadingButton } from "@mui/lab";
 import ControlledTextField from "./ControlledTextField";
 
@@ -60,7 +61,7 @@ const ClientForm = ({
   useEffect(() => {
     console.log({ editData });
     ["name", "promotionText", "url", "email", "phone"].forEach((field: any) => {
-      if (!!editData) setValue(field, editData[field as keyof Client]);
+      if (editData) setValue(field, editData[field as keyof Client]);
     });
   }, [editData]);
 

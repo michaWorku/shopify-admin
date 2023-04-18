@@ -1,7 +1,7 @@
 import { json } from '@remix-run/node'
 import { db } from '../db.server'
 import customErr, { Response, errorHandler } from '~/utils/handler.server'
-import { Permission, Role, Status } from '@prisma/client'
+import type { Permission, Role, Status } from '@prisma/client'
 import getParams from '~/utils/params/getParams.server'
 import { searchCombinedColumn } from '~/utils/params/search.server'
 import { filterFunction } from '~/utils/params/filter.server'
@@ -282,7 +282,7 @@ export const getAllRoles = async (request: Request, userId: string) => {
                 },
             },
         })
-        if (!!roleCount) {
+        if (roleCount) {
             roles = await db.role.findMany({
                 take,
                 skip,
@@ -306,7 +306,7 @@ export const getAllRoles = async (request: Request, userId: string) => {
                 },
             })
             roles?.map((e: any) => {
-                ;(e.canEdit = true), (e.canDelete = true)
+                (e.canEdit = true), (e.canDelete = true)
             })
             return {
                 data: roles,

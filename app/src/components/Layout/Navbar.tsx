@@ -1,4 +1,6 @@
 import { useTheme } from "@emotion/react";
+import type {
+  Theme} from "@mui/material";
 import {
   AppBar,
   Avatar,
@@ -9,7 +11,6 @@ import {
   Menu,
   MenuItem,
   Paper,
-  Theme,
   Toolbar,
   Tooltip,
   Typography,

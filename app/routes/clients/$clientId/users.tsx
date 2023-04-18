@@ -1,13 +1,15 @@
 import { Box } from '@mui/material'
-import { Reward, User } from '@prisma/client'
-import { LoaderFunction, json } from '@remix-run/node'
+import type { User } from '@prisma/client';
+import { Reward } from '@prisma/client'
+import type { LoaderFunction} from '@remix-run/node';
+import { json } from '@remix-run/node'
 import {
     useFetcher,
     useLoaderData,
     useLocation,
     useNavigation,
 } from '@remix-run/react'
-import { MRT_ColumnDef } from 'material-react-table'
+import type { MRT_ColumnDef } from 'material-react-table'
 import moment from 'moment-timezone'
 import { useEffect, useMemo, useState } from 'react'
 import customErr, { Response } from '~/utils/handler.server'
@@ -149,7 +151,7 @@ const ClientUsers = () => {
     )
 
     useEffect(() => {
-        if (!!loaderData?.data?.error?.error?.message) {
+        if (loaderData?.data?.error?.error?.message) {
             toast.error(loaderData?.data?.error?.error?.message)
         }
     }, [loaderData])

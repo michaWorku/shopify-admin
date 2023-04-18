@@ -1,6 +1,8 @@
-import { FC, useEffect, useState } from "react";
-import { useForm, useFieldArray, Control } from "react-hook-form";
-import { z } from "zod";
+import type { FC} from "react";
+import { useEffect, useState } from "react";
+import type { Control } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
+import type { z } from "zod";
 import ClearIcon from "@mui/icons-material/Clear";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
@@ -28,8 +30,9 @@ import { Controller } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, useLocation } from "@remix-run/react";
+import type {
+  dynamicFormFieldSchema} from "~/utils/schema/dynamicFormSchema";
 import {
-  dynamicFormFieldSchema,
   dynamicFormSchema,
 } from "~/utils/schema/dynamicFormSchema";
 import { flattenErrors } from "~/utils/validators/validate";
@@ -429,7 +432,7 @@ const DynamicForm: React.FC<any> = ({
   useEffect(() => {
     console.log({ editData });
     ["name", "description", "fields"].forEach((field: any) => {
-      if (!!editData) setValue(field, editData[field as keyof DynamicForm]);
+      if (editData) setValue(field, editData[field as keyof DynamicForm]);
     });
     if (!editData) {
       setValue("name", "");

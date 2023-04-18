@@ -1,10 +1,11 @@
-import { DynamicFormSubmission, PLAN, Prisma, Reward } from "@prisma/client";
+import type { DynamicFormSubmission, PLAN, Prisma, Reward } from "@prisma/client";
 import { filterFunction } from "~/utils/params/filter.server";
 import getParams from "~/utils/params/getParams.server";
 import { searchFunction } from "~/utils/params/search.server";
 import { db } from "../db.server";
 import { json } from '@remix-run/node'
-import customErr, { Response, ResponseType, badRequest, errorHandler } from "~/utils/handler.server";
+import type { ResponseType} from "~/utils/handler.server";
+import customErr, { Response, badRequest, errorHandler } from "~/utils/handler.server";
 import canUser, { AbilityType } from "~/utils/casl/ability";
 import { canPerformAction } from "~/utils/casl/canPerformAction";
 import { commitSession, getSession } from "../session.server";
@@ -503,7 +504,7 @@ export const verifyUser = async (request: Request, rewardId: string, clientId: s
                 const fullHash = await createOTP(phone);
                 console.log({ phone, fullHash });
 
-                if (!!fullHash?.data) {
+                if (fullHash?.data) {
                     session.set("hash", fullHash?.data?.fullHash);
                     return json<ResponseType>(
                         { data: { phone: fullHash?.data?.phone, sendOTP: true } },

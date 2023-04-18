@@ -39,7 +39,7 @@ import {
     getUserEntities,
 } from '../services/Entities/entity.server'
 import { DeleteAlert } from '../src/components'
-import { DeleteDialogType } from '../src/components/DeleteAlert'
+import type { DeleteDialogType } from '../src/components/DeleteAlert'
 import DateFilter from '../src/components/Table/DatePicker'
 import React from 'react'
 
@@ -201,10 +201,10 @@ export default function ViewRole() {
     }
 
     useEffect(() => {
-        if (!!fetcher?.data?.error?.error?.message) {
+        if (fetcher?.data?.error?.error?.message) {
             toast.error(fetcher?.data?.error?.error?.message)
         }
-        if (!!fetcher?.data?.message) {
+        if (fetcher?.data?.message) {
             toast.success(fetcher?.data?.message)
             setOpenModal(false)
             setDeleteDialog(DefaultDialogInfo)

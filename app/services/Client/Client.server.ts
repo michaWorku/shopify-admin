@@ -1,9 +1,10 @@
 import { Client, Permission, Prisma } from '@prisma/client'
 import { json } from '@remix-run/node'
 import canUser, { AbilityType } from '~/utils/casl/ability'
+import type {
+    ResponseType} from '~/utils/handler.server';
 import customErr, {
     Response,
-    ResponseType,
     errorHandler,
 } from '~/utils/handler.server'
 import { db } from '../db.server'
@@ -342,10 +343,10 @@ const setClientPermissions = async (
         const canViewSystemUsers = await canPerformAction(
             userId,
             'read',
-            'SystemUser',
+            'ClientSystemUser',
             {}
         )
-        const canViewForms = await canPerformAction(userId, 'read', 'Form', {
+        const canViewForms = await canPerformAction(userId, 'read', 'DynamicForm', {
             clientId: clientData.id,
         })
         const canViewRewards = await canPerformAction(
@@ -359,7 +360,7 @@ const setClientPermissions = async (
         const canViewSubmissions = await canPerformAction(
             userId,
             'read',
-            'Submission',
+            'DynamicFormSubmission',
             {
                 clientId: clientData.id,
             }
