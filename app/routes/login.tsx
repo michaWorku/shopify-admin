@@ -41,7 +41,7 @@ type signinInput = TypeOf<typeof signinSchema>;
 
 export const action: ActionFunction = async ({  request  }) => {
   return await authenticator.authenticate(USER_LOGIN, request, {
-    successRedirect: "/users",
+    successRedirect: "/clients",
     throwOnError: true,
     failureRedirect: "/login",
   });
