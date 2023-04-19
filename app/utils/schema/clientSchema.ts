@@ -19,7 +19,7 @@ export const status = ['ACTIVE', 'INACTIVE'] as const
 export const clientSchema = z.object({
     name: z.string().trim().min(2, { message: 'Too short' }),
     promotionText: z.string().trim().min(2, { message: 'Too short' }),
-    url: z.string().trim().url(),
+    url: z.string().trim().url()?.optional(),
     phone: z
         .string({ required_error: 'Phone number is required' })
         .min(10, { message: 'Invalid number' }),
