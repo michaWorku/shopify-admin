@@ -10,6 +10,8 @@ import { separateAndCapitalize } from "~/utils/format";
  * @param {Array<Object>} props.columns - The table columns
  * @param {Object} props.data - The table data
  * @param {boolean} [props.enableExport=true] - Whether to enable export functionality
+ * @param {boolean} [props.enableDetailPanel=false] - Whether to enable show detail panel for sub data
+ * @param {boolean} [props.enableSubDataExport=false] - Whether to enable export sub data functionality
  * @param {string} [props.exportFileName] - The export file name
  * @param {boolean} props.loading - Whether the table data is loading
  * @param {string} [props.height] - The table height
@@ -25,6 +27,7 @@ const CustomizedTable = ({
   height,
   customAction,
   enableDetailPanel = false,
+  enableSubDataExport = false,
 }: any): JSX.Element => {
   const {
     pagination,
@@ -108,6 +111,7 @@ const CustomizedTable = ({
               data?.metaData
             }
             enableExport={enableExport}
+            enableSubDataExport={enableSubDataExport}
             exportType={exportType}
             setExportType={setExportType}
             exportFileName={exportFileName}
