@@ -140,7 +140,7 @@ const SystemUsers = () => {
   const breadcrumbs = [
     <Typography
       key={"1"}
-      variant="h6"
+      variant="subtitle1"
       color={palette.primary.main}
       fontSize={"bold"}
     >
@@ -236,13 +236,13 @@ const SystemUsers = () => {
   const handleCloseModal = () => {
     setOpenModal(false);
   };
-  const handleDelete = (clientId: any) => {
+  const handleDelete = (userId: any) => {
     setDeleteDialog({
       open: true,
-      id: clientId,
-      title: "Remove a Client",
-      contentText: "Are you sure you want to remove this client?",
-      action: `systemusers/${clientId}`,
+      id: userId,
+      title: "Remove a System User",
+      contentText: "Are you sure you want to remove this user?",
+      action: `systemusers/${userId}`,
     });
   };
   useEffect(() => {
@@ -271,31 +271,33 @@ const SystemUsers = () => {
   }, [fetcher?.data]);
 
   return (
-    <Box>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        page="System Users"
-        loading={loading || navigation.state === "loading" ? true : false}
-        enableExport={true}
-        customAction={(table: any) => (
-          <Button variant="add" onClick={handleOpenModal}>
-            Add User
-          </Button>
-        )}
-      />
-
       <Box>
-        <AddUserForm openModal={openModal} closeModal={handleCloseModal} />
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          page="System Users"
+          loading={loading || navigation.state === "loading" ? true : false}
+          enableExport={true}
+          customAction={(table: any) => (
+            <Button variant="add" onClick={handleOpenModal}>
+              Add User
+            </Button>
+          )}
+        />
+
+        <Box>
+          <AddUserForm openModal={openModal} closeModal={handleCloseModal} />
+        </Box>
+        <DeleteAlert
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+          fetcher={fetcher}
+        />
+        <Outlet />
       </Box>
-      <DeleteAlert
-        deleteDialog={deleteDialog}
-        setDeleteDialog={setDeleteDialog}
-        fetcher={fetcher}
-      />
-      <Outlet />
-    </Box>
+    </>
   );
 };
 
