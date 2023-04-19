@@ -123,7 +123,7 @@ const ClientUsers = () => {
       },
       {
         accessorKey: "birthDate",
-        header: "Plan",
+        header: "Birth Date",
         renderColumnFilterModeMenuItems: FilterModes,
       },
       {
