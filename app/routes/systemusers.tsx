@@ -264,7 +264,6 @@ const SystemUsers = () => {
             <CustomizedTable
                 columns={columns}
                 data={loaderData}
-                page="System Users"
                 loading={
                     loading || navigation.state === 'loading' ? true : false
                 }

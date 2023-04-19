@@ -104,11 +104,14 @@ const ClientSubmissions = () => {
       },
       {
         accessorFn: (originalRow) =>
-          (originalRow?.submittedBy?.firstName || " ") +
-          " " +
-          (originalRow?.submittedBy?.middleName || " ") +
-          " " +
-          (originalRow?.submittedBy?.lastName || " "),
+          {
+            const submittedBy = (originalRow?.submittedBy?.firstName || " ") +
+            " " +
+            (originalRow?.submittedBy?.middleName || " ") +
+            " " +
+            (originalRow?.submittedBy?.lastName || " ")
+            return !!submittedBy?.trim() ? submittedBy: originalRow?.submittedById
+          },
         id: "submittedBy",
         header: "Submitted By",
         renderColumnFilterModeMenuItems: FilterModes,
@@ -170,6 +173,7 @@ const ClientSubmissions = () => {
   );
 
   useEffect(() => {
+    console.log({loaderData})
     if (loaderData?.data?.error?.error?.message) {
       toast.error(loaderData?.data?.error?.error?.message);
     }
@@ -184,6 +188,7 @@ const ClientSubmissions = () => {
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
         enableDetailPanel={true}
+        enableSubDataExport={true}
       />
     </Box>
   );

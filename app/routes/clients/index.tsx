@@ -348,7 +348,6 @@ const Clients = () => {
             <CustomizedTable
                 columns={columns}
                 data={loaderData}
-                page="Client"
                 exportFileName="Clients"
                 enableExport={true}
                 loading={navigation.state === 'loading' ? true : false}

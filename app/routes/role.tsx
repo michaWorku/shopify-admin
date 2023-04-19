@@ -299,7 +299,6 @@ export default function ViewRole() {
             <CustomizedTable
                 columns={columns}
                 data={loaderData}
-                page="Role"
                 // openModal={handleOpenModal}
                 loading={
                     loading || navigation.state === 'loading' ? true : false
