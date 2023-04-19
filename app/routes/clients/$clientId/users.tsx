@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Box, Link, Typography } from "@mui/material";
 import type { User } from "@prisma/client";
 import type { LoaderFunction } from "@remix-run/node";
@@ -21,6 +22,32 @@ import {
 } from "~/services/Client/Client.server";
 import palette from "~/src/theme/palette";
 import Navbar from "~/src/components/Layout/Navbar";
+=======
+import { Box } from "@mui/material";
+import type { User } from "@prisma/client";
+import { Reward } from "@prisma/client";
+import type { LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import {
+  useFetcher,
+  useLoaderData,
+  useLocation,
+  useNavigation,
+} from "@remix-run/react";
+import type { MRT_ColumnDef } from "material-react-table";
+import moment from "moment-timezone";
+import { useEffect, useMemo, useState } from "react";
+import customErr, { Response } from "~/utils/handler.server";
+import { authenticator } from "~/services/auth.server";
+import { CustomizedTable } from "~/src/components/Table";
+import FilterModes from "~/src/components/Table/CustomFilter";
+import DateFilter from "~/src/components/Table/DatePicker";
+import canUser from "~/utils/casl/ability";
+import { errorHandler } from "~/utils/handler.server";
+import { toast } from "react-toastify";
+import { getRewardUsers } from "~/services/Reward/Reward.server";
+import { getClientUsers } from "~/services/Client/Client.server";
+>>>>>>> dev
 
 /**
  * Loader function to fetch users of a client.
@@ -41,7 +68,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     const canRead = (await canUser(user?.id, "read", "User", {
       clientId: params?.clientId,
     })) as any;
+<<<<<<< HEAD
     const client = (await getClientById(params?.clientId)) as any;
+=======
+
+>>>>>>> dev
     // Get all all users that get any reward of a client
     let clientUsers;
     clientUsers = (await getClientUsers(
@@ -52,6 +83,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     console.dir({ form: clientUsers?.data });
 
     if (clientUsers?.status === 404) {
+<<<<<<< HEAD
+=======
+      // const test = await dynamicForms.json()
+      // console.log({ data: test });
+>>>>>>> dev
       return json(
         Response({
           data: {
@@ -73,7 +109,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           ...clientUsers,
           canRead: canRead?.status === 200,
           user,
+<<<<<<< HEAD
           client: client,
+=======
+>>>>>>> dev
         },
       })
     );
@@ -91,6 +130,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 const ClientUsers = () => {
   const loaderData = useLoaderData<typeof loader>();
   const navigation = useNavigation();
+<<<<<<< HEAD
   const breadcrumbs = [
     <Link
       underline="hover"
@@ -110,6 +150,8 @@ const ClientUsers = () => {
       Users
     </Typography>,
   ];
+=======
+>>>>>>> dev
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -175,11 +217,17 @@ const ClientUsers = () => {
 
   return (
     <Box m={2}>
+<<<<<<< HEAD
       <Navbar breadcrumbs={breadcrumbs} />
       <CustomizedTable
         columns={columns}
         data={loaderData}
         page="users"
+=======
+      <CustomizedTable
+        columns={columns}
+        data={loaderData}
+>>>>>>> dev
         exportFileName="Client Users"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}

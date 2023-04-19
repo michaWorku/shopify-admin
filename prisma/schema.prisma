@@ -194,6 +194,8 @@ model DynamicFormSubmission {
   rewardId      String
   reward        Reward    @relation(fields: [rewardId], references: [id])
   submittedBy   User      @relation(fields: [submittedById], references: [id])
+
+  @@unique([rewardId, submittedById])
 }
 
 model BulkTask {

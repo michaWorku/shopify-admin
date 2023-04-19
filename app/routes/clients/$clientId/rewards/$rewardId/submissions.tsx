@@ -136,11 +136,14 @@ const RewardSubmissions = () => {
       },
       {
         accessorFn: (originalRow) =>
-          (originalRow?.submittedBy?.firstName || " ") +
-          " " +
-          (originalRow?.submittedBy?.middleName || " ") +
-          " " +
-          (originalRow?.submittedBy?.lastName || " "),
+          {
+            const submittedBy = (originalRow?.submittedBy?.firstName || " ") +
+            " " +
+            (originalRow?.submittedBy?.middleName || " ") +
+            " " +
+            (originalRow?.submittedBy?.lastName || " ")
+            return !!submittedBy?.trim() ? submittedBy: originalRow?.submittedById
+          },
         id: "submittedBy",
         header: "Submitted By",
         renderColumnFilterModeMenuItems: FilterModes,
@@ -202,6 +205,7 @@ const RewardSubmissions = () => {
   );
 
   useEffect(() => {
+    console.log({loaderData})
     if (loaderData?.data?.error?.error?.message) {
       toast.error(loaderData?.data?.error?.error?.message);
     }
@@ -217,6 +221,7 @@ const RewardSubmissions = () => {
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
         enableDetailPanel={true}
+        enableSubDataExport={true}
       />
     </Box>
   );

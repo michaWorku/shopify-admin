@@ -127,6 +127,7 @@ const SystemUsers = () => {
     }
   }, [fetcher?.data]);
 
+<<<<<<< HEAD
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -221,6 +222,33 @@ const SystemUsers = () => {
       action: `systemusers/${userId}`,
     });
   };
+=======
+    return (
+        <Box>
+            <CustomizedTable
+                columns={columns}
+                data={loaderData}
+                exportFileName="SystemUsers"
+                enableExport={true}
+                loading={
+                    loading || navigation.state === 'loading' ? true : false
+                }
+                customAction={(table: any) => (
+                    <Button variant="add" onClick={handleOpenModal}>
+                        Add User
+                    </Button>
+                )}
+            />
+            <DeleteAlert
+                deleteDialog={deleteDialog}
+                setDeleteDialog={setDeleteDialog}
+                fetcher={fetcher}
+            />
+            <Outlet />
+        </Box>
+    )
+}
+>>>>>>> dev
 
   return (
     <Box>

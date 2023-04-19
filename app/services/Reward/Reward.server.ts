@@ -588,7 +588,8 @@ export const checkReward = async (rewardId: string, clientId: string, phone: str
 
         if (rewardedCount > 0) {
             return json(Response({
-                error: { error: { message: 'User has already got a reward' } },
+                message: 'User has already got a reward',
+                // error: { error: { message: 'User has already got a reward' } },
                 data: {
                     rewarded: true,
                     plan: reward?.plan,
@@ -605,10 +606,18 @@ export const checkReward = async (rewardId: string, clientId: string, phone: str
                 error: { error: { message: "No reward found" } }
             }));
         }
-
+        // Check if a user has a pending submission
+        const checkSubmission = (await db.dynamicFormSubmission.count({
+            where: {
+                submittedBy: {
+                    phone
+                },
+                status: "PENDING"
+            }
+        })) > 0
         // Return the reward data
         return json(Response({
-            data: { ...rewardData }
+            data: { ...rewardData, submit: checkSubmission }
         }));
 
     } catch (error) {
@@ -667,10 +676,11 @@ export const rewardUser = async (rewardData: RewardInteface, submissionData: Sub
                 update: {
                 }
             })
+            console.log({ userReward })
             const rewardUser = await tx.clientUser.update({
                 where: {
                     userId_clientId: {
-                        userId: "submissionData?.submittedBy?.id",
+                        userId: submissionData?.submittedBy?.id,
                         clientId: rewardData?.client?.id
                     }
                 },
@@ -714,6 +724,7 @@ export const rewardUser = async (rewardData: RewardInteface, submissionData: Sub
                     }
                 }
             })
+            console.log({ rewardUser })
             return {
                 rewarded: rewardUser?.isRewarded,
                 reward: rewardData,

@@ -17,7 +17,7 @@ import { rewardUser } from "../Reward/Reward.server";
  * @returns {Promise<Response>} - A Promise that resolves to a Response object with the status and data of the submission
  * @throws {customErr} - Throws an error if either the reward ID or client ID are missing
  */
- export const createDynamicFormSubmission = async (rewardId: string, clientId: string, submitedData: any, phone: string) => {
+export const createDynamicFormSubmission = async (rewardId: string, clientId: string, submitedData: any, phone: string) => {
     if (!rewardId) {
         throw new customErr('Custom_Error', 'Reward ID is required', 404)
     }
@@ -26,27 +26,41 @@ import { rewardUser } from "../Reward/Reward.server";
     }
     try {
         const result = await db.$transaction(async (tx) => {
-            const { submit, ...selectedSubmittedData } = submitedData
+
+            const submittedUser = await tx.user.upsert({
+                where: {
+                    phone
+                },
+                create: {
+                    phone,
+                    firstName: submitedData?.firstName,
+                    middleName: submitedData?.middleName,
+                    lastName: submitedData?.lastName,
+                    email: submitedData?.email,
+                    gender: submitedData?.gender?.toUpperCase(),
+                },
+                update: {
+                    firstName: submitedData?.firstName,
+                    middleName: submitedData?.middleName,
+                    lastName: submitedData?.lastName,
+                    email: submitedData?.email,
+                    gender: submitedData?.gender?.toUpperCase(),
+                }
+            })
+            console.log({ submittedUser })
 
             const createSubmission = await tx.dynamicFormSubmission.upsert({
                 where: {
-                    id: submit
+                    rewardId_submittedById: {
+                        rewardId,
+                        submittedById: submittedUser?.id
+                    }
                 },
                 create: {
-                    data: selectedSubmittedData,
+                    data: submitedData,
                     submittedBy: {
-                        connectOrCreate: {
-                            create: {
-                                phone,
-                                firstName: submitedData?.firstName,
-                                middleName: submitedData?.middleName,
-                                lastName: submitedData?.lastName,
-                                email: submitedData?.email,
-                                gender: submitedData?.gender?.toUpperCase(),
-                            },
-                            where: {
-                                phone
-                            }
+                        connect: {
+                            id: submittedUser?.id
                         }
                     },
                     reward: {
@@ -57,7 +71,7 @@ import { rewardUser } from "../Reward/Reward.server";
 
                 },
                 update: {
-                    data: selectedSubmittedData
+                    data: submitedData
                 },
                 include: {
                     reward: true,
@@ -65,7 +79,7 @@ import { rewardUser } from "../Reward/Reward.server";
                 }
             })
 
-            console.log({createSubmission, clientId})
+            console.log({ createSubmission, clientId })
 
             const clientUser = await tx.clientUser.upsert({
                 where: {
@@ -111,8 +125,8 @@ import { rewardUser } from "../Reward/Reward.server";
                             url: true
                         }
                     },
-                    form:{
-                        include:{
+                    form: {
+                        include: {
                             fields: true
                         }
                     },
@@ -129,8 +143,8 @@ import { rewardUser } from "../Reward/Reward.server";
                 submission: createSubmission
             }
         }, {
-            maxWait: 10000,
-            timeout: 50000
+            maxWait: 30000,
+            timeout: 80000
         })
 
 
@@ -142,6 +156,7 @@ import { rewardUser } from "../Reward/Reward.server";
             message: 'Submiting data in progress'
         })
     } catch (err) {
+        console.dir(err)
         return json(Response({
             error: {
                 error: {
@@ -239,11 +254,15 @@ export const getClientSubmissions = async (request: Request, clientId: string): 
         if (exportType === 'page') {
             exportData = submissions;
         } else if (exportType === 'filtered') {
-            exportData = await db.user.findMany({
+            exportData = await db.dynamicFormSubmission.findMany({
                 orderBy: [{ [sortField]: sortType }],
                 where: submissionWhere,
             });
-        } else {
+        } else if (exportType === 'subData') {
+            const submissions = await db.dynamicFormSubmission.findMany({});
+            exportData = submissions?.map((submission: any) => ({ ...submission.data }))
+        }
+        else {
             exportData = await db.dynamicFormSubmission.findMany({});
         }
 
@@ -284,7 +303,7 @@ export const getRewardSubmissions = async (request: Request, rewardId: string): 
         const { sortType, sortField, skip, take, pageNo, search, filter, exportType } = getParams(request);
 
         const searchParams = searchFunction(search, 'DynamicFormSubmission', ['id', 'submittedById', 'status']);
-        console.log({searchParams})
+        console.log({ searchParams })
         const filterParams = filterFunction(filter, 'DynamicFormSubmission');
 
         const submissionWhere: Prisma.DynamicFormSubmissionWhereInput = {
@@ -322,7 +341,11 @@ export const getRewardSubmissions = async (request: Request, rewardId: string): 
                 orderBy: [{ [sortField]: sortType }],
                 where: submissionWhere,
             });
-        } else {
+        } else if (exportType === 'subData') {
+            const submissions = await db.dynamicFormSubmission.findMany({});
+            exportData = submissions?.map((submission: any) => ({ ...submission.data }))
+        }
+        else {
             exportData = await db.dynamicFormSubmission.findMany({});
         }
 
@@ -361,7 +384,7 @@ export const handleDynamicFormSubmission = async (rewardId: string, clientId: st
     try {
         // create dynamic form submission
         const submission = await createDynamicFormSubmission(rewardId, clientId, submitedData, phone) as any
-        console.log({submission})
+        console.log({ submission })
         if (submission?.data?.status === 'INPROGRESS' && !!submission?.data?.reward && !!submission.data?.submission) {
             // sewasew reward
             const sewasewRewardResp = await sewasewReward({
@@ -371,11 +394,11 @@ export const handleDynamicFormSubmission = async (rewardId: string, clientId: st
                 reward_id: submission?.data?.reward?.id,
                 subscription_plan: submission?.data?.reward?.plan
             })
-            console.log({sewasewRewardResp})
+            console.log({ sewasewRewardResp })
             // reward user
             if (sewasewRewardResp?.status === 200 && !!sewasewRewardResp?.data?.ok) {
                 const reward = await rewardUser(submission?.data?.reward, submission?.data?.submission, submitedData)
-                console.log({userReward: reward})
+                console.log({ userReward: reward })
                 return reward
             } else if (sewasewRewardResp?.status === 409) {
                 if (sewasewRewardResp?.message?.includes('subscription')) {
@@ -412,7 +435,7 @@ export const handleDynamicFormSubmission = async (rewardId: string, clientId: st
                     submissionId: submission?.data?.id,
                     submitedData,
                     submit: true,
-                    data:{
+                    data: {
                         ...submission?.data?.reward
                     }
                 }

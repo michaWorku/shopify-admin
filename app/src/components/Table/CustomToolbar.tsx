@@ -6,8 +6,7 @@ import {
   MRT_ToggleFiltersButton,
   MRT_ToggleGlobalFilterButton,
 } from "material-react-table";
-import type {
-  Theme} from "@mui/material";
+import type { Theme } from "@mui/material";
 import {
   Box,
   Button,
@@ -27,6 +26,7 @@ interface CustomToolbarProps {
   exportType: string;
   setExportType: (type: string) => void;
   enableExport: boolean;
+  enableSubDataExport: boolean;
   exportFileName: string;
 }
 /**
@@ -37,6 +37,7 @@ interface CustomToolbarProps {
  * @param {string} props.exportType - The type of export to perform.
  * @param {function} props.setExportType - The function to set the export type.
  * @param {boolean} props.enableExport - Whether to enable the export feature.
+ * @param {boolean} props.enableSubDataExport - Whether to enable the export sub data feature.
  * @param {string} props.exportFileName - The filename to use for the exported file.
  * @returns {JSX.Element} CustomToolbar component.
  */
@@ -47,6 +48,7 @@ const CustomToolbar: React.FC<CustomToolbarProps> = ({
   setExportType,
   enableExport,
   exportFileName,
+  enableSubDataExport,
 }: any) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
@@ -79,12 +81,14 @@ const CustomToolbar: React.FC<CustomToolbarProps> = ({
   const csvExporter = new ExportToCsv(csvOptions);
 
   useEffect(() => {
-    console.log({data,exportData: data?.exportData, exportType})
-    
+    console.log({ data, exportData: data?.exportData, exportType });
+
     if (exportType && exportType === data?.exportType) {
-      // csvExporter.generateCsv(data?.exportData);
-      
-      handleExportData(data?.exportData, `Sewasew-Reward-${exportFileName}`, `Sewasew-Reward-${exportFileName}`)
+      handleExportData(
+        data?.exportData,
+        `Sewasew-Reward-${exportFileName}`,
+        `Sewasew-Reward-${exportFileName}`
+      );
       setExportType("");
     }
   }, [exportType, data]);
@@ -144,16 +148,25 @@ const CustomToolbar: React.FC<CustomToolbarProps> = ({
             <Button
               variant="export"
               onClick={() =>
-                csvExporter.generateCsv(
+                handleExportData(
                   table
                     .getSelectedRowModel()
-                    .rows.map((row: any) => row.original)
+                    .rows.map((row: any) => row.original),
+                  `Sewasew-Reward-${exportFileName}`,
+                  `Sewasew-Reward-${exportFileName}`
                 )
               }
             >
               Export SELECTED ROWS
             </Button>
           </MenuItem>
+          {enableSubDataExport && (
+            <MenuItem>
+              <Button variant="export" onClick={() => setExportType("subData")}>
+                Export Sub Data
+              </Button>
+            </MenuItem>
+          )}
         </Box>
       </Menu>
       <MRT_ToggleFiltersButton table={table} />
