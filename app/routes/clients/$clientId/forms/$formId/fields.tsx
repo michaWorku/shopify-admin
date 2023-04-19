@@ -176,6 +176,7 @@ export const DefaultDialogInfo = {
 const FormFields = () => {
   const loaderData = useLoaderData<typeof loader>();
   const location = useLocation();
+  const params = useParams();
   const [actionData, setActionData] = useState(null);
   const [deleteDialog, setDeleteDialog] =
     useState<DeleteDialogType>(DefaultDialogInfo);
@@ -198,7 +199,7 @@ const FormFields = () => {
       key="2"
       variant="h6"
       color={palette.primary.main}
-      href="/clients"
+      href={`/clients/${params?.clientId}/forms`}
     >
       {loaderData?.data?.form?.data?.name}
     </Link>,

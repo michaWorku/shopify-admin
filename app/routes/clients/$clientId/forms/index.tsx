@@ -7,6 +7,7 @@ import {
   useLoaderData,
   useLocation,
   useNavigation,
+  useParams,
 } from "@remix-run/react";
 import type { MRT_ColumnDef } from "material-react-table";
 import moment from "moment-timezone";
@@ -32,6 +33,7 @@ import { DynamicForm as AddDynamicForm } from "~/src/components/Forms";
 import { dynamicFormSchema } from "~/utils/schema/dynamicFormSchema";
 import palette from "~/src/theme/palette";
 import { getClientById } from "~/services/Client/Client.server";
+import Navbar from "~/src/components/Layout/Navbar";
 
 /**
  * Loader function to fetch dynamic forms.
@@ -186,6 +188,7 @@ const Forms = () => {
   const loaderData = useLoaderData<typeof loader>();
   const location = useLocation();
   const [actionData, setActionData] = useState(null);
+  const parmas = useParams();
   const [deleteDialog, setDeleteDialog] =
     useState<DeleteDialogType>(DefaultDialogInfo);
   const [editData, setEditData] = useState<undefined | null>(null);
@@ -197,7 +200,7 @@ const Forms = () => {
     <Link
       underline="hover"
       key="2"
-      variant="h6"
+      variant="subtitle1"
       color={palette.primary.main}
       href="/clients"
     >
@@ -331,34 +334,37 @@ const Forms = () => {
   };
 
   return (
-    <Box m={2}>
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="Forms"
-        enableExport={true}
-        loading={navigation.state === "loading" ? true : false}
-        customAction={(table: any) => (
-          <Button variant="add" onClick={() => handleModal(undefined)}>
-            Add Form
-          </Button>
-        )}
-      />
-      <AddDynamicForm
-        openModal={openModal}
-        actionData={actionData}
-        setActionData={setActionData}
-        editData={editData}
-        setEditData={setEditData}
-        setOpenModal={setOpenModal}
-        fetcher={fetcher}
-      />
-      <DeleteAlert
-        deleteDialog={deleteDialog}
-        setDeleteDialog={setDeleteDialog}
-        fetcher={fetcher}
-      />
-    </Box>
+    <>
+      <Navbar breadcrumbs={breadcrumbs} />
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="Forms"
+          enableExport={true}
+          loading={navigation.state === "loading" ? true : false}
+          customAction={(table: any) => (
+            <Button variant="add" onClick={() => handleModal(undefined)}>
+              Add Form
+            </Button>
+          )}
+        />
+        <AddDynamicForm
+          openModal={openModal}
+          actionData={actionData}
+          setActionData={setActionData}
+          editData={editData}
+          setEditData={setEditData}
+          setOpenModal={setOpenModal}
+          fetcher={fetcher}
+        />
+        <DeleteAlert
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+          fetcher={fetcher}
+        />
+      </Box>
+    </>
   );
 };
 
