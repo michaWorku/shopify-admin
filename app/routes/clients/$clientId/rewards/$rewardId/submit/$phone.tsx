@@ -35,7 +35,7 @@ import { requestFormHandler } from "~/utils/formHandler";
 import customErr, { Response, errorHandler } from "~/utils/handler.server";
 import { verifyOTP } from "~/services/otp.server";
 import { destroySession, getSession } from "~/services/session.server";
-import { SewasewLogo } from "public/assets";
+import { SewasewBlackLogo } from "public/assets";
 import { Download } from "~/src/components";
 import { handleDynamicFormSubmission } from "~/services/DynamicFormSubmission/DynamicFormSubmission.server";
 
@@ -218,11 +218,10 @@ const SubmitForm = () => {
 
   useEffect(() => {
     console.log({ loaderData });
+    if (loaderData?.data?.message) {
+      toast.success(loaderData?.data?.message);
+    }
   }, [loaderData]);
-
-  useEffect(() => {
-    console.log({ navigation });
-  }, [navigation]);
 
   useEffect(() => {
     console.log({ fetcher });
@@ -618,7 +617,7 @@ const SubmitForm = () => {
           }}
         >
           <img
-            src={SewasewLogo}
+            src={SewasewBlackLogo}
             height="65px"
             width="65px"
             alt="sewasew logo"
@@ -707,7 +706,6 @@ const SubmitForm = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: "red",
           minWidth: { xs: "100%", sm: "90%", md: "80%" },
         }}
       >
@@ -729,9 +727,10 @@ const SubmitForm = () => {
           >
             {Reward}
           </Box>
-        ) : !state.sendOTP ? (
-          SendOTP
-        ) : !!loaderData?.data?.submit || !!fetcher?.data?.data?.submit ? (
+        ) : !!loaderData?.data?.submit ||
+          !!fetcher?.data?.data?.submit ||
+          !!loaderData?.data?.retry ||
+          !!fetcher?.data?.data?.retry ? (
           <Box
             sx={{
               width: "100%",
@@ -754,6 +753,8 @@ const SubmitForm = () => {
               navigation={navigation}
             />
           </Box>
+        ) : !state.sendOTP ? (
+          SendOTP
         ) : (
           Verify
         )}

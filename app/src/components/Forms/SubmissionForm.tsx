@@ -384,12 +384,6 @@ const SubmissionForm: React.FC<any> = ({
           loadingPosition="end"
           type="submit"
           variant="add"
-          {...register("submit")}
-          value={
-            fetcher?.data?.data?.submissionId
-              ? fetcher?.data?.data?.submissionId
-              : "1"
-          }
           sx={{
             my: 2,
             background: "#601E1D",

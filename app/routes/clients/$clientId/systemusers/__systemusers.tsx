@@ -228,7 +228,6 @@ const SystemUsers = () => {
       <CustomizedTable
         columns={columns}
         data={loaderData}
-        page="System Users"
         exportFileName="SystemUsers"
         enableExport={true}
         loading={loading || navigation.state === "loading" ? true : false}
