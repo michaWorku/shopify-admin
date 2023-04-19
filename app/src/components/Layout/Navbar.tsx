@@ -1,40 +1,18 @@
 import { useTheme } from "@emotion/react";
-import type {
-  Theme} from "@mui/material";
-import {
-  AppBar,
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  Menu,
-  MenuItem,
-  Paper,
-  Toolbar,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import { SewasewLogo } from "public/assets";
-import React, { useEffect, useState } from "react";
-import { Form, Link, useLoaderData, useLocation } from "@remix-run/react";
-import MobileNav from "./SideBar";
+import { Breadcrumbs, Stack, Theme } from "@mui/material";
+import { AppBar, Box, Toolbar } from "@mui/material";
+import { ChevronRight } from "@mui/icons-material";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import React, { useState } from "react";
+import { useLoaderData } from "@remix-run/react";
 import Profile from "./Profile";
+import palette from "~/src/theme/palette";
 
-const Navbar = () => {
+const Navbar = ({ breadcrumbs }: any) => {
   const theme = useTheme() as Theme;
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  );
-  const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation();
   const loaderData = useLoaderData();
-
-  useEffect(() => {
-    console.log({ loaderData, location });
-  }, [loaderData]);
-
+  console.log({ loaderData, breadcrumbs });
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -42,11 +20,6 @@ const Navbar = () => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
-
-  const toggleMenu = () => {
-    setMenuOpen((menuOpen) => !menuOpen);
-  };
-
   return (
     <>
       <AppBar
@@ -66,15 +39,25 @@ const Navbar = () => {
             my: 2,
           }}
         >
-          <Link prefetch="intent" to="/client">
-            <Box sx={{alignSelf: 'start'}}>
-              <Typography variant="h6" component="h6">
-               {
-                location.pathname.slice(1) === 'systemusers' ? 'System Users' : location.pathname.slice(1)
-               }
-              </Typography>
-            </Box>
-          </Link>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              width: "100%",
+            }}
+          >
+            <Stack spacing={2}>
+              <Breadcrumbs
+                separator={
+                  <NavigateNextIcon fontSize="medium" color={"primary"} />
+                }
+                aria-label="breadcrumb"
+              >
+                {breadcrumbs}
+              </Breadcrumbs>
+            </Stack>
+          </Box>
           <Profile
             user={loaderData?.data?.user}
             anchorElUser={anchorElUser}
