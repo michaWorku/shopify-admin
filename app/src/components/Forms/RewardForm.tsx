@@ -1,8 +1,8 @@
-import type { FC} from "react";
+import type { FC } from "react";
 import { useEffect } from "react";
-import type { Control } from "react-hook-form";
+import type { Control, SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { TypeOf, z } from "zod";
 import SendIcon from "@mui/icons-material/Send";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -17,7 +17,6 @@ import {
   IconButton,
   Autocomplete,
 } from "@mui/material";
-
 import { Controller } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,6 +34,8 @@ type RewardProps = {
   actionData?: any;
   forms?: any;
 };
+type RewardFormInput = TypeOf<typeof rewardSchema>
+
 /**
  * Reward component displays a reward form
  * @component Reward
@@ -63,7 +64,6 @@ const Reward: FC<RewardProps> = ({
       justifyContent="start"
       mt={1}
     >
-      <input type="hidden" {...register("id")} value={reward?.id} />
       <Grid item xs={6}>
         <ControlledTextField
           name="name"
@@ -86,16 +86,19 @@ const Reward: FC<RewardProps> = ({
             <Autocomplete
               id="formId"
               disableClearable
-              value={forms?.find((form: any) => form?.id === reward?.formId)?.name || value}
+              value={
+                forms?.find((form: any) => form?.id === reward?.formId)?.name ||
+                value
+              }
               options={forms?.map((option: any) => option?.name)}
               onChange={(event, value: any) =>
                 onChange(forms?.find((form: any) => form?.name === value)?.id)
               }
               placeholder="Search form"
               sx={{
-                '& .MuiFormLabel-root':{
-                  color: 'primary.main'
-                }
+                "& .MuiFormLabel-root": {
+                  color: "primary.main",
+                },
               }}
               renderInput={(params) => (
                 <TextField
@@ -105,7 +108,7 @@ const Reward: FC<RewardProps> = ({
                   required
                   InputProps={{
                     ...params.InputProps,
-                    type: "search"
+                    type: "search",
                   }}
                   error={
                     !!errors["formId"] ||
@@ -327,7 +330,7 @@ const RewardForm: React.FC<any> = ({
     formState: { errors },
     reset,
     setValue,
-  } = useForm<Reward>({
+  } = useForm<RewardFormInput>({
     mode: "onChange",
     resolver: zodResolver(rewardSchema, undefined, {
       rawValues: true,
@@ -345,7 +348,8 @@ const RewardForm: React.FC<any> = ({
 
   const location = useLocation();
 
-  const onSubmit = (data: any) => {
+  const onSubmit: SubmitHandler<RewardFormInput> = (data, e) => {
+    e?.preventDefault();
     // const test = {
     //   name: "",
     //   description: "",
