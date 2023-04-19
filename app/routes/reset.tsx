@@ -45,7 +45,7 @@ import customErr, {
   errorHandler
 } from "~/utils/handler.server";
 import { createOTP, verifyOTP } from "~/services/otp.server";
-import { checkUserExists, updatePassword } from "~/services/User/users.server";
+import { checkUserExists, updatePassword } from "~/services/User/Users.server";
 import { toast } from "react-toastify";
 import {
   commitSession,

@@ -30,7 +30,7 @@ import {
 } from '@remix-run/node'
 import { badRequest } from '~/utils/utils-server'
 import { addUserSchema, signupSchema } from '~/utils/validations'
-import { checkUserExists, createUser } from '~/services/User/users.server'
+import { checkUserExists, createUser } from '~/services/User/Users.server'
 import type { SubmitHandler} from 'react-hook-form';
 import { useForm } from 'react-hook-form'
 import type { TypeOf } from 'zod'

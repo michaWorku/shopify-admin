@@ -9,7 +9,7 @@ import AddUserForm from '~/src/components/Forms/AddUserForm'
 import { validate } from '~/utils/validators/validate'
 import { systemUserSchema } from '~/utils/schema/systemUserSchema'
 import { toast } from 'react-toastify'
-import { getUserById } from '~/services/User/users.server'
+import { getUserById } from '~/services/User/Users.server'
 import { getUserCreatedRole } from '~/services/Role/role.server'
 
 export const loader: LoaderFunction = async ({ request, params }) => {

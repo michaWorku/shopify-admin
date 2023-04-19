@@ -7,7 +7,7 @@ import { permittedFieldsOf } from '@casl/ability/extra'
 import { Prisma } from '@prisma/client'
 import { pick } from 'lodash'
 import { getUserPermissions } from '~/services/Role/Permissions/permission.server'
-import { getUserById } from '~/services/User/users.server'
+import { getUserById } from '~/services/User/Users.server'
 import { Response, errorHandler } from '../handler.server'
 
 export enum AbilityType {

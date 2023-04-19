@@ -3,12 +3,13 @@ import type { ClientUser, Prisma, User } from '@prisma/client';
 import { Client } from '@prisma/client'
 import type { z } from 'zod'
 import moment from 'moment-timezone'
-import customErr, { badRequest } from '~/utils/handler.server'
+import customErr, { Response, badRequest, errorHandler } from '~/utils/handler.server'
 import { hashPassword, verifyPassword } from '~/utils/auth'
 import { db } from '../db.server'
-import { searchCombinedColumn } from '~/utils/params/search.server'
-import { multipleFilter } from '~/utils/params/filter.server'
+import { searchCombinedColumn, searchFunction } from '~/utils/params/search.server'
+import { filterFunction, multipleFilter } from '~/utils/params/filter.server'
 import { format } from '~/utils/format'
+import getParams from '~/utils/params/getParams.server';
 
 export enum Role {
     'ADMIN',
@@ -171,7 +172,7 @@ export const getUserById = async (userId: string) => {
                 clientSystemUser.push(client.clientId)
                 return
             }
-            if (client.isRewareded) {
+            if (client.isRewarded) {
                 clientUser.push(client.clientId)
             }
         })
@@ -211,78 +212,74 @@ export const deleteUser = async (phone: string) => {
     }
 }
 
-export const getUsers = async (request: Request) => {
+
+/**
+ * Retrieve all users.
+ * @async
+ * @function getUsers
+ * @param {Request} request - The HTTP request object.
+ * @returns {Promise<obj>} The retrieved users.
+ * @throws {Error} Throws an error if users are not found.
+ */
+ export const getUsers = async (request: Request): Promise<any> => {
     try {
-        const url = new URL(request.url)
+        const { sortType, sortField, skip, take, pageNo, search, filter, exportType } = getParams(request);
 
-        let filters = url.searchParams.get('filters')
-        if (typeof filters === 'string' && !!filters)
-            filters = JSON.parse(filters)
-        let sort: any = url.searchParams.get('sort')
-        if (typeof sort === 'string' && !!sort) sort = JSON.parse(sort)
-        const page = url.searchParams.get('page')
-        const perPage = url.searchParams.get('perPage')
-        const search = url.searchParams.get('search') || ''
-        console.log({ search, filters, page, perPage, sort })
+        const searchParams = searchFunction(search, 'User', ['firstName', 'middleName', 'lastName']);
+        const filterParams = filterFunction(filter, 'User');
 
-        const fields = ['firstName', 'middleName', 'lastName', 'email', 'phone']
-        const take = perPage ? parseInt(perPage) : 5
-        const count = await db.user.count({
-            where: {
-                ...(search ? searchCombinedColumn(search, fields) : {}),
-                ...(filters?.length ? multipleFilter(filters, 'User') : {}),
-            },
-        })
+        const usersWhere: Prisma.UserWhereInput = {
+            deletedAt: null,
+            ...searchParams,
+            ...filterParams,
+        };
+
+        const usersCount = await db.user.count({ where: usersWhere });
+
+        if (usersCount === 0) {
+            throw new customErr('Custom_Error', 'No user found', 404);
+        }
 
         const users = await db.user.findMany({
-            where: {
-                ...(search !== '' ? searchCombinedColumn(search, fields) : {}),
-                ...(filters?.length ? multipleFilter(filters, 'User') : {}),
-            },
-            orderBy: sort?.length
-                ? sort?.map((item: any) => {
-                      if (item.field === 'name') {
-                          return {
-                              firstName: item.sort,
-                          }
-                      }
-                      return { [item.field]: item.sort }
-                  })
-                : {},
-            select: userSelect,
             take,
-            skip: page ? take * parseInt(page) : 0,
-        })
-        return {
-            data: {
-                users: users?.map((user: any) => ({
-                    ...user,
-                    createdAt: moment(new Date(user?.createdAt), format)
-                        .tz('Africa/Addis_Ababa')
-                        .format(format),
-                    updatedAt: moment(new Date(user?.updatedAt), format)
-                        .tz('Africa/Addis_Ababa')
-                        .format(format),
-                    deletedAt: user?.deltedAt
-                        ? moment(new Date(user?.deletedAt), format)
-                              .tz('Africa/Addis_Ababa')
-                              .format(format)
-                        : '',
-                })),
-            },
-            metaData: {
-                total: count,
-                page,
-                perPage,
-                search,
-                filters,
-                sort,
-            },
+            skip,
+            orderBy: [{ [sortField]: sortType }],
+            where: usersWhere
+        });
+
+        let exportData;
+
+        if (exportType === 'page') {
+            exportData = users;
+        } else if (exportType === 'filtered') {
+            exportData = await db.user.findMany({
+                orderBy: [{ [sortField]: sortType }],
+                where: usersWhere,
+            });
+        } else {
+            exportData = await db.user.findMany({});
         }
+
+        return Response({
+            data: users,
+            metaData: {
+                page: pageNo,
+                pageSize: take,
+                total: usersCount,
+                sort: [sortField, sortType],
+                searchVal: search,
+                filter,
+                exportType,
+                exportData,
+            },
+        })
     } catch (error) {
-        throw error
+        console.log('Error occurred loading users.');
+        console.dir(error, { depth: null });
+        return errorHandler(error);
     }
-}
+};
+
 
 export const updatePassword = async (phone: string, password: string) => {
     try {
