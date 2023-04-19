@@ -1,6 +1,7 @@
 export { default as EthiopianMusicStreamingAppForAll } from './ethiopian_music_streaming_app_for_all.png'
 export { default as Profile } from './profile.svg'
 export { default as SewasewLogo } from './sewasewLogo.svg'
+export {default as SewasewBlackLogo} from './sewasew_music_streaming_black_logo.png'
 export { default as TelebirrLogo } from './support_telebirr_logo.png'
 export { default as AirtimeLogo } from './support_airtime_logo.png'
 export { default as EnatbankLogo } from './support_enatbank_logo.png'
