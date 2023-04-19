@@ -1,16 +1,13 @@
-import { Box } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import type { DynamicFormSubmission, Reward, User } from "@prisma/client";
 import { Status } from "@prisma/client";
-import type { LoaderFunction} from "@remix-run/node";
+import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import {
-  useLoaderData,
-  useNavigation,
-} from "@remix-run/react";
+import { useLoaderData, useNavigation, useParams } from "@remix-run/react";
 import type { MRT_ColumnDef } from "material-react-table";
 import moment from "moment-timezone";
 import { useEffect, useMemo } from "react";
-import  { Response } from "~/utils/handler.server";
+import { Response } from "~/utils/handler.server";
 import { authenticator } from "~/services/auth.server";
 import { CustomizedTable } from "~/src/components/Table";
 import FilterModes from "~/src/components/Table/CustomFilter";
@@ -19,6 +16,10 @@ import canUser from "~/utils/casl/ability";
 import { errorHandler } from "~/utils/handler.server";
 import { toast } from "react-toastify";
 import { getRewardSubmissions } from "~/services/DynamicFormSubmission/DynamicFormSubmission.server";
+import palette from "~/src/theme/palette";
+import Navbar from "~/src/components/Layout/Navbar";
+import { getClientById } from "~/services/Client/Client.server";
+import { getReward } from "~/services/Reward/Reward.server";
 
 /**
  * Loader function to fetch submissions of a reward.
@@ -39,7 +40,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     const canRead = (await canUser(user?.id, "read", "DynamicFormSubmission", {
       clientId: params?.clientId,
     })) as any;
-
+    const client = await getClientById(params?.clientId);
+    const reward = await getReward(params?.rewardId);
     // Get all all users that get reward submission
     let clientSubmissions;
     clientSubmissions = (await getRewardSubmissions(
@@ -55,6 +57,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           data: {
             canRead: canRead?.status === 200,
             user,
+            client,
+            reward,
           },
           error: {
             error: {
@@ -71,6 +75,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           ...clientSubmissions,
           canRead: canRead?.status === 200,
           user,
+          reward,
+          client,
         },
       })
     );
@@ -88,6 +94,32 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 const RewardSubmissions = () => {
   const loaderData = useLoaderData<typeof loader>();
   const navigation = useNavigation();
+  const breadcrumbs = [
+    <Link
+      underline="hover"
+      key="2"
+      color={palette.primary.main}
+      href="/clients"
+    >
+      {loaderData?.data?.client?.data?.name}
+    </Link>,
+    <Link
+      underline="hover"
+      key="2"
+      color={palette.primary.main}
+      href={`/clients/${loaderData?.data?.client?.data?.id}/rewards`}
+    >
+      {loaderData?.data?.reward?.data?.name}
+    </Link>,
+    <Typography
+      key={"1"}
+      variant="h6"
+      color={palette.primary.main}
+      fontSize={"bold"}
+    >
+      Reward Submissios
+    </Typography>,
+  ];
   const columns = useMemo<
     MRT_ColumnDef<
       DynamicFormSubmission & {
@@ -177,6 +209,7 @@ const RewardSubmissions = () => {
 
   return (
     <Box m={2}>
+      <Navbar breadcrumbs={breadcrumbs} />
       <CustomizedTable
         columns={columns}
         data={loaderData}

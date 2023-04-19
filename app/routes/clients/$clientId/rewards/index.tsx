@@ -1,12 +1,13 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, Link, Typography } from "@mui/material";
 import { Reward, Status } from "@prisma/client";
-import type { ActionFunction, LoaderFunction} from "@remix-run/node";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   useFetcher,
   useLoaderData,
   useLocation,
   useNavigation,
+  useParams,
 } from "@remix-run/react";
 import type { MRT_ColumnDef } from "material-react-table";
 import moment from "moment-timezone";
@@ -26,12 +27,18 @@ import { formHandler } from "~/utils/formHandler";
 import { toast } from "react-toastify";
 import type { DeleteDialogType } from "~/src/components/DeleteAlert";
 import DeleteAlert from "~/src/components/DeleteAlert";
-import {
-  getDynamicForms,
-} from "~/services/Form/Form.server";
+import { getDynamicForms } from "~/services/Form/Form.server";
 import { RewardForm } from "~/src/components/Forms";
-import { createReward, deleteRewardById, getRewards, updateRewardById } from "~/services/Reward/Reward.server";
+import {
+  createReward,
+  deleteRewardById,
+  getRewards,
+  updateRewardById,
+} from "~/services/Reward/Reward.server";
 import { rewardSchema, updateRewardSchema } from "~/utils/schema/rewardSchema";
+import palette from "~/src/theme/palette";
+import Navbar from "~/src/components/Layout/Navbar";
+import { getClientById } from "~/services/Client/Client.server";
 
 /**
  * Loader function to fetch rewards of a client.
@@ -49,15 +56,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
     console.log({ user, params });
     // Check if the user can create a reward
-    const canCreate = (await canUser(
-      user?.id,
-      "create",
-      "Reward",
-      {}
-    )) as any;
-
+    const canCreate = (await canUser(user?.id, "create", "Reward", {})) as any;
+    const client = await getClientById(params?.clientId);
     // Get all dynamic forms and rewards
-    let dynamicForms, rewards
+    let dynamicForms, rewards;
     dynamicForms = (await getDynamicForms(
       request,
       user.id,
@@ -74,6 +76,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           data: {
             canCreate: canCreate?.status === 200,
             user,
+            client,
           },
           error: {
             error: {
@@ -84,7 +87,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       );
     }
 
-   // Get all dynamic forms and rewards
+    // Get all dynamic forms and rewards
     rewards = (await getRewards(
       request,
       user.id,
@@ -100,6 +103,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
             canCreate: canCreate?.status === 200,
             user,
             forms: dynamicForms?.data,
+            client,
           },
           error: {
             error: {
@@ -117,6 +121,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           forms: dynamicForms?.data,
           canCreate: canCreate?.status === 200,
           user,
+          client,
         },
       })
     );
@@ -134,7 +139,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
  * @param {Request} context.request - The HTTP request.
  * @returns {Promise<Response>} A Promise that resolves to a response.
  * @throws {Error} Throws an error if the operation fails.
-*/
+ */
 export const action: ActionFunction = async ({ request, params }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
@@ -146,10 +151,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     console.log({ rewardId });
     switch (request.method) {
       case "POST":
-        const addRewardData = (await formHandler(
-          request,
-          rewardSchema
-        )) as any;
+        const addRewardData = (await formHandler(request, rewardSchema)) as any;
         console.log({ status: addRewardData?.success });
         if (!addRewardData?.success) {
           return addRewardData;
@@ -165,7 +167,10 @@ export const action: ActionFunction = async ({ request, params }) => {
           request,
           updateRewardSchema
         )) as any;
-        console.log({ status: updateRewardData?.success, data: updateRewardData });
+        console.log({
+          status: updateRewardData?.success,
+          data: updateRewardData,
+        });
         if (!updateRewardData?.success) {
           return updateRewardData;
         }
@@ -180,7 +185,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         response = await deleteRewardById(
           rewardId as string,
           params.clientId as string,
-          user.id,
+          user.id
         );
         break;
       default:
@@ -216,6 +221,25 @@ const Reward = () => {
   const fetcher = useFetcher();
   const [openModal, setOpenModal] = useState(false);
   const navigation = useNavigation();
+  const breadcrumbs = [
+    <Link
+      underline="hover"
+      key="2"
+      variant="h6"
+      color={palette.primary.main}
+      href="/clients"
+    >
+      {loaderData?.data?.client?.data?.name}
+    </Link>,
+    <Typography
+      key={"1"}
+      variant="h6"
+      color={palette.primary.main}
+      fontSize={"bold"}
+    >
+      Rewards
+    </Typography>,
+  ];
   const columns = useMemo<MRT_ColumnDef<Reward>[]>(
     () => [
       {
@@ -344,7 +368,7 @@ const Reward = () => {
     if (fetcher?.data) setActionData(fetcher?.data);
   }, [fetcher?.data]);
 
-  const handleModal = (row:any) => {
+  const handleModal = (row: any) => {
     setEditData(row);
     setOpenModal(true);
   };
@@ -361,6 +385,7 @@ const Reward = () => {
 
   return (
     <Box m={2}>
+      <Navbar breadcrumbs={breadcrumbs} />
       <CustomizedTable
         columns={columns}
         data={loaderData}
@@ -368,7 +393,7 @@ const Reward = () => {
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
         customAction={(table: any) => (
-          <Button variant="add" onClick={()=>handleModal(undefined)}>
+          <Button variant="add" onClick={() => handleModal(undefined)}>
             Add Reward
           </Button>
         )}

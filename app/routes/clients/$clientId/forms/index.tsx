@@ -1,7 +1,6 @@
-import { Box, Button } from "@mui/material";
-import type { DynamicForm} from "@prisma/client";
-import { Status } from "@prisma/client";
-import type { ActionFunction, LoaderFunction} from "@remix-run/node";
+import { Box, Button, Link, Typography } from "@mui/material";
+import type { DynamicForm } from "@prisma/client";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   useFetcher,
@@ -14,11 +13,7 @@ import moment from "moment-timezone";
 import { useEffect, useMemo, useState } from "react";
 import customErr, { Response } from "~/utils/handler.server";
 import { authenticator } from "~/services/auth.server";
-import {
-  CustomizedTable,
-  RowActions,
-  StatusUpdate,
-} from "~/src/components/Table";
+import { CustomizedTable, RowActions } from "~/src/components/Table";
 import FilterModes from "~/src/components/Table/CustomFilter";
 import DateFilter from "~/src/components/Table/DatePicker";
 import canUser from "~/utils/casl/ability";
@@ -34,9 +29,9 @@ import {
   updateDynamicFormById,
 } from "~/services/Form/Form.server";
 import { DynamicForm as AddDynamicForm } from "~/src/components/Forms";
-import {
-  dynamicFormSchema,
-} from "~/utils/schema/dynamicFormSchema";
+import { dynamicFormSchema } from "~/utils/schema/dynamicFormSchema";
+import palette from "~/src/theme/palette";
+import { getClientById } from "~/services/Client/Client.server";
 
 /**
  * Loader function to fetch dynamic forms.
@@ -60,6 +55,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       "DynamicForm",
       {}
     )) as any;
+    const client = await getClientById(params?.clientId);
 
     // Get all dynamic forms
     let dynamicForms;
@@ -79,6 +75,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           data: {
             canCreate: canCreate?.status === 200,
             user,
+            client,
           },
           error: {
             error: {
@@ -95,6 +92,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           ...dynamicForms,
           canCreate: canCreate?.status === 200,
           user,
+          client,
         },
       })
     );
@@ -112,7 +110,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
  * @param {Request} context.request - The HTTP request.
  * @returns {Promise<Response>} A Promise that resolves to a response.
  * @throws {Error} Throws an error if the operation fails.
-*/
+ */
 export const action: ActionFunction = async ({ request, params }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
@@ -194,6 +192,26 @@ const Forms = () => {
   const fetcher = useFetcher();
   const [openModal, setOpenModal] = useState(false);
   const navigation = useNavigation();
+
+  const breadcrumbs = [
+    <Link
+      underline="hover"
+      key="2"
+      variant="h6"
+      color={palette.primary.main}
+      href="/clients"
+    >
+      {loaderData?.data?.client?.data?.name}
+    </Link>,
+    <Typography
+      key={"1"}
+      variant="h6"
+      color={palette.primary.main}
+      fontSize={"bold"}
+    >
+      Forms
+    </Typography>,
+  ];
   const columns = useMemo<MRT_ColumnDef<DynamicForm>[]>(
     () => [
       {
@@ -297,7 +315,7 @@ const Forms = () => {
     if (fetcher?.data) setActionData(fetcher?.data);
   }, [fetcher?.data]);
 
-  const handleModal = (row:any) => {
+  const handleModal = (row: any) => {
     setEditData(row);
     setOpenModal(true);
   };
@@ -321,7 +339,7 @@ const Forms = () => {
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
         customAction={(table: any) => (
-          <Button variant="add" onClick={()=>handleModal(undefined)}>
+          <Button variant="add" onClick={() => handleModal(undefined)}>
             Add Form
           </Button>
         )}

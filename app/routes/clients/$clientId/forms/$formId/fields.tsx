@@ -1,13 +1,14 @@
-import { Box, Button } from "@mui/material";
-import type { DynamicFormField} from "@prisma/client";
+import { Box, Button, Link, Typography } from "@mui/material";
+import type { DynamicFormField } from "@prisma/client";
 import { Status } from "@prisma/client";
-import type { ActionFunction, LoaderFunction} from "@remix-run/node";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   useFetcher,
   useLoaderData,
   useLocation,
   useNavigation,
+  useParams,
 } from "@remix-run/react";
 import type { MRT_ColumnDef } from "material-react-table";
 import DoneIcon from "@mui/icons-material/Done";
@@ -16,11 +17,7 @@ import moment from "moment-timezone";
 import { useEffect, useMemo, useState } from "react";
 import customErr, { Response } from "~/utils/handler.server";
 import { authenticator } from "~/services/auth.server";
-import {
-  CustomizedTable,
-  RowActions,
-  StatusUpdate,
-} from "~/src/components/Table";
+import { CustomizedTable, RowActions } from "~/src/components/Table";
 import FilterModes from "~/src/components/Table/CustomFilter";
 import DateFilter from "~/src/components/Table/DatePicker";
 import canUser from "~/utils/casl/ability";
@@ -36,9 +33,10 @@ import {
   updateDynamicFormField,
 } from "~/services/Form/Form.server";
 import { DynamicFormField as AddDynamicFormField } from "~/src/components/Forms";
-import {
-  dynamicFormFieldSchema,
-} from "~/utils/schema/dynamicFormSchema";
+import { dynamicFormFieldSchema } from "~/utils/schema/dynamicFormSchema";
+import palette from "~/src/theme/palette";
+import { getClientById } from "~/services/Client/Client.server";
+import Navbar from "~/src/components/Layout/Navbar";
 
 /**
  * Loader function to fetch dynamic form fields.
@@ -62,10 +60,14 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       "DynamicForm",
       {}
     )) as any;
-
+    const client = await getClientById(params?.clientId);
+    const form = await getDynamicFormByField(params?.formId);
     // Get dynamic form with formId
     let dynamicFormField;
-    dynamicFormField = (await getAllFormFields(request,params.formId as string)) as any;
+    dynamicFormField = (await getAllFormFields(
+      request,
+      params.formId as string
+    )) as any;
 
     console.dir({ before: dynamicFormField }, { depth: null });
 
@@ -75,6 +77,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           data: {
             canCreate: canCreate?.status === 200,
             user,
+            client,
+            form,
           },
           error: {
             error: {
@@ -91,6 +95,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           ...dynamicFormField,
           canCreate: canCreate?.status === 200,
           user,
+          client,
+          form,
         },
       })
     );
@@ -177,6 +183,34 @@ const FormFields = () => {
   const fetcher = useFetcher();
   const [openModal, setOpenModal] = useState(false);
   const navigation = useNavigation();
+  const breadcrumbs = [
+    <Link
+      underline="hover"
+      key="2"
+      variant="h6"
+      color={palette.primary.main}
+      href="/clients"
+    >
+      {loaderData?.data?.client?.data?.name}
+    </Link>,
+    <Link
+      underline="hover"
+      key="2"
+      variant="h6"
+      color={palette.primary.main}
+      href="/clients"
+    >
+      {loaderData?.data?.form?.data?.name}
+    </Link>,
+    <Typography
+      key={"1"}
+      variant="h6"
+      color={palette.primary.main}
+      fontSize={"bold"}
+    >
+      Fields
+    </Typography>,
+  ];
   const columns = useMemo<MRT_ColumnDef<DynamicFormField>[]>(
     () => [
       {
@@ -317,7 +351,8 @@ const FormFields = () => {
   };
 
   return (
-    <Box m={2} >
+    <Box m={2}>
+      <Navbar breadcrumbs={breadcrumbs} />
       <CustomizedTable
         columns={columns}
         data={loaderData?.data?.data}

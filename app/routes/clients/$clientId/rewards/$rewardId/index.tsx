@@ -1,7 +1,7 @@
-import { Box} from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import type { User } from "@prisma/client";
 import { Reward } from "@prisma/client";
-import type { LoaderFunction} from "@remix-run/node";
+import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   useFetcher,
@@ -14,17 +14,17 @@ import moment from "moment-timezone";
 import { useEffect, useMemo, useState } from "react";
 import customErr, { Response } from "~/utils/handler.server";
 import { authenticator } from "~/services/auth.server";
-import {
-  CustomizedTable,
-} from "~/src/components/Table";
+import { CustomizedTable } from "~/src/components/Table";
 import FilterModes from "~/src/components/Table/CustomFilter";
 import DateFilter from "~/src/components/Table/DatePicker";
 import canUser from "~/utils/casl/ability";
 import { errorHandler } from "~/utils/handler.server";
 import { toast } from "react-toastify";
-import {
-  getRewardUsers,
-} from "~/services/Reward/Reward.server";
+import { getRewardUsers, getRewards } from "~/services/Reward/Reward.server";
+import palette from "~/src/theme/palette";
+import { getClientById } from "~/services/Client/Client.server";
+import { getReward } from "~/services/Reward/Reward.server";
+import Navbar from "~/src/components/Layout/Navbar";
 
 /**
  * Loader function to fetch users of a reward.
@@ -46,6 +46,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       clientId: params?.clientId,
     })) as any;
 
+    const client = await getClientById(params?.clientId);
+    const reward = await getReward(params?.rewardId);
     // Get all all users that get a reward
     let rewardUsers;
     rewardUsers = (await getRewardUsers(
@@ -64,6 +66,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           data: {
             canRead: canRead?.status === 200,
             user,
+            client,
+            reward,
           },
           error: {
             error: {
@@ -80,6 +84,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           ...rewardUsers,
           canRead: canRead?.status === 200,
           user,
+          client,
+          reward,
         },
       })
     );
@@ -97,6 +103,34 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 const RewardUsers = () => {
   const loaderData = useLoaderData<typeof loader>();
   const navigation = useNavigation();
+  const breadcrumbs = [
+    <Link
+      underline="hover"
+      key="2"
+      variant="h6"
+      color={palette.primary.main}
+      href="/clients"
+    >
+      {loaderData?.data?.client?.data?.name}
+    </Link>,
+    <Link
+      underline="hover"
+      key="2"
+      variant="h6"
+      color={palette.primary.main}
+      href={`/clients/${loaderData?.data?.client?.data?.id}/rewards`}
+    >
+      {loaderData?.data?.reward?.data?.name}
+    </Link>,
+    <Typography
+      key={"1"}
+      variant="h6"
+      color={palette.primary.main}
+      fontSize={"bold"}
+    >
+      Reward Users
+    </Typography>,
+  ];
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -149,11 +183,10 @@ const RewardUsers = () => {
         filterVariant: "date" as any,
         renderColumnFilterModeMenuItems: FilterModes,
         Filter: (props) => <DateFilter {...props} />,
-      }
+      },
     ],
     []
   );
-
 
   useEffect(() => {
     console.log({ loaderData });
@@ -162,9 +195,9 @@ const RewardUsers = () => {
     }
   }, [loaderData]);
 
-
   return (
     <Box m={2}>
+      <Navbar breadcrumbs={breadcrumbs} />
       <CustomizedTable
         columns={columns}
         data={loaderData}
