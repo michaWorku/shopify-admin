@@ -45,7 +45,10 @@ export const createForm = async (formData: DynamicForm, userId: string, clientId
                 },
                 fields: {
                     createMany: {
-                        data: formData?.fields as any
+                        data: formData?.fields?.map((field: any)=>{
+                            const {id, ...rest} = field
+                            return rest
+                        })
                     }
                 }
             },
