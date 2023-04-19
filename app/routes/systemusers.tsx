@@ -15,9 +15,10 @@ import {
   RowActions,
   StatusUpdate,
 } from "~/src/components/Table";
+import Link from "@mui/material/Link";
 import moment from "moment";
 import DateFilter from "~/src/components/Table/DatePicker";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import FilterModes from "~/src/components/Table/CustomFilter";
 import type { LoaderFunction, ActionFunction } from "@remix-run/server-runtime";
 import { json } from "@remix-run/server-runtime";
@@ -38,6 +39,9 @@ import { toast } from "react-toastify";
 import { DeleteAlert } from "~/src/components";
 import type { DeleteDialogType } from "~/src/components/DeleteAlert";
 import { getUserEntities } from "~/services/Entities/entity.server";
+import palette from "~/src/theme/palette";
+import { formHandler } from "~/utils/formHandler";
+import Navbar from "~/src/components/Layout/Navbar";
 
 export const loader: LoaderFunction = async ({ request }) => {
   try {
@@ -76,6 +80,7 @@ export const loader: LoaderFunction = async ({ request }) => {
         data: systemUsers?.data,
         canCreate: canCreate?.ok,
         roles: roles,
+        user: user,
       },
       metaData: systemUsers?.metaData,
     });
@@ -91,37 +96,22 @@ export const action: ActionFunction = async ({ request, params }) => {
       failureRedirect: "/login",
     });
     const clients = (await getUserEntities(user?.id)) as any;
-
-    const form = await request.formData();
-    const userData = Object.fromEntries(form) as any;
-    if (userData?.roleId) {
-      userData.roleId = JSON.parse(userData.roleId);
-    }
-    const { success, data, ...fieldError } = await validate(
-      userData,
-      systemUserSchema
-    );
-    if (!success) {
-      return json(
-        Response({
-          error: {
-            fieldError: [fieldError],
-            error: { message: "Invalid user Input fields" },
-          },
-        }),
-        { status: 422 }
-      );
+    const result = (await formHandler(request, systemUserSchema)) as any;
+    if (!result?.success) {
+      return result;
     } else {
+      if (result?.roleId) {
+        result.roleId = JSON.parse(result.roleId);
+      }
       const response = await createSystemUser(
         user?.id,
-        data,
+        result?.data,
         clients?.data?.id
       );
-      if (response.status == 200) {
-      }
       return response;
     }
   } catch (err) {
+    console.log("INSIDE CATCH", { err });
     return await errorHandler(err);
   }
 };
@@ -147,7 +137,16 @@ const SystemUsers = () => {
   function handleEdit(row: any) {
     navigate(`${row}`);
   }
-  console.log({ loaderData, actionData });
+  const breadcrumbs = [
+    <Typography
+      key={"1"}
+      variant="h6"
+      color={palette.primary.main}
+      fontSize={"bold"}
+    >
+      System User
+    </Typography>,
+  ];
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -260,8 +259,20 @@ const SystemUsers = () => {
     }
   }, [actionData]);
 
+  useEffect(() => {
+    if (fetcher?.data?.error?.error?.message) {
+      toast.error(fetcher?.data?.error?.error?.message);
+    }
+    if (fetcher?.data?.message) {
+      toast.success(fetcher?.data?.message);
+      setOpenModal(false);
+      setDeleteDialog(DefaultDialogInfo);
+    }
+  }, [fetcher?.data]);
+
   return (
     <Box>
+      <Navbar breadcrumbs={breadcrumbs} />
       <CustomizedTable
         columns={columns}
         data={loaderData}
