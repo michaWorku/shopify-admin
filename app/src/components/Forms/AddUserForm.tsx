@@ -60,7 +60,7 @@ export default function AddUserForm({ openModal, closeModal }: any) {
 
   function handleSubmit(event: any) {
     event.preventDefault();
-    submit(values, { method: "post" });
+    submit({ data: JSON.stringify(values) }, { method: "post" });
   }
 
   return (
@@ -133,15 +133,15 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                   onChange={handleChange}
                   helperText={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.firstName
-                      ? actionData?.error?.fieldError[0].fieldErrors?.firstName?.join(
+                    actionData?.error?.fieldError[0]?.fieldErrors?.firstName
+                      ? actionData?.error?.fieldError[0]?.fieldErrors?.firstName?.join(
                           ","
                         )
                       : null
                   }
                   error={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.firstName
+                    actionData?.error?.fieldError[0]?.fieldErrors?.firstName
                   }
                 />
                 <TextField
@@ -165,15 +165,15 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                   onChange={handleChange}
                   helperText={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.middleName
-                      ? actionData?.error?.fieldError[0].fieldErrors?.middleName?.join(
+                    actionData?.error?.fieldError[0]?.fieldErrors?.middleName
+                      ? actionData?.error?.fieldError[0]?.fieldErrors?.middleName?.join(
                           ","
                         )
                       : null
                   }
                   error={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.middleName
+                    actionData?.error?.fieldError[0]?.fieldErrors?.middleName
                   }
                 />
 
@@ -198,15 +198,15 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                   onChange={handleChange}
                   helperText={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.lastName
-                      ? actionData?.error?.fieldError[0].fieldErrors?.lastName?.join(
+                    actionData?.error?.fieldError[0]?.fieldErrors?.lastName
+                      ? actionData?.error?.fieldError[0]?.fieldErrors?.lastName?.join(
                           ","
                         )
                       : null
                   }
                   error={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.lastName
+                    actionData?.error?.fieldError[0]?.fieldErrors?.lastName
                   }
                 />
                 <TextField
@@ -230,15 +230,15 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                   onChange={handleChange}
                   helperText={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.email
-                      ? actionData?.error?.fieldError[0].fieldErrors?.email?.join(
+                    actionData?.error?.fieldError[0]?.fieldErrors?.email
+                      ? actionData?.error?.fieldError[0]?.fieldErrors?.email?.join(
                           ","
                         )
                       : null
                   }
                   error={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.email
+                    actionData?.error?.fieldError[0]?.fieldErrors?.email
                   }
                 />
                 <TextField
@@ -263,15 +263,15 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                   onChange={handleChange}
                   helperText={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.password
-                      ? actionData?.error?.fieldError[0].fieldErrors?.password?.join(
+                    actionData?.error?.fieldError[0]?.fieldErrors?.password
+                      ? actionData?.error?.fieldError[0]?.fieldErrors?.password?.join(
                           ","
                         )
                       : null
                   }
                   error={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.password
+                    actionData?.error?.fieldError[0]?.fieldErrors?.password
                   }
                 />
                 <TextField
@@ -295,15 +295,15 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                   onChange={handleChange}
                   helperText={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.phone
-                      ? actionData?.error?.fieldError[0].fieldErrors?.phone?.join(
+                    actionData?.error?.fieldError[0]?.fieldErrors?.phone
+                      ? actionData?.error?.fieldError[0]?.fieldErrors?.phone?.join(
                           ","
                         )
                       : null
                   }
                   error={
                     actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.phone
+                    actionData?.error?.fieldError[0]?.fieldErrors?.phone
                   }
                 />
                 <Box
@@ -325,16 +325,16 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                         variant="filled"
                         helperText={
                           actionData?.error?.fieldError &&
-                          actionData?.error?.fieldError[0].fieldErrors
+                          actionData?.error?.fieldError[0]?.fieldErrors
                             ?.birthDate
-                            ? actionData?.error?.fieldError[0].fieldErrors?.birthDate?.join(
+                            ? actionData?.error?.fieldError[0]?.fieldErrors?.birthDate?.join(
                                 ","
                               )
                             : null
                         }
                         error={
                           actionData?.error?.fieldError &&
-                          actionData?.error?.fieldError[0].fieldErrors
+                          actionData?.error?.fieldError[0]?.fieldErrors
                             ?.birthDate
                         }
                       />
@@ -374,8 +374,8 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                   </RadioGroup>
                   <FormHelperText sx={{ color: "red", mb: 2, pl: 2 }}>
                     {actionData?.error?.fieldError &&
-                    actionData?.error?.fieldError[0].fieldErrors?.gender
-                      ? actionData?.error?.fieldError[0].fieldErrors?.gender?.join(
+                    actionData?.error?.fieldError[0]?.fieldErrors?.gender
+                      ? actionData?.error?.fieldError[0]?.fieldErrors?.gender?.join(
                           ","
                         )
                       : null}
@@ -405,15 +405,15 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                         label="Role"
                         helperText={
                           actionData?.error?.fieldError &&
-                          actionData?.error?.fieldError[0].fieldErrors?.roleId
-                            ? actionData?.error?.fieldError[0].fieldErrors?.roleId?.join(
+                          actionData?.error?.fieldError[0]?.fieldErrors?.roleId
+                            ? actionData?.error?.fieldError[0]?.fieldErrors?.roleId?.join(
                                 ","
                               )
                             : null
                         }
                         error={
                           actionData?.error?.fieldError &&
-                          actionData?.error?.fieldError[0].fieldErrors?.roleId
+                          actionData?.error?.fieldError[0]?.fieldErrors?.roleId
                         }
                       />
                     )}
