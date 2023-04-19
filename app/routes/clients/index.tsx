@@ -326,46 +326,10 @@ const Clients = () => {
     if (fetcher?.data) setActionData(fetcher?.data);
   }, [fetcher?.data]);
 
-<<<<<<< HEAD
   const handleModal = (row: any) => {
     setEditData(row);
     setOpenModal(true);
   };
-=======
-    return (
-        <Box m={2}>
-            <CustomizedTable
-                columns={columns}
-                data={loaderData}
-                exportFileName="Clients"
-                enableExport={true}
-                loading={navigation.state === 'loading' ? true : false}
-                customAction={(table: any) => (
-                    <Button
-                        variant="add"
-                        onClick={() => handleModal(undefined)}
-                    >
-                        Add Client
-                    </Button>
-                )}
-            />
-            <ClientForm
-                openModal={openModal}
-                actionData={actionData}
-                setActionData={setActionData}
-                editData={editData}
-                setOpenModal={setOpenModal}
-                fetcher={fetcher}
-            />
-            <DeleteAlert
-                deleteDialog={deleteDialog}
-                setDeleteDialog={setDeleteDialog}
-                fetcher={fetcher}
-            />
-        </Box>
-    )
-}
->>>>>>> dev
 
   const handleDelete = (clientId: any) => {
     setDeleteDialog({
@@ -383,7 +347,6 @@ const Clients = () => {
       <CustomizedTable
         columns={columns}
         data={loaderData}
-        page="Client"
         exportFileName="Clients"
         enableExport={true}
         loading={navigation.state === "loading" ? true : false}
