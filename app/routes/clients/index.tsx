@@ -342,34 +342,36 @@ const Clients = () => {
   };
 
   return (
-    <Box m={2}>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="Clients"
-        enableExport={true}
-        loading={navigation.state === "loading" ? true : false}
-        customAction={(table: any) => (
-          <Button variant="add" onClick={() => handleModal(undefined)}>
-            Add Client
-          </Button>
-        )}
-      />
-      <ClientForm
-        openModal={openModal}
-        actionData={actionData}
-        setActionData={setActionData}
-        editData={editData}
-        setOpenModal={setOpenModal}
-        fetcher={fetcher}
-      />
-      <DeleteAlert
-        deleteDialog={deleteDialog}
-        setDeleteDialog={setDeleteDialog}
-        fetcher={fetcher}
-      />
-    </Box>
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="Clients"
+          enableExport={true}
+          loading={navigation.state === "loading" ? true : false}
+          customAction={(table: any) => (
+            <Button variant="add" onClick={() => handleModal(undefined)}>
+              Add Client
+            </Button>
+          )}
+        />
+        <ClientForm
+          openModal={openModal}
+          actionData={actionData}
+          setActionData={setActionData}
+          editData={editData}
+          setOpenModal={setOpenModal}
+          fetcher={fetcher}
+        />
+        <DeleteAlert
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+          fetcher={fetcher}
+        />
+      </Box>
+    </>
   );
 };
 
