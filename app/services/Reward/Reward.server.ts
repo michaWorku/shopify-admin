@@ -556,6 +556,13 @@ export const checkReward = async (rewardId: string, clientId: string, phone: str
 
         // Check if the reward has already been completed
         if (reward?.rewardGiven === reward?.rewardTaken) {
+            const deactiveReward = await db.reward.update({
+                where: { id: rewardId },
+                data:{
+                    status: 'INACTIVE'
+                } 
+            })
+            console.log({deactiveReward})
             return json(Response({
                 error: { error: { message: "Reward completed" } },
                 data: {
@@ -725,6 +732,7 @@ export const rewardUser = async (rewardData: RewardInteface, submissionData: Sub
                 }
             })
             console.log({ rewardUser })
+            
             return {
                 rewarded: rewardUser?.isRewarded,
                 reward: rewardData,
