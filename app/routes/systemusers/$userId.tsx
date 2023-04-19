@@ -109,7 +109,12 @@ export const action: ActionFunction = async ({ request, params }) => {
       }
       case "DELETE": {
         const deletedUserId = params?.userId as string;
-        const deletedUserInfo = await deleteSystemUser(user?.id, deletedUserId);
+
+        const deletedUserInfo = await deleteSystemUser(
+          user?.id,
+          deletedUserId,
+          clients?.data?.id
+        );
 
         return deletedUserInfo;
       }
