@@ -1,14 +1,14 @@
-import { Client, Permission, Prisma } from "@prisma/client";
-import { json } from "@remix-run/node";
-import canUser, { AbilityType } from "~/utils/casl/ability";
-import type { ResponseType } from "~/utils/handler.server";
-import customErr, { Response, errorHandler } from "~/utils/handler.server";
-import { db } from "../db.server";
-import getParams from "~/utils/params/getParams.server";
-import { filterFunction } from "~/utils/params/filter.server";
-import { searchFunction } from "~/utils/params/search.server";
-import { canPerformAction } from "~/utils/casl/canPerformAction";
-import { getAllEntityPermissions } from "../Role/Permissions/permission.server";
+import { Client, Permission, Prisma } from "@prisma/client"
+import { json } from "@remix-run/node"
+import canUser, { AbilityType } from "~/utils/casl/ability"
+import type { ResponseType } from "~/utils/handler.server"
+import customErr, { Response, errorHandler } from "~/utils/handler.server"
+import { db } from "../db.server"
+import getParams from "~/utils/params/getParams.server"
+import { filterFunction } from "~/utils/params/filter.server"
+import { searchFunction } from "~/utils/params/search.server"
+import { canPerformAction } from "~/utils/casl/canPerformAction"
+import { getAllEntityPermissions } from "../Role/Permissions/permission.server"
 
 /**
  * Creates a new client with the provided data.
@@ -22,53 +22,33 @@ export const createClient = async (
   userId: string
 ): Promise<ResponseType> => {
   try {
-    const canCreate = await canUser(userId, "create", "Client", {});
+    const canCreate = await canUser(userId, "create", "Client", {})
     if (canCreate?.status !== 200) {
-      return canCreate;
+      return canCreate
     }
 
     const result = await db.$transaction(
       async (tx) => {
         const newClient = await tx.client.create({
           data: clientData,
-        });
-        const clientPermission = await getAllEntityPermissions();
+        })
 
-        await tx.role.create({
-          data: {
-            name: `${newClient?.name}`,
-            permissions: {
-              create: clientPermission?.data?.map(
-                (item: Partial<Permission>) => {
-                  return {
-                    permission: {
-                      connect: {
-                        id: item?.id,
-                      },
-                    },
-                  };
-                }
-              ),
-            },
-            createdBy: userId,
-          },
-        });
-        return { newClient };
+        return { newClient }
       },
       {
         maxWait: 5000,
         timeout: 30000,
       }
-    );
+    )
 
     return Response({
       data: result.newClient,
       message: "Client successfully created",
-    });
+    })
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 
 /**
  * Retrieves all clients based on the specified request parameters.
@@ -93,10 +73,10 @@ export const getAllClients = async (
       search,
       filter,
       exportType,
-    } = getParams(request);
+    } = getParams(request)
 
-    const searchParams = searchFunction(search, "Client", ["name", "phone"]); // Adjust the search columns as necessary.
-    const filterParams = filterFunction(filter, "Client");
+    const searchParams = searchFunction(search, "Client", ["name", "phone"]) // Adjust the search columns as necessary.
+    const filterParams = filterFunction(filter, "Client")
 
     let _where: any = {
       deletedAt: null,
@@ -112,11 +92,11 @@ export const getAllClients = async (
         : {}),
       ...searchParams,
       ...filterParams,
-    };
+    }
 
     const clientsCount = await db.client.count({
       where: _where,
-    });
+    })
 
     if (clientsCount > 0) {
       const clients = await db.client.findMany({
@@ -128,12 +108,12 @@ export const getAllClients = async (
           },
         ],
         where: _where,
-      });
+      })
 
-      let exportData;
+      let exportData
 
       if (exportType === "page") {
-        exportData = clients;
+        exportData = clients
       } else if (exportType === "filtered") {
         exportData = await db.client.findMany({
           orderBy: [
@@ -146,9 +126,9 @@ export const getAllClients = async (
             },
           ],
           where: _where,
-        });
+        })
       } else {
-        exportData = await db.client.findMany({});
+        exportData = await db.client.findMany({})
       }
 
       return Response({
@@ -163,15 +143,15 @@ export const getAllClients = async (
           exportType,
           exportData,
         },
-      });
+      })
     }
-    throw new customErr("Custom_Error", "No clients found", 404);
+    throw new customErr("Custom_Error", "No clients found", 404)
   } catch (error) {
-    console.log("Error occured loading clients");
-    console.dir(error, { depth: null });
-    return errorHandler(error);
+    console.log("Error occured loading clients")
+    console.dir(error, { depth: null })
+    return errorHandler(error)
   }
-};
+}
 
 /**
  * Updates a client by ID
@@ -189,21 +169,21 @@ export const updateClientById = async (
   userId: string
 ): Promise<any> => {
   if (!clientId) {
-    throw new customErr("Custom_Error", "Client ID is required", 404);
+    throw new customErr("Custom_Error", "Client ID is required", 404)
   }
 
   const canUpdate = await canUser(userId, "update", "Client", {
     clientId: clientId,
-  });
+  })
   if (canUpdate?.status !== 200) {
-    return canUpdate;
+    return canUpdate
   }
 
   try {
     const updatedClient = await db.client.update({
       where: { id: clientId },
       data,
-    });
+    })
 
     return json(
       Response({
@@ -213,11 +193,11 @@ export const updateClientById = async (
       {
         status: 200,
       }
-    );
+    )
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 
 /**
  * Get a client by unique field.
@@ -236,21 +216,21 @@ export const getClientByField = async (
 ): Promise<any> => {
   try {
     if (!clientId) {
-      throw new customErr("Custom_Error", "Client ID is required", 404);
+      throw new customErr("Custom_Error", "Client ID is required", 404)
     }
 
     const client = await db.client.findUnique({
       where: {
         [fieldName]: fieldValue,
       },
-    });
+    })
 
     if (!client) {
       throw new customErr(
         "Custom_Error",
         `Client not found with ${fieldValue}`,
         404
-      );
+      )
     }
 
     return json(
@@ -260,39 +240,39 @@ export const getClientByField = async (
       {
         status: 200,
       }
-    );
+    )
   } catch (error) {
-    return errorHandler(error);
+    return errorHandler(error)
   }
-};
+}
 
 export const getClientById = async (clientId: any): Promise<any> => {
   try {
     if (!clientId) {
-      throw new customErr("Custom_Error", "Client ID is required", 404);
+      throw new customErr("Custom_Error", "Client ID is required", 404)
     }
 
     const client = await db.client.findUnique({
       where: {
         id: clientId,
       },
-    });
+    })
 
     if (!client) {
       throw new customErr(
         "Custom_Error",
         `Client not found with ${clientId}`,
         404
-      );
+      )
     }
 
     return Response({
       data: client,
-    });
+    })
   } catch (error) {
-    return errorHandler(error);
+    return errorHandler(error)
   }
-};
+}
 
 /**
  * Deletes a client with the given ID.
@@ -309,14 +289,14 @@ export const deleteClient = async (
 ): Promise<any> => {
   try {
     if (!clientId) {
-      throw new customErr("Custom_Error", "Client ID is required", 404);
+      throw new customErr("Custom_Error", "Client ID is required", 404)
     }
 
     const canDelete = await canUser(userId, "delete", "Client", {
       clientId: clientId,
-    });
+    })
     if (canDelete?.status !== 200) {
-      return canDelete;
+      return canDelete
     }
 
     const client = await db.client.update({
@@ -326,7 +306,7 @@ export const deleteClient = async (
       data: {
         deletedAt: new Date(),
       },
-    });
+    })
 
     return json(
       Response({
@@ -336,11 +316,11 @@ export const deleteClient = async (
       {
         status: 200,
       }
-    );
+    )
   } catch (error) {
-    return errorHandler(error);
+    return errorHandler(error)
   }
-};
+}
 /**
  * Sets client permissions for a given user.
  *
@@ -359,23 +339,23 @@ const setClientPermissions = async (
   const promises = clients.map(async (clientData: any, index: number) => {
     const canEdit = await canPerformAction(userId, "update", "Client", {
       clientId: clientData.id,
-    });
+    })
 
     const canViewUsers = await canPerformAction(userId, "read", "User", {
       clientId: clientData.id,
-    });
+    })
     const canViewSystemUsers = await canPerformAction(
       userId,
       "read",
       "ClientSystemUser",
       {}
-    );
+    )
     const canViewForms = await canPerformAction(userId, "read", "DynamicForm", {
       clientId: clientData.id,
-    });
+    })
     const canViewRewards = await canPerformAction(userId, "read", "Reward", {
       clientId: clientData.id,
-    });
+    })
     const canViewSubmissions = await canPerformAction(
       userId,
       "read",
@@ -383,11 +363,11 @@ const setClientPermissions = async (
       {
         clientId: clientData.id,
       }
-    );
+    )
 
     const canDelete = await canPerformAction(userId, "delete", "Client", {
       clientId: clientData.id,
-    });
+    })
 
     clients[index] = {
       ...clientData,
@@ -398,11 +378,11 @@ const setClientPermissions = async (
       canViewRewards,
       canViewSubmissions,
       canViewSystemUsers,
-    };
-  });
+    }
+  })
 
-  await Promise.all(promises);
-};
+  await Promise.all(promises)
+}
 
 /**
  * Retrieves all clients for a given user, with associated permissions and capabilities.
@@ -419,14 +399,14 @@ export const getClients = async (
   userId: string
 ): Promise<Object> => {
   try {
-    const canView = await canUser(userId, "read", "Client", {});
+    const canView = await canUser(userId, "read", "Client", {})
 
     if (canView?.status === 200) {
-      const clients = await getAllClients(request);
+      const clients = await getAllClients(request)
       if (clients?.data) {
-        await setClientPermissions(userId, clients.data);
+        await setClientPermissions(userId, clients.data)
       }
-      return clients;
+      return clients
     } else {
       const canViewPartial = await canUser(
         userId,
@@ -434,25 +414,25 @@ export const getClients = async (
         "Client",
         {},
         AbilityType.PARTIAL
-      );
+      )
 
       if (canViewPartial?.ok) {
-        const clients = (await getAllClients(request, userId)) as any;
+        const clients = (await getAllClients(request, userId)) as any
 
         if (clients?.data) {
-          await setClientPermissions(userId, clients.data);
+          await setClientPermissions(userId, clients.data)
         }
 
-        console.log({ clients: clients?.data });
-        return clients;
+        console.log({ clients: clients?.data })
+        return clients
       } else {
-        return canViewPartial;
+        return canViewPartial
       }
     }
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 
 /**
  * Retrieve users of a client.
@@ -467,7 +447,7 @@ export const getClientUsers = async (
   clientId: string
 ): Promise<any> => {
   if (!clientId) {
-    throw new customErr("Custom_Error", "Client ID is required", 404);
+    throw new customErr("Custom_Error", "Client ID is required", 404)
   }
   try {
     const {
@@ -479,14 +459,14 @@ export const getClientUsers = async (
       search,
       filter,
       exportType,
-    } = getParams(request);
+    } = getParams(request)
 
     const searchParams = searchFunction(search, "User", [
       "firstName",
       "middleName",
       "lastName",
-    ]);
-    const filterParams = filterFunction(filter, "User");
+    ])
+    const filterParams = filterFunction(filter, "User")
 
     const usersWhere: Prisma.UserWhereInput = {
       deletedAt: null,
@@ -500,12 +480,12 @@ export const getClientUsers = async (
       },
       ...searchParams,
       ...filterParams,
-    };
+    }
 
-    const usersCount = await db.user.count({ where: usersWhere });
+    const usersCount = await db.user.count({ where: usersWhere })
 
     if (usersCount === 0) {
-      throw new customErr("Custom_Error", "No user found", 404);
+      throw new customErr("Custom_Error", "No user found", 404)
     }
 
     const users = await db.user.findMany({
@@ -513,19 +493,19 @@ export const getClientUsers = async (
       skip,
       orderBy: [{ [sortField]: sortType }],
       where: usersWhere,
-    });
+    })
 
-    let exportData;
+    let exportData
 
     if (exportType === "page") {
-      exportData = users;
+      exportData = users
     } else if (exportType === "filtered") {
       exportData = await db.user.findMany({
         orderBy: [{ [sortField]: sortType }],
         where: usersWhere,
-      });
+      })
     } else {
-      exportData = await db.user.findMany({});
+      exportData = await db.user.findMany({})
     }
 
     return Response({
@@ -540,10 +520,10 @@ export const getClientUsers = async (
         exportType,
         exportData,
       },
-    });
+    })
   } catch (error) {
-    console.log("Error occurred loading users.");
-    console.dir(error, { depth: null });
-    return errorHandler(error);
+    console.log("Error occurred loading users.")
+    console.dir(error, { depth: null })
+    return errorHandler(error)
   }
-};
+}
