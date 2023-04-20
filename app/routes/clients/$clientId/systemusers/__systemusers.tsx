@@ -5,47 +5,47 @@ import {
   useLocation,
   useNavigate,
   useNavigation,
-} from "@remix-run/react";
-import type { MRT_ColumnDef } from "material-react-table";
-import { Link, Typography } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import type { User } from "@prisma/client";
-import { Gender, Status } from "@prisma/client";
+} from "@remix-run/react"
+import type { MRT_ColumnDef } from "material-react-table"
+import { Link, Typography } from "@mui/material"
+import { useEffect, useMemo, useState } from "react"
+import type { User } from "@prisma/client"
+import { Gender, Status } from "@prisma/client"
 import {
   CustomizedTable,
   RowActions,
   StatusUpdate,
-} from "~/src/components/Table";
-import moment from "moment";
-import DateFilter from "~/src/components/Table/DatePicker";
-import { Box, Button } from "@mui/material";
-import FilterModes from "~/src/components/Table/CustomFilter";
-import type { LoaderFunction } from "@remix-run/server-runtime";
-import { authenticator } from "~/services/auth.server";
-import { getSystemUsers } from "~/services/User/systemuser.server";
-import { Response, errorHandler } from "~/utils/handler.server";
-import { getUserCreatedRole } from "~/services/Role/role.server";
-import canUser, { AbilityType } from "~/utils/casl/ability";
-import { toast } from "react-toastify";
-import { DeleteAlert } from "~/src/components";
-import type { DeleteDialogType } from "~/src/components/DeleteAlert";
-import palette from "~/src/theme/palette";
-import { getClientById } from "~/services/Client/Client.server";
-import Navbar from "~/src/components/Layout/Navbar";
+} from "~/src/components/Table"
+import moment from "moment"
+import DateFilter from "~/src/components/Table/DatePicker"
+import { Box, Button } from "@mui/material"
+import FilterModes from "~/src/components/Table/CustomFilter"
+import type { LoaderFunction } from "@remix-run/server-runtime"
+import { authenticator } from "~/services/auth.server"
+import { getSystemUsers } from "~/services/User/systemuser.server"
+import { Response, errorHandler } from "~/utils/handler.server"
+import { getUserCreatedRole } from "~/services/Role/role.server"
+import canUser, { AbilityType } from "~/utils/casl/ability"
+import { toast } from "react-toastify"
+import { DeleteAlert } from "~/src/components"
+import type { DeleteDialogType } from "~/src/components/DeleteAlert"
+import palette from "~/src/theme/palette"
+import { getClientById } from "~/services/Client/Client.server"
+import Navbar from "~/src/components/Layout/Navbar"
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
     // Authenticate the user
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
-    let canCreate: any;
+    })
+    let canCreate: any
     const systemUsers = await getSystemUsers(
       request,
       user?.id,
       params?.clientId
-    );
-    const { roles } = await getUserCreatedRole(user?.id);
+    )
+    const { roles } = await getUserCreatedRole(user?.id, params?.clientId)
     if (params?.clientId) {
       canCreate = await canUser(
         user?.id,
@@ -53,7 +53,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         "SystemUser",
         { clientId: params?.clientId },
         AbilityType.PARTIAL
-      );
+      )
     } else {
       canCreate = await canUser(
         user?.id,
@@ -61,22 +61,23 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         "SystemUser",
         {},
         AbilityType.PARTIAL
-      );
+      )
     }
-    const client = await getClientById(params?.clientId);
+    const client = await getClientById(params?.clientId)
     return Response({
       data: {
         data: systemUsers?.data,
         canCreate: canCreate?.ok,
         roles: roles,
+        user,
         client,
       },
       metaData: systemUsers?.metaData,
-    });
+    })
   } catch (error) {
-    return errorHandler(error);
+    return errorHandler(error)
   }
-};
+}
 
 export const DefaultDialogInfo = {
   open: false,
@@ -84,17 +85,16 @@ export const DefaultDialogInfo = {
   title: "Remove a System User",
   contentText: "Are you sure you want to remove this User?",
   action: "systemusers",
-};
+}
 const SystemUsers = () => {
-  const loaderData = useLoaderData();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const fetcher = useFetcher();
-  const navigation = useNavigation();
+  const loaderData = useLoaderData()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const fetcher = useFetcher()
+  const navigation = useNavigation()
   const [deleteDialog, setDeleteDialog] =
-    useState<DeleteDialogType>(DefaultDialogInfo);
-  const [loading, setLoading] = useState(false);
+    useState<DeleteDialogType>(DefaultDialogInfo)
+  const [loading, setLoading] = useState(false)
   const breadcrumbs = [
     <Link
       underline="none"
@@ -113,19 +113,19 @@ const SystemUsers = () => {
     >
       System Users
     </Typography>,
-  ];
+  ]
   function handleEdit(row: any) {
-    navigate(`${row}`);
+    navigate(`${row}`)
   }
   useEffect(() => {
     if (fetcher?.data?.error?.error?.message) {
-      toast.error(fetcher?.data?.error?.error?.message);
+      toast.error(fetcher?.data?.error?.error?.message)
     }
     if (fetcher?.data?.message) {
-      toast.success(fetcher?.data?.message);
-      setDeleteDialog(DefaultDialogInfo);
+      toast.success(fetcher?.data?.message)
+      setDeleteDialog(DefaultDialogInfo)
     }
-  }, [fetcher?.data]);
+  }, [fetcher?.data])
 
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
@@ -158,7 +158,7 @@ const SystemUsers = () => {
           return {
             text: gender,
             value: gender,
-          };
+          }
         }),
         renderColumnFilterModeMenuItems: FilterModes,
       },
@@ -179,7 +179,7 @@ const SystemUsers = () => {
           return {
             text: status,
             value: status,
-          };
+          }
         }),
         renderColumnFilterModeMenuItems: FilterModes,
         filterVariant: "multi-select",
@@ -208,10 +208,10 @@ const SystemUsers = () => {
       },
     ],
     []
-  );
+  )
   const handleOpenModal = () => {
-    navigate("addNew");
-  };
+    navigate("addNew")
+  }
   const handleDelete = (userId: any) => {
     setDeleteDialog({
       open: true,
@@ -219,8 +219,8 @@ const SystemUsers = () => {
       title: "Remove a System User",
       contentText: "Are you sure you want to remove this System User?",
       action: `systemusers/${userId}`,
-    });
-  };
+    })
+  }
 
   return (
     <>
@@ -246,7 +246,7 @@ const SystemUsers = () => {
         <Outlet />
       </Box>
     </>
-  );
-};
+  )
+}
 
-export default SystemUsers;
+export default SystemUsers

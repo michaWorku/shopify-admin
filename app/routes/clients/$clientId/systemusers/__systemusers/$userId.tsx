@@ -46,6 +46,7 @@ import { getUserCreatedRole } from "~/services/Role/role.server"
 import { DesktopDatePicker } from "@mui/x-date-pickers"
 import { toast } from "react-toastify"
 import { getUserEntities } from "~/services/Entities/entity.server"
+import ViewUserDetail from "~/src/components/ViewDetail"
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
@@ -490,7 +491,7 @@ const SystemUsers = () => {
     )
   }
   if (view) {
-    ;<ViewUserDetail />
+    return <ViewUserDetail />
   }
 }
 

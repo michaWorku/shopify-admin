@@ -1,42 +1,42 @@
-import { Box, Button, Link, Typography } from "@mui/material";
-import type { DynamicFormField } from "@prisma/client";
-import { Status } from "@prisma/client";
-import type { ActionFunction, LoaderFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { Box, Button, Link, Typography } from "@mui/material"
+import type { DynamicFormField } from "@prisma/client"
+import { Status } from "@prisma/client"
+import type { ActionFunction, LoaderFunction } from "@remix-run/node"
+import { json } from "@remix-run/node"
 import {
   useFetcher,
   useLoaderData,
   useLocation,
   useNavigation,
   useParams,
-} from "@remix-run/react";
-import type { MRT_ColumnDef } from "material-react-table";
-import DoneIcon from "@mui/icons-material/Done";
-import ClearIcon from "@mui/icons-material/Clear";
-import moment from "moment-timezone";
-import { useEffect, useMemo, useState } from "react";
-import customErr, { Response } from "~/utils/handler.server";
-import { authenticator } from "~/services/auth.server";
-import { CustomizedTable, RowActions } from "~/src/components/Table";
-import FilterModes from "~/src/components/Table/CustomFilter";
-import DateFilter from "~/src/components/Table/DatePicker";
-import canUser from "~/utils/casl/ability";
-import { errorHandler } from "~/utils/handler.server";
-import { formHandler } from "~/utils/formHandler";
-import { toast } from "react-toastify";
-import type { DeleteDialogType } from "~/src/components/DeleteAlert";
-import DeleteAlert from "~/src/components/DeleteAlert";
+} from "@remix-run/react"
+import type { MRT_ColumnDef } from "material-react-table"
+import DoneIcon from "@mui/icons-material/Done"
+import ClearIcon from "@mui/icons-material/Clear"
+import moment from "moment-timezone"
+import { useEffect, useMemo, useState } from "react"
+import customErr, { Response } from "~/utils/handler.server"
+import { authenticator } from "~/services/auth.server"
+import { CustomizedTable, RowActions } from "~/src/components/Table"
+import FilterModes from "~/src/components/Table/CustomFilter"
+import DateFilter from "~/src/components/Table/DatePicker"
+import canUser from "~/utils/casl/ability"
+import { errorHandler } from "~/utils/handler.server"
+import { formHandler } from "~/utils/formHandler"
+import { toast } from "react-toastify"
+import type { DeleteDialogType } from "~/src/components/DeleteAlert"
+import DeleteAlert from "~/src/components/DeleteAlert"
 import {
   deleteDynamicFormField,
   getAllFormFields,
   getDynamicFormByField,
   updateDynamicFormField,
-} from "~/services/Form/Form.server";
-import { DynamicFormField as AddDynamicFormField } from "~/src/components/Forms";
-import { dynamicFormFieldSchema } from "~/utils/schema/dynamicFormSchema";
-import palette from "~/src/theme/palette";
-import { getClientById } from "~/services/Client/Client.server";
-import Navbar from "~/src/components/Layout/Navbar";
+} from "~/services/Form/Form.server"
+import { DynamicFormField as AddDynamicFormField } from "~/src/components/Forms"
+import { dynamicFormFieldSchema } from "~/utils/schema/dynamicFormSchema"
+import palette from "~/src/theme/palette"
+import { getClientById } from "~/services/Client/Client.server"
+import Navbar from "~/src/components/Layout/Navbar"
 
 /**
  * Loader function to fetch dynamic form fields.
@@ -50,26 +50,27 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     // Authenticate the user
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
+    })
 
-    console.log({ user, params });
+    console.log({ user, params })
     // Check if the user can create a dynamic form field
     const canCreate = (await canUser(
       user?.id,
       "create",
       "DynamicForm",
       {}
-    )) as any;
-    const client = await getClientById(params?.clientId);
-    const form = await getDynamicFormByField(params?.formId);
+    )) as any
+
+    const client = await getClientById(params?.clientId)
+    const form = await getDynamicFormByField(params?.formId)
     // Get dynamic form with formId
-    let dynamicFormField;
+    let dynamicFormField
     dynamicFormField = (await getAllFormFields(
       request,
       params.formId as string
-    )) as any;
+    )) as any
 
-    console.dir({ before: dynamicFormField }, { depth: null });
+    console.dir({ before: dynamicFormField }, { depth: null })
 
     if (dynamicFormField?.status === 404) {
       return json(
@@ -86,9 +87,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
             },
           },
         })
-      );
+      )
     }
-    console.log({ dynamicFormField });
+    console.log({ dynamicFormField })
     return json(
       Response({
         data: {
@@ -99,13 +100,13 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           form,
         },
       })
-    );
+    )
   } catch (error) {
-    console.log("Error occured loading clients");
-    console.dir(error, { depth: null });
-    return errorHandler(error);
+    console.log("Error occured loading clients")
+    console.dir(error, { depth: null })
+    return errorHandler(error)
   }
-};
+}
 
 /**
  * Action function performs a specific operation on a dynamic form field.
@@ -119,8 +120,8 @@ export const action: ActionFunction = async ({ request, params }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
-    let response;
+    })
+    let response
 
     switch (request.method) {
       case "POST":
@@ -128,39 +129,39 @@ export const action: ActionFunction = async ({ request, params }) => {
         const editDynamicFormData = (await formHandler(
           request,
           dynamicFormFieldSchema
-        )) as any;
-        console.log({ status: editDynamicFormData?.success });
+        )) as any
+        console.log({ status: editDynamicFormData?.success })
         if (!editDynamicFormData?.success) {
-          return editDynamicFormData;
+          return editDynamicFormData
         }
         response = await updateDynamicFormField(
           params.formId as string,
           editDynamicFormData?.data,
           user.id,
           params.clientId as string
-        );
-        break;
+        )
+        break
       case "DELETE":
-        const url = new URL(request.url);
-        const fieldId = url.searchParams.get("fieldId") as string;
+        const url = new URL(request.url)
+        const fieldId = url.searchParams.get("fieldId") as string
         response = await deleteDynamicFormField(
           params.formId as string,
           fieldId,
           user.id,
           params.clientId as string
-        );
-        break;
+        )
+        break
       default:
-        throw new customErr("Custom_Error", "Unsupported action!", 403);
+        throw new customErr("Custom_Error", "Unsupported action!", 403)
     }
-    console.log({ response });
-    return response;
+    console.log({ response })
+    return response
   } catch (error: any) {
-    console.error("error occured performing operation on dynamic form");
-    console.dir(error, { depth: null });
-    return errorHandler(error);
+    console.error("error occured performing operation on dynamic form")
+    console.dir(error, { depth: null })
+    return errorHandler(error)
   }
-};
+}
 
 export const DefaultDialogInfo = {
   open: false,
@@ -168,22 +169,22 @@ export const DefaultDialogInfo = {
   title: "Remove a Form Rield",
   contentText: "Are you sure you want to remove this form field?",
   action: "forms",
-};
+}
 /**
  * Renders the FormFieldss component.
  * @returns {JSX.Element} JSX element containing the clients table.
  */
 const FormFields = () => {
-  const loaderData = useLoaderData<typeof loader>();
-  const location = useLocation();
-  const params = useParams();
-  const [actionData, setActionData] = useState(null);
+  const loaderData = useLoaderData<typeof loader>()
+  const location = useLocation()
+  const params = useParams()
+  const [actionData, setActionData] = useState(null)
   const [deleteDialog, setDeleteDialog] =
-    useState<DeleteDialogType>(DefaultDialogInfo);
-  const [editData, setEditData] = useState<undefined | null>(null);
-  const fetcher = useFetcher();
-  const [openModal, setOpenModal] = useState(false);
-  const navigation = useNavigation();
+    useState<DeleteDialogType>(DefaultDialogInfo)
+  const [editData, setEditData] = useState<undefined | null>(null)
+  const fetcher = useFetcher()
+  const [openModal, setOpenModal] = useState(false)
+  const navigation = useNavigation()
   const breadcrumbs = [
     <Link
       underline="none"
@@ -211,7 +212,7 @@ const FormFields = () => {
     >
       Fields
     </Typography>,
-  ];
+  ]
   const columns = useMemo<MRT_ColumnDef<DynamicFormField>[]>(
     () => [
       {
@@ -316,30 +317,30 @@ const FormFields = () => {
       },
     ],
     []
-  );
+  )
 
   useEffect(() => {
-    console.log({ loaderData });
-  }, [loaderData]);
+    console.log({ loaderData })
+  }, [loaderData])
 
   useEffect(() => {
-    console.log({ fetcher });
+    console.log({ fetcher })
     if (fetcher?.data?.error?.error?.message) {
-      toast.error(fetcher?.data?.error?.error?.message);
+      toast.error(fetcher?.data?.error?.error?.message)
     }
     if (fetcher?.data?.message) {
-      toast.success(fetcher?.data?.message);
-      setOpenModal(false);
-      setEditData(undefined);
-      setDeleteDialog(DefaultDialogInfo);
+      toast.success(fetcher?.data?.message)
+      setOpenModal(false)
+      setEditData(undefined)
+      setDeleteDialog(DefaultDialogInfo)
     }
-    if (fetcher?.data) setActionData(fetcher?.data);
-  }, [fetcher?.data]);
+    if (fetcher?.data) setActionData(fetcher?.data)
+  }, [fetcher?.data])
 
   const handleModal = (row: any) => {
-    setEditData(row);
-    setOpenModal(true);
-  };
+    setEditData(row)
+    setOpenModal(true)
+  }
 
   const handleDelete = (fieldId: any) => {
     setDeleteDialog({
@@ -348,8 +349,8 @@ const FormFields = () => {
       title: "Remove a Form Rield",
       contentText: "Are you sure you want to remove this form field?",
       action: `${location.pathname}?fieldId=${fieldId}`,
-    });
-  };
+    })
+  }
 
   return (
     <>
@@ -399,7 +400,7 @@ const FormFields = () => {
         />
       </Box>
     </>
-  );
-};
+  )
+}
 
-export default FormFields;
+export default FormFields

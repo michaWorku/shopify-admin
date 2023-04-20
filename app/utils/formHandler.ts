@@ -1,7 +1,7 @@
-import { json } from "@remix-run/node";
-import { validate } from "./validators/validate";
-import { Response } from "./handler.server";
-import type { z } from "zod";
+import { json } from "@remix-run/node"
+import { validate } from "./validators/validate"
+import { Response } from "./handler.server"
+import type { z } from "zod"
 
 /**
  * Parses a multipart form data and validates it against the specified schema.
@@ -16,32 +16,32 @@ export const formHandler = async (
   request: Request,
   schema: z.ZodObject<any>
 ) => {
-  const form = await request.formData();
-  let formData = Object.fromEntries(form) as any;
+  const form = await request.formData()
+  let formData = Object.fromEntries(form) as any
 
-  formData = JSON.parse(formData.data);
-  console.dir(formData, { depth: null });
-  const hasPhone = formData.hasOwnProperty("phone");
-  Object.entries(formData).map(async ([key, value]) => {
+  formData = JSON.parse(formData.data)
+  console.dir(formData, { depth: null })
+  const hasPhone = formData.hasOwnProperty("phone")
+  Object.entries(formData).map(async ([key, value]: any) => {
     if (key === "roleId") {
-      formData[key] = JSON.parse(value);
+      formData[key] = JSON.parse(value)
     }
-  });
+  })
   if (hasPhone) {
     const parsedPhone = formData.phone.startsWith("+")
       ? formData.phone.slice(1)
-      : formData.phone;
+      : formData.phone
     const phone = `251${
       parsedPhone.startsWith("0")
         ? parsedPhone.slice(1)
         : parsedPhone.startsWith("251")
         ? parsedPhone.slice(3)
         : parsedPhone
-    }`;
-    formData = { ...formData, phone };
+    }`
+    formData = { ...formData, phone }
   }
-  const { success, data, ...fieldError } = await validate(formData, schema);
-  console.dir(fieldError, { depth: null });
+  const { success, data, ...fieldError } = await validate(formData, schema)
+  console.dir(fieldError, { depth: null })
   if (!success) {
     return json(
       Response({
@@ -51,10 +51,10 @@ export const formHandler = async (
         },
       }),
       { status: 422 }
-    );
+    )
   }
-  return { success, data };
-};
+  return { success, data }
+}
 
 /**
  * Parses a request's form data, optionally transforming a phone number to the Ethiopian format.
@@ -63,25 +63,25 @@ export const formHandler = async (
  * @returns {Promise<{ data: any }>} A Promise that resolves to an object with a `data` property containing the parsed form data.
  */
 export const requestFormHandler = async (request: Request) => {
-  const form = await request.formData();
-  let formData = Object.fromEntries(form) as any;
+  const form = await request.formData()
+  let formData = Object.fromEntries(form) as any
 
-  formData = JSON.parse(formData.data);
-  console.dir(formData, { depth: null });
-  const hasPhone = formData.hasOwnProperty("phone");
+  formData = JSON.parse(formData.data)
+  console.dir(formData, { depth: null })
+  const hasPhone = formData.hasOwnProperty("phone")
 
   if (hasPhone) {
     const parsedPhone = formData.phone.startsWith("+")
       ? formData.phone.slice(1)
-      : formData.phone;
+      : formData.phone
     const phone = `251${
       parsedPhone.startsWith("0")
         ? parsedPhone.slice(1)
         : parsedPhone.startsWith("251")
         ? parsedPhone.slice(3)
         : parsedPhone
-    }`;
-    formData = { ...formData, phone };
+    }`
+    formData = { ...formData, phone }
   }
 
   if (!Object.keys(formData).length) {
@@ -92,9 +92,9 @@ export const requestFormHandler = async (request: Request) => {
         },
       }),
       { status: 422 }
-    );
+    )
   }
   return {
     data: formData,
-  };
-};
+  }
+}
