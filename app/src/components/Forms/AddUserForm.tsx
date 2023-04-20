@@ -14,53 +14,52 @@ import {
   Slide,
   Card,
   Autocomplete,
-} from "@mui/material";
-import { pink, blue } from "@mui/material/colors";
+} from "@mui/material"
+import { pink, blue } from "@mui/material/colors"
 import {
   Form,
   useActionData,
   useLoaderData,
   useNavigation,
   useSubmit,
-} from "@remix-run/react";
-import type { ChangeEvent, SyntheticEvent } from "react";
-import { useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import { DesktopDatePicker } from "@mui/x-date-pickers";
-import type { Dayjs } from "dayjs";
-import moment from "moment";
-export const GenderValue = ["MALE", "FEMALE"] as const;
+} from "@remix-run/react"
+import type { ChangeEvent, SyntheticEvent } from "react"
+import { useState } from "react"
+import CloseIcon from "@mui/icons-material/Close"
+import { DesktopDatePicker } from "@mui/x-date-pickers"
+import type { Dayjs } from "dayjs"
+import moment from "moment"
+export const GenderValue = ["MALE", "FEMALE"] as const
 
-export default function AddUserForm({ openModal, closeModal }: any) {
-  const data = useLoaderData();
-  const transition = useNavigation();
-  const actionData = useActionData();
-  const submit = useSubmit();
-  const date = moment().subtract(25, "years") as Dayjs;
-  const [values, setValues] = useState({}) as any;
-  const [birthDate, setBirthdate] = useState<Dayjs | null>(date);
+export default function AddUserForm({ openModal, closeModal, data }: any) {
+  const transition = useNavigation()
+  const actionData = useActionData()
+  const submit = useSubmit()
+  const date = moment().subtract(25, "years") as Dayjs
+  const [values, setValues] = useState({}) as any
+  const [birthDate, setBirthdate] = useState<Dayjs | null>(date)
 
   const handleBirthDateChange = (value: any) => {
-    setBirthdate(value);
-    values.birthDate = value;
-  };
+    setBirthdate(value)
+    values.birthDate = value
+  }
   const handleRoleChange = (
     event: SyntheticEvent<Element, Event>,
     value: any
   ) => {
-    event.preventDefault();
-    const roleIds = value.map((item: any) => item.id);
-    values.roleId = JSON.stringify(roleIds);
-  };
+    event.preventDefault()
+    const roleIds = value.map((item: any) => item.id)
+    values.roleId = JSON.stringify(roleIds)
+  }
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    setValues({ ...values, [event.target.name]: event.target.value });
-  };
+    event.preventDefault()
+    setValues({ ...values, [event.target.name]: event.target.value })
+  }
 
   function handleSubmit(event: any) {
-    event.preventDefault();
-    submit({ data: JSON.stringify(values) }, { method: "post" });
+    event.preventDefault()
+    submit({ data: JSON.stringify(values) }, { method: "post" })
   }
 
   return (
@@ -458,5 +457,5 @@ export default function AddUserForm({ openModal, closeModal }: any) {
         </Box>
       </Slide>
     </Modal>
-  );
+  )
 }

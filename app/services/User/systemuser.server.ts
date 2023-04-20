@@ -1,17 +1,17 @@
-import { Response } from "../..//utils/utils-server";
-import { json } from "@remix-run/node";
+import { Response } from "../..//utils/utils-server"
+import { json } from "@remix-run/node"
 // import canUser from '../utils/casl/ability'
-import canUser from "../../utils/casl/ability";
-import { db } from "../db.server";
-import getParams from "../..//utils/params/getParams.server";
-import { searchCombinedColumn } from "../..//utils/params/search.server";
-import { filterFunction } from "../..//utils/params/filter.server";
-import customErr, { errorHandler } from "../..//utils/handler.server";
-import { canEditUser } from "../..//utils/casl/canEditUser";
-import { canDeleteUser } from "../..//utils/casl/canDeleteUser";
-import { roleChange } from "../Role/role.server";
-import { getUserEntities } from "../Entities/entity.server";
-import { hashPassword } from "~/utils/auth";
+import canUser from "../../utils/casl/ability"
+import { db } from "../db.server"
+import getParams from "../..//utils/params/getParams.server"
+import { searchCombinedColumn } from "../..//utils/params/search.server"
+import { filterFunction } from "../..//utils/params/filter.server"
+import customErr, { errorHandler } from "../..//utils/handler.server"
+import { canEditUser } from "../..//utils/casl/canEditUser"
+import { canDeleteUser } from "../..//utils/casl/canDeleteUser"
+import { roleChange } from "../Role/role.server"
+import { getUserEntities } from "../Entities/entity.server"
+import { hashPassword } from "~/utils/auth"
 // import { getUserEntities } from "../entity.server";
 
 export const getSystemUsers = async (
@@ -21,57 +21,57 @@ export const getSystemUsers = async (
 ) => {
   try {
     if (!clientId) {
-      const iCanView = await canUser(userId, "read", "SystemUser", {});
+      const iCanView = await canUser(userId, "read", "SystemUser", {})
       if (iCanView?.status === 200) {
-        const users = (await getAllSystemUsers(request, userId)) as any;
+        const users = (await getAllSystemUsers(request, userId)) as any
         if (users?.data) {
           await Promise.all(
             users?.data?.map(async (user: any) => {
-              let data;
+              let data
               data = canEditUser(userId, user?.id).then(
                 (res) => (user.canEdit = res)
-              );
+              )
 
               data = canDeleteUser(userId, user?.id).then(
                 (res) => (user.canDelete = res)
-              );
-              return data;
+              )
+              return data
             })
-          );
-          return users;
+          )
+          return users
         } else {
-          return users;
+          return users
         }
-      } else return iCanView;
+      } else return iCanView
     } else {
       const iCanView = await canUser(userId, "read", "SystemUser", {
         clientId,
-      });
+      })
       if (iCanView?.status === 200) {
         const systemUsers = (await getAllClientSystemUsers(
           request,
           clientId,
           userId
-        )) as any;
+        )) as any
         await Promise.all(
           systemUsers?.data?.map(async (user: any) => {
-            let data;
+            let data
             data = canEditUser(userId, user?.id, clientId).then((res) => {
-              user.canEdit = res;
-            });
+              user.canEdit = res
+            })
             data = canDeleteUser(userId, user?.id, clientId).then(
               (res) => (user.canDelete = res)
-            );
-            return data;
+            )
+            return data
           })
-        );
-        return systemUsers;
-      } else return iCanView;
+        )
+        return systemUsers
+      } else return iCanView
     }
   } catch (error) {
-    return errorHandler(error);
+    return errorHandler(error)
   }
-};
+}
 
 const getAllSystemUsers = async (request: any, userId: string) => {
   try {
@@ -84,13 +84,13 @@ const getAllSystemUsers = async (request: any, userId: string) => {
       search,
       filter,
       exportType,
-    } = getParams(request);
+    } = getParams(request)
     const searchParams = searchCombinedColumn(
       search,
       ["firstName", "middleName", "lastName"],
       "search"
-    );
-    const filterParams = filterFunction(filter, "User");
+    )
+    const filterParams = filterFunction(filter, "User")
 
     let _where: any = {
       roles: {
@@ -113,11 +113,11 @@ const getAllSystemUsers = async (request: any, userId: string) => {
       },
       ...searchParams,
       ...filterParams,
-    };
-    let users;
+    }
+    let users
     const userCount = await db.user.count({
       where: _where,
-    });
+    })
 
     if (userCount) {
       users = await db.user.findMany({
@@ -129,10 +129,10 @@ const getAllSystemUsers = async (request: any, userId: string) => {
           },
         ],
         where: _where,
-      });
-      let exportData;
+      })
+      let exportData
       if (exportType === "page") {
-        exportData = users;
+        exportData = users
       } else if (exportType === "filtered") {
         exportData = await db.user.findMany({
           orderBy: [
@@ -145,9 +145,9 @@ const getAllSystemUsers = async (request: any, userId: string) => {
             },
           ],
           where: _where,
-        });
+        })
       } else {
-        exportData = await db.user.findMany({});
+        exportData = await db.user.findMany({})
       }
       return {
         data: users,
@@ -161,14 +161,14 @@ const getAllSystemUsers = async (request: any, userId: string) => {
           exportType,
           exportData,
         },
-      };
+      }
     }
 
-    throw new customErr("Custom_Error", "User not found", 404);
+    throw new customErr("Custom_Error", "User not found", 404)
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 
 const getAllClientSystemUsers = async (
   request: any,
@@ -177,29 +177,30 @@ const getAllClientSystemUsers = async (
 ) => {
   try {
     const { sortType, sortField, skip, take, pageNo, search, filter } =
-      getParams(request);
+      getParams(request)
     const searchParams = searchCombinedColumn(
       search,
       ["firstName", "middleName", "lastName"],
       "search"
-    );
-    const filterParams = filterFunction(filter, "User");
-    let users;
-    const userCount = await db.user.count({
-      where: {
-        clients: {
-          some: {
-            isSystemUser: true,
-            clientId: clientId,
-          },
+    )
+    const filterParams = filterFunction(filter, "User")
+    let users
+    let _where = {
+      clients: {
+        some: {
+          isSystemUser: true,
+          clientId: clientId,
         },
-        id: {
-          not: userId,
-        },
-        ...searchParams,
-        ...filterParams,
       },
-    });
+      id: {
+        not: userId,
+      },
+      ...searchParams,
+      ...filterParams,
+    }
+    const userCount = await db.user.count({
+      where: _where,
+    })
 
     if (userCount) {
       users = await db.user.findMany({
@@ -210,20 +211,8 @@ const getAllClientSystemUsers = async (
             [sortField]: sortType,
           },
         ],
-        where: {
-          clients: {
-            some: {
-              isSystemUser: true,
-              clientId: clientId,
-            },
-          },
-          id: {
-            not: userId,
-          },
-          ...searchParams,
-          ...filterParams,
-        },
-      });
+        where: _where,
+      })
 
       return {
         data: users,
@@ -235,14 +224,14 @@ const getAllClientSystemUsers = async (
           filter,
           total: userCount,
         },
-      };
+      }
     }
 
-    throw new customErr("Custom_Error", "No User was found", 404);
+    throw new customErr("Custom_Error", "No User was found", 404)
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 export const createSystemUser = async (
   userId: string,
   data: any,
@@ -252,46 +241,46 @@ export const createSystemUser = async (
     if (clientId) {
       const isClientUser = await canUser(userId, "create", "SystemUser", {
         clientId,
-      });
+      })
       if (isClientUser?.status === 200) {
         // create user
-        const response = await createSystemUserDb(data, clientId);
-        return json(response, { status: 200 });
+        const response = await createSystemUserDb(data, clientId)
+        return json(response, { status: 200 })
       } else {
-        return isClientUser;
+        return isClientUser
       }
     } else {
-      const isSysteUser = await canUser(userId, "create", "SystemUser", {});
+      const isSysteUser = await canUser(userId, "create", "SystemUser", {})
       if (isSysteUser?.status === 200) {
         //create user
-        const response = await createSystemUserDb(data);
-        return json(response, { status: 200 });
+        const response = await createSystemUserDb(data)
+        return json(response, { status: 200 })
       } else {
-        return isSysteUser;
+        return isSysteUser
       }
     }
   } catch (err) {
-    console.log("INSIDE CATCH", { err });
-    return errorHandler(err);
+    console.log("INSIDE CATCH", { err })
+    return errorHandler(err)
   }
-};
+}
 
 export const createSystemUserDb = async (data: any, clientId?: string) => {
   try {
-    const hashedPassword = await hashPassword(data?.password as string);
+    const hashedPassword = await hashPassword(data?.password as string)
     const result = await db.$transaction(
       async (tx) => {
-        let userObject: any = {};
+        let userObject: any = {}
         Object.entries(data).map(async ([key, value]) => {
           if (key === "roleId") {
           } else if (key === "password") {
-            Object.assign(userObject, { [key]: hashedPassword });
+            Object.assign(userObject, { [key]: hashedPassword })
           } else {
-            Object.assign(userObject, { [key]: value });
+            Object.assign(userObject, { [key]: value })
           }
-        });
+        })
 
-        console.log({ userObject });
+        console.log({ userObject })
         const newUser = await tx.user.create({
           data: {
             ...userObject,
@@ -300,12 +289,12 @@ export const createSystemUserDb = async (data: any, clientId?: string) => {
                 data: data?.roleId?.map((e: string) => {
                   return {
                     roleId: e,
-                  };
+                  }
                 }),
               },
             },
           },
-        });
+        })
 
         if (clientId) {
           await tx.user.update({
@@ -320,27 +309,27 @@ export const createSystemUserDb = async (data: any, clientId?: string) => {
                 },
               },
             },
-          });
+          })
         }
 
-        return { newUser };
+        return { newUser }
       },
       {
         maxWait: 5000,
         timeout: 30000,
       }
-    );
+    )
 
     return Response({
       data: {
         data: result.newUser,
         message: "User successfully created",
       },
-    });
+    })
   } catch (err) {
-    throw err;
+    throw err
   }
-};
+}
 
 export const updateSystemUser = async (
   editorId: string,
@@ -352,14 +341,14 @@ export const updateSystemUser = async (
     if (clientId) {
       const isClientUser = await canUser(editorId, "update", "SystemUser", {
         clientId: clientId,
-      });
+      })
       if (isClientUser?.status === 200) {
         //Check if the edited user is from the same client
-        const editedUserClient = (await getUserEntities(editorId)) as any;
+        const editedUserClient = (await getUserEntities(editorId)) as any
         if (editedUserClient?.data?.id === clientId) {
           // create user
-          const response = await updateSystemUserDb(userId, data, editorId);
-          return json(response, { status: 200 });
+          const response = await updateSystemUserDb(userId, data, editorId)
+          return json(response, { status: 200 })
         } else {
           return json(
             Response({
@@ -369,26 +358,26 @@ export const updateSystemUser = async (
                 },
               },
             })
-          );
+          )
         }
       } else {
-        return isClientUser;
+        return isClientUser
       }
     } else {
-      const isSysteUser = await canUser(editorId, "update", "SystemUser", {});
+      const isSysteUser = await canUser(editorId, "update", "SystemUser", {})
       if (isSysteUser?.status === 200) {
         //create user
-        const response = await updateSystemUserDb(userId, data, editorId);
-        return json(response, { status: 200 });
+        const response = await updateSystemUserDb(userId, data, editorId)
+        return json(response, { status: 200 })
       } else {
-        return isSysteUser;
+        return isSysteUser
       }
     }
   } catch (err) {
-    console.log("INIDE CATCH", { err });
-    return errorHandler(err);
+    console.log("INIDE CATCH", { err })
+    return errorHandler(err)
   }
-};
+}
 
 export const updateSystemUserDb = async (
   userId: string,
@@ -396,7 +385,7 @@ export const updateSystemUserDb = async (
   editorId: string
 ) => {
   try {
-    let roles;
+    let roles
     if (data?.roleId) {
       const userRoles = await db.role.findMany({
         where: {
@@ -407,11 +396,11 @@ export const updateSystemUserDb = async (
             },
           },
         },
-      });
+      })
       const { connect, disconnect } = await roleChange(
         userRoles?.map((e) => e.id),
         data?.roleId
-      );
+      )
       roles = {
         create: connect
           .filter((e) => e !== undefined && e !== null)
@@ -422,24 +411,24 @@ export const updateSystemUserDb = async (
                   id: elt,
                 },
               },
-            };
+            }
           }),
         deleteMany: disconnect
           .filter((e) => e !== undefined && e !== null)
           .map((elt) => {
             return {
               roleId: elt,
-            };
+            }
           }),
-      };
+      }
     }
-    let userObject: any = {};
+    let userObject: any = {}
     Object.entries(data).map(([key, value]) => {
       if (key === "roleId") {
       } else {
-        Object.assign(userObject, { [key]: value });
+        Object.assign(userObject, { [key]: value })
       }
-    });
+    })
     const updatedUser = await db.user.update({
       where: {
         id: userId,
@@ -448,18 +437,18 @@ export const updateSystemUserDb = async (
         ...userObject,
         roles,
       },
-    });
+    })
 
     return Response({
       data: {
         data: updatedUser,
         message: "User successfully updated",
       },
-    });
+    })
   } catch (err) {
-    throw err;
+    throw err
   }
-};
+}
 
 export const deleteSystemUser = async (
   userId: string,
@@ -470,14 +459,14 @@ export const deleteSystemUser = async (
     if (clientId) {
       const isClientUser = await canUser(userId, "delete", "SystemUser", {
         clientId,
-      });
+      })
       if (isClientUser?.status === 200) {
         //Check if the edited user is from the same client
-        const deletedUserClient = (await getUserEntities(userId)) as any;
+        const deletedUserClient = (await getUserEntities(userId)) as any
         if (deletedUserClient?.data?.id === clientId) {
           // create user
-          const response = await deleteSystemUserDb(deletedUserId);
-          return json(response, { status: 200 });
+          const response = await deleteSystemUserDb(deletedUserId)
+          return json(response, { status: 200 })
         } else {
           return json(
             Response({
@@ -487,25 +476,25 @@ export const deleteSystemUser = async (
                 },
               },
             })
-          );
+          )
         }
       } else {
-        return isClientUser;
+        return isClientUser
       }
     } else {
-      const isSysteUser = await canUser(userId, "delete", "SystemUser", {});
+      const isSysteUser = await canUser(userId, "delete", "SystemUser", {})
       if (isSysteUser?.status === 200) {
         //create user
-        const response = await deleteSystemUserDb(userId);
-        return json(response, { status: 200 });
+        const response = await deleteSystemUserDb(userId)
+        return json(response, { status: 200 })
       } else {
-        return isSysteUser;
+        return isSysteUser
       }
     }
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 
 export const deleteSystemUserDb = async (deletedUserId: string) => {
   const user = await db.user.update({
@@ -515,12 +504,12 @@ export const deleteSystemUserDb = async (deletedUserId: string) => {
     data: {
       deletedAt: new Date(),
     },
-  });
+  })
 
   return Response({
     data: {
       user,
       message: "User successfuly deleted.",
     },
-  });
-};
+  })
+}

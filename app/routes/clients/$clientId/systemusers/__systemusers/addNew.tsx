@@ -1,4 +1,4 @@
-import { useActionData, useNavigate } from "@remix-run/react"
+import { useActionData, useLoaderData, useNavigate } from "@remix-run/react"
 import { useEffect } from "react"
 import type { LoaderFunction, ActionFunction } from "@remix-run/server-runtime"
 import { json } from "@remix-run/server-runtime"
@@ -16,15 +16,14 @@ import { getUserById } from "~/services/User/Users.server"
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
-    const user = await authenticator.isAuthenticated(request, {
+    const user = (await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    })
-    const userData = (await getUserById(user?.id)) as any
-    const { roles } = await getUserCreatedRole(user?.id)
-    userData.userRoles = roles
+    })) as any
+    const { roles } = await getUserCreatedRole(user?.id, params?.clientId)
+    user.userRoles = roles
     return json(
       Response({
-        data: userData,
+        data: user,
       })
     )
   } catch (err) {
@@ -55,6 +54,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 }
 export default function Users() {
   const actionData = useActionData<typeof action>()
+  const loaderData = useLoaderData()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -67,5 +67,11 @@ export default function Users() {
     }
   }, [actionData])
 
-  return <AddUserForm openModal={true} closeModal={() => navigate(-1)} />
+  return (
+    <AddUserForm
+      openModal={true}
+      closeModal={() => navigate(-1)}
+      data={loaderData}
+    />
+  )
 }
