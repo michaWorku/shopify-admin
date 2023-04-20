@@ -1,47 +1,47 @@
 /* eslint-disable react/jsx-pascal-case */
 
-import type { ActionFunction, LoaderFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node"
+import { json } from "@remix-run/node"
 import {
   useActionData,
   useFetcher,
   useLoaderData,
   useNavigate,
   useNavigation,
-} from "@remix-run/react";
-import { Outlet } from "@remix-run/react";
-import type { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Card, Modal, Slide, Typography } from "@mui/material";
-import { useState, useEffect } from "react";
-import { Status } from "@prisma/client";
-import type { Role } from "@prisma/client";
-import { toast } from "react-toastify";
-import { useMemo } from "react";
-import { Response, errorHandler } from "../utils/handler.server";
-import moment from "moment";
-import { CustomizedTable } from "../src/components/Table";
-import AddRoleForm from "../src/components/Forms/AddRoleForm";
-import { authenticator } from "../services/auth.server";
-import { commitSession, getSession } from "../services/session.server";
-import { createRole, getAllRoles } from "../services/Role/role.server";
-import { getSystemPermissions } from "../services/Role/Permissions/permission.server";
+} from "@remix-run/react"
+import { Outlet } from "@remix-run/react"
+import type { MRT_ColumnDef } from "material-react-table"
+import { Box, Button, Card, Modal, Slide, Typography } from "@mui/material"
+import { useState, useEffect } from "react"
+import { Status } from "@prisma/client"
+import type { Role } from "@prisma/client"
+import { toast } from "react-toastify"
+import { useMemo } from "react"
+import { Response, errorHandler } from "../utils/handler.server"
+import moment from "moment"
+import { CustomizedTable } from "../src/components/Table"
+import AddRoleForm from "../src/components/Forms/AddRoleForm"
+import { authenticator } from "../services/auth.server"
+import { commitSession, getSession } from "../services/session.server"
+import { createRole, getAllRoles } from "../services/Role/role.server"
+import { getSystemPermissions } from "../services/Role/Permissions/permission.server"
 
-import canUser, { AbilityType } from "../utils/casl/ability";
-import { validate } from "../utils/validators/validate";
-import { roleSchema } from "../utils/schema/roleSchema";
-import FilterModes from "../src/components/Table/CustomFilter";
+import canUser, { AbilityType } from "../utils/casl/ability"
+import { validate } from "../utils/validators/validate"
+import { roleSchema } from "../utils/schema/roleSchema"
+import FilterModes from "../src/components/Table/CustomFilter"
 // import {DateFilter} from '../src/components/Table/DatePicker'
-import StatusUpdate from "../src/components/Table/StatusUpdate";
-import RowActions from "../src/components/Table/RowActions";
+import StatusUpdate from "../src/components/Table/StatusUpdate"
+import RowActions from "../src/components/Table/RowActions"
 import {
   getEntities,
   getUserEntities,
-} from "../services/Entities/entity.server";
-import { DeleteAlert } from "../src/components";
-import type { DeleteDialogType } from "../src/components/DeleteAlert";
-import DateFilter from "../src/components/Table/DatePicker";
-import palette from "~/src/theme/palette";
-import Navbar from "~/src/components/Layout/Navbar";
+} from "../services/Entities/entity.server"
+import { DeleteAlert } from "../src/components"
+import type { DeleteDialogType } from "../src/components/DeleteAlert"
+import DateFilter from "../src/components/Table/DatePicker"
+import palette from "~/src/theme/palette"
+import Navbar from "~/src/components/Layout/Navbar"
 
 /**
  * Loader function to fetch role and permisions.
@@ -54,22 +54,22 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     // Authenticate the user
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
+    })
 
     // // Get the user's session
-    const session = await getSession(request.headers.get("Cookie"));
+    const session = await getSession(request.headers.get("Cookie"))
 
     // // Get the message from the session, if any
-    const message = session.get("message") || null;
-    session.unset("message");
+    const message = session.get("message") || null
+    session.unset("message")
 
     // Get all roles for the user
-    const roles = (await getAllRoles(request, user.id)) as any;
+    const roles = (await getAllRoles(request, user.id)) as any
     // Get system permissions for the user
-    const systemPermission = await getSystemPermissions(user.id);
+    const systemPermission = await getSystemPermissions(user.id)
 
     // Get all clients for the user
-    const clients = await getEntities(user.id);
+    const clients = await getEntities(user.id)
     // Check if the user can create a new role
     const able = (await canUser(
       user.id,
@@ -77,11 +77,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       "Role",
       {},
       AbilityType.BOTH
-    )) as any;
-    console.log({ able });
-    let systemPermissions;
+    )) as any
+    console.log({ able })
+    let systemPermissions
     if (systemPermission?.data) {
-      systemPermissions = systemPermission?.data;
+      systemPermissions = systemPermission?.data
     }
 
     // Build the response data
@@ -97,37 +97,37 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         },
       },
       metaData: roles?.metaData,
-    };
+    }
     // Return the response with the session cookie set
     return json(responseData, {
       status: 200,
       headers: {
         "Set-Cookie": await commitSession(session),
       },
-    });
+    })
   } catch (error) {
     // Handle errors
-    return errorHandler(error);
+    return errorHandler(error)
   }
-};
+}
 
 export const action: ActionFunction = async ({ request }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
+    })
 
-    const formData = await request.formData();
-    const fields = Object.fromEntries(formData) as any;
-    const permissions: any = fields?.permissions;
-    fields.permissions = JSON.parse(permissions);
-    const { success, data, fieldErrors } = await validate(fields, roleSchema);
-    console.log({ data, success });
+    const formData = await request.formData()
+    const fields = Object.fromEntries(formData) as any
+    const permissions: any = fields?.permissions
+    fields.permissions = JSON.parse(permissions)
+    const { success, data, fieldErrors } = await validate(fields, roleSchema)
+    console.log({ data, success })
     if (success) {
-      const clients = (await getUserEntities(user?.id)) as any;
-      data.clientId = clients?.data?.id;
-      const role = await createRole(user.id, data);
-      return role;
+      const clients = (await getUserEntities(user?.id)) as any
+      data.clientId = clients?.data?.id
+      const role = await createRole(user.id, data)
+      return role
     }
 
     return json(
@@ -137,7 +137,7 @@ export const action: ActionFunction = async ({ request }) => {
         },
       }),
       { status: 422 }
-    );
+    )
   } catch (error: any) {
     if (!error?.success) {
       return json(
@@ -148,11 +148,11 @@ export const action: ActionFunction = async ({ request }) => {
           },
         }),
         { status: 422 }
-      );
+      )
     }
-    return errorHandler(error);
+    return errorHandler(error)
   }
-};
+}
 
 const breadcrumbs = [
   <Typography
@@ -163,7 +163,7 @@ const breadcrumbs = [
   >
     Role
   </Typography>,
-];
+]
 
 export const DefaultDialogInfo = {
   open: false,
@@ -171,52 +171,52 @@ export const DefaultDialogInfo = {
   title: "Remove a Role",
   contentText: "Are you sure you want to remove this Role?",
   action: "role",
-};
+}
 export default function ViewRole() {
-  const loaderData = useLoaderData();
-  const actionData = useActionData();
-  const navigate = useNavigate();
-  const fetcher = useFetcher();
-  const navigation = useNavigation();
-  const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
-  const [loadingEdit, setLoadingEdit] = useState<boolean>(false);
+  const loaderData = useLoaderData()
+  const actionData = useActionData()
+  const navigate = useNavigate()
+  const fetcher = useFetcher()
+  const navigation = useNavigation()
+  const [loading, setLoading] = useState(false)
+  const [openModal, setOpenModal] = useState(false)
+  const [loadingEdit, setLoadingEdit] = useState<boolean>(false)
   const [deleteDialog, setDeleteDialog] =
-    useState<DeleteDialogType>(DefaultDialogInfo);
+    useState<DeleteDialogType>(DefaultDialogInfo)
 
   useEffect(() => {
     if (navigation.state === "idle" && loading) {
-      setLoading(false);
+      setLoading(false)
     }
     if (navigation.state === "idle" && loadingEdit) {
-      setLoadingEdit(false);
+      setLoadingEdit(false)
     }
-  }, [navigation.state]);
+  }, [navigation.state])
   function handleEdit(row: any) {
-    navigate(`${row}`);
+    navigate(`${row}`)
   }
 
   useEffect(() => {
     if (fetcher?.data?.error?.error?.message) {
-      toast.error(fetcher?.data?.error?.error?.message);
+      toast.error(fetcher?.data?.error?.error?.message)
     }
     if (fetcher?.data?.message) {
-      toast.success(fetcher?.data?.message);
-      setOpenModal(false);
-      setDeleteDialog(DefaultDialogInfo);
+      toast.success(fetcher?.data?.message)
+      setOpenModal(false)
+      setDeleteDialog(DefaultDialogInfo)
     }
-  }, [fetcher?.data]);
+  }, [fetcher?.data])
 
   const handleDelete = (id: string) => {
-    console.log({ id });
+    console.log({ id })
     setDeleteDialog({
       open: true,
       id: id,
       title: "Remove a Role",
       contentText: "Are you sure you want to remove this Role?",
       action: `role/${id}`,
-    });
-  };
+    })
+  }
   const columns = useMemo<MRT_ColumnDef<Role>[]>(
     () => [
       {
@@ -241,7 +241,7 @@ export default function ViewRole() {
           return {
             text: status,
             value: status,
-          };
+          }
         }),
         renderColumnFilterModeMenuItems: FilterModes,
         filterVariant: "multi-select",
@@ -270,29 +270,29 @@ export default function ViewRole() {
       },
     ],
     []
-  );
+  )
 
   useEffect(() => {
     if (actionData !== undefined) {
       if (actionData?.error?.error) {
-        toast.error(actionData?.error?.error?.message);
+        toast.error(actionData?.error?.error?.message)
       }
       if (!actionData?.error && actionData?.data?.role) {
-        handleCloseModal();
-        toast.success(actionData?.data?.message);
+        handleCloseModal()
+        toast.success(actionData?.data?.message)
       }
     }
-  }, [actionData]);
+  }, [actionData])
 
   const handleOpenModal = () => {
-    setOpenModal(true);
-  };
+    setOpenModal(true)
+  }
   const handleCloseModal = () => {
-    setOpenModal(false);
-  };
+    setOpenModal(false)
+  }
   return (
     <>
-      <Navbar breadcrumbs={breadcrumbs} />
+      <Navbar breadcrumbs={breadcrumbs} loaderData={loaderData} />
       <Box m={2}>
         <CustomizedTable
           columns={columns}
@@ -341,5 +341,5 @@ export default function ViewRole() {
         <Outlet />
       </Box>
     </>
-  );
+  )
 }

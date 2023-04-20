@@ -1,26 +1,26 @@
-import { Box, Link, Typography } from "@mui/material";
-import type { User } from "@prisma/client";
-import type { LoaderFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useLoaderData, useNavigation, useParams } from "@remix-run/react";
-import type { MRT_ColumnDef } from "material-react-table";
-import moment from "moment-timezone";
-import { useEffect, useMemo, useState } from "react";
-import { Response } from "~/utils/handler.server";
-import { authenticator } from "~/services/auth.server";
-import { CustomizedTable } from "~/src/components/Table";
-import FilterModes from "~/src/components/Table/CustomFilter";
-import DateFilter from "~/src/components/Table/DatePicker";
-import canUser from "~/utils/casl/ability";
-import { errorHandler } from "~/utils/handler.server";
-import { toast } from "react-toastify";
+import { Box, Link, Typography } from "@mui/material"
+import type { User } from "@prisma/client"
+import type { LoaderFunction } from "@remix-run/node"
+import { json } from "@remix-run/node"
+import { useLoaderData, useNavigation, useParams } from "@remix-run/react"
+import type { MRT_ColumnDef } from "material-react-table"
+import moment from "moment-timezone"
+import { useEffect, useMemo, useState } from "react"
+import { Response } from "~/utils/handler.server"
+import { authenticator } from "~/services/auth.server"
+import { CustomizedTable } from "~/src/components/Table"
+import FilterModes from "~/src/components/Table/CustomFilter"
+import DateFilter from "~/src/components/Table/DatePicker"
+import canUser from "~/utils/casl/ability"
+import { errorHandler } from "~/utils/handler.server"
+import { toast } from "react-toastify"
 import {
   getClientByField,
   getClientById,
   getClientUsers,
-} from "~/services/Client/Client.server";
-import palette from "~/src/theme/palette";
-import Navbar from "~/src/components/Layout/Navbar";
+} from "~/services/Client/Client.server"
+import palette from "~/src/theme/palette"
+import Navbar from "~/src/components/Layout/Navbar"
 
 /**
  * Loader function to fetch users of a client.
@@ -34,22 +34,22 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     // Authenticate the user
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
+    })
 
-    console.log({ user, params });
+    console.log({ user, params })
     // Check if the user can read a client users
     const canRead = (await canUser(user?.id, "read", "User", {
       clientId: params?.clientId,
-    })) as any;
-    const client = (await getClientById(params?.clientId)) as any;
+    })) as any
+    const client = (await getClientById(params?.clientId)) as any
     // Get all all users that get any reward of a client
-    let clientUsers;
+    let clientUsers
     clientUsers = (await getClientUsers(
       request,
       params?.clientId as string
-    )) as any;
+    )) as any
 
-    console.dir({ form: clientUsers?.data });
+    console.dir({ form: clientUsers?.data })
 
     if (clientUsers?.status === 404) {
       return json(
@@ -64,7 +64,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
             },
           },
         })
-      );
+      )
     }
 
     return json(
@@ -76,21 +76,21 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           client: client,
         },
       })
-    );
+    )
   } catch (error) {
-    console.log("Error occured loading reward users");
-    console.dir(error, { depth: null });
-    return errorHandler(error);
+    console.log("Error occured loading reward users")
+    console.dir(error, { depth: null })
+    return errorHandler(error)
   }
-};
+}
 
 /**
  * Renders the Client User component.
  * @returns {JSX.Element} JSX element containing the client users table.
  */
 const ClientUsers = () => {
-  const loaderData = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
+  const loaderData = useLoaderData<typeof loader>()
+  const navigation = useNavigation()
   const breadcrumbs = [
     <Link
       underline="none"
@@ -111,7 +111,7 @@ const ClientUsers = () => {
     >
       Users
     </Typography>,
-  ];
+  ]
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -167,19 +167,18 @@ const ClientUsers = () => {
       },
     ],
     []
-  );
+  )
 
   useEffect(() => {
     if (loaderData?.data?.error?.error?.message) {
-      toast.error(loaderData?.data?.error?.error?.message);
+      toast.error(loaderData?.data?.error?.error?.message)
     }
-  }, [loaderData]);
+  }, [loaderData])
 
   return (
     <>
-      <Navbar breadcrumbs={breadcrumbs} />
+      <Navbar breadcrumbs={breadcrumbs} loaderData={loaderData} />
       <Box m={2}>
-        <Navbar breadcrumbs={breadcrumbs} />
         <CustomizedTable
           columns={columns}
           data={loaderData}
@@ -189,7 +188,7 @@ const ClientUsers = () => {
         />
       </Box>
     </>
-  );
-};
+  )
+}
 
-export default ClientUsers;
+export default ClientUsers

@@ -224,7 +224,7 @@ const SystemUsers = () => {
 
   return (
     <>
-      <Navbar breadcrumbs={breadcrumbs} />
+      <Navbar breadcrumbs={breadcrumbs} loaderData={loaderData} />
       <Box m={2}>
         <CustomizedTable
           columns={columns}

@@ -1,28 +1,28 @@
-import { Box } from "@mui/material";
-import type { User } from "@prisma/client";
-import { Reward } from "@prisma/client";
-import type { LoaderFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { Box, Typography } from "@mui/material"
+import type { User } from "@prisma/client"
+import { Reward } from "@prisma/client"
+import type { LoaderFunction } from "@remix-run/node"
+import { json } from "@remix-run/node"
 import {
   useFetcher,
   useLoaderData,
   useLocation,
   useNavigation,
-} from "@remix-run/react";
-import type { MRT_ColumnDef } from "material-react-table";
-import moment from "moment-timezone";
-import { useEffect, useMemo, useState } from "react";
-import customErr, { Response } from "~/utils/handler.server";
-import { authenticator } from "~/services/auth.server";
-import { CustomizedTable } from "~/src/components/Table";
-import FilterModes from "~/src/components/Table/CustomFilter";
-import DateFilter from "~/src/components/Table/DatePicker";
-import canUser from "~/utils/casl/ability";
-import { errorHandler } from "~/utils/handler.server";
-import { toast } from "react-toastify";
-import { getRewardUsers } from "~/services/Reward/Reward.server";
-import { getClientUsers } from "~/services/Client/Client.server";
-import { getUsers } from "~/services/User/Users.server";
+} from "@remix-run/react"
+import type { MRT_ColumnDef } from "material-react-table"
+import moment from "moment-timezone"
+import { useEffect, useMemo, useState } from "react"
+import customErr, { Response } from "~/utils/handler.server"
+import { authenticator } from "~/services/auth.server"
+import { CustomizedTable } from "~/src/components/Table"
+import FilterModes from "~/src/components/Table/CustomFilter"
+import DateFilter from "~/src/components/Table/DatePicker"
+import canUser from "~/utils/casl/ability"
+import { errorHandler } from "~/utils/handler.server"
+import { toast } from "react-toastify"
+import { getUsers } from "~/services/User/Users.server"
+import Navbar from "~/src/components/Layout/Navbar"
+import palette from "~/src/theme/palette"
 
 /**
  * Loader function to fetch users.
@@ -36,19 +36,17 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     // Authenticate the user
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
+    })
 
-    console.log({ user, params });
+    console.log({ user, params })
     // Check if the user can read all users
-    const canRead = (await canUser(user?.id, "read", "User", {})) as any;
+    const canRead = (await canUser(user?.id, "read", "User", {})) as any
 
     // Get all all users
-    let users;
-    users = (await getUsers(
-      request,
-    )) as any;
+    let users
+    users = (await getUsers(request)) as any
 
-    console.dir({ form: users?.data });
+    console.dir({ form: users?.data })
 
     if (users?.status === 404) {
       return json(
@@ -63,7 +61,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
             },
           },
         })
-      );
+      )
     }
 
     return json(
@@ -74,21 +72,31 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           user,
         },
       })
-    );
+    )
   } catch (error) {
-    console.log("Error occured loading users");
-    console.dir(error, { depth: null });
-    return errorHandler(error);
+    console.log("Error occured loading users")
+    console.dir(error, { depth: null })
+    return errorHandler(error)
   }
-};
+}
 
 /**
  * Renders the User component.
  * @returns {JSX.Element} JSX element containing the users table.
  */
 const Users = () => {
-  const loaderData = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
+  const loaderData = useLoaderData<typeof loader>()
+  const navigation = useNavigation()
+  const breadcrumbs = [
+    <Typography
+      key={"1"}
+      variant="subtitle1"
+      color={palette.primary.main}
+      sx={{ color: "#828282", fontWeight: 700 }}
+    >
+      Users
+    </Typography>,
+  ]
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -144,26 +152,28 @@ const Users = () => {
       },
     ],
     []
-  );
+  )
 
   useEffect(() => {
     if (loaderData?.data?.error?.error?.message) {
-      toast.error(loaderData?.data?.error?.error?.message);
+      toast.error(loaderData?.data?.error?.error?.message)
     }
-  }, [loaderData]);
+  }, [loaderData])
 
   return (
-    <Box m={2}>
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="Users"
-        enableExport={true}
-        loading={navigation.state === "loading" ? true : false}
-      />
-    </Box>
-  );
-};
+    <>
+      <Navbar breadcrumbs={breadcrumbs} loaderData={loaderData} />
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="Users"
+          enableExport={true}
+          loading={navigation.state === "loading" ? true : false}
+        />
+      </Box>
+    </>
+  )
+}
 
-export default Users;
-
+export default Users
