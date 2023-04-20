@@ -104,8 +104,8 @@ const ClientForm = ({
                   }}
                 >
                   <Box sx={{ px: 5, pt: 5 }}>
-                    <Typography variant="h6">Add New Client</Typography>
-                    <Typography>Add a new client</Typography>
+                    <Typography variant="subtitle1" gutterBottom>Add New Client</Typography>
+                    <Typography variant="body2">Add a new client</Typography>
                   </Box>
 
                   <Box

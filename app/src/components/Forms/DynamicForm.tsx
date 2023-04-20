@@ -550,8 +550,8 @@ const DynamicForm: React.FC<any> = ({
                   }}
                 >
                   <Box sx={{ px: 5, pt: 5 }}>
-                    <Typography variant="h6">Add New Form</Typography>
-                    <Typography variant="body1">Add a new Form</Typography>
+                    <Typography variant="subtitle1" gutterBottom>Add New Form</Typography>
+                    <Typography variant="body2">Add a new Form</Typography>
                   </Box>
 
                   <Box

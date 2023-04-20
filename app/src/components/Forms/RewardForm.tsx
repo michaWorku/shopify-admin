@@ -407,8 +407,8 @@ const RewardForm: React.FC<any> = ({
                   }}
                 >
                   <Box sx={{ px: 5, pt: 5 }}>
-                    <Typography variant="h6">Add New Reward</Typography>
-                    <Typography>Add a new Reward</Typography>
+                    <Typography variant="subtitle1" gutterBottom>Add New Reward</Typography>
+                    <Typography variant="body2">Add a new Reward</Typography>
                   </Box>
 
                   <Box
