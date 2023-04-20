@@ -88,10 +88,12 @@ const StatusUpdate = ({ row, route, disable }: any): JSX.Element => {
               onChange={() =>
                 submit(
                   {
-                    status:
-                    row.original.status === 'ACTIVE'
-                        ? 'INACTIVE'
-                        : 'ACTIVE',
+                    data: JSON.stringify({
+                      status:
+                      row.original.status === 'ACTIVE'
+                          ? 'INACTIVE'
+                          : 'ACTIVE'
+                    })
                   },
                   {
                     method: "patch",

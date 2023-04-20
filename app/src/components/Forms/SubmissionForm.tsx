@@ -321,13 +321,15 @@ const SubmissionForm: React.FC<any> = ({
   const onSubmit = (data: any, e: any) => {
     e?.preventDefault()
     console.log({ data, params });
-    fetcher.submit(
-      { data: JSON.stringify({ submitedData: data, phone: params?.phone }) },
-      {
-        method: "post",
-        action: location?.pathname,
-      }
-    );
+    if(Object.keys(fetcher).length){
+      fetcher.submit(
+        { data: JSON.stringify({ submitedData: data, phone: params?.phone }) },
+        {
+          method: "post",
+          action: location?.pathname,
+        }
+      );
+    }
   };
 
   return (
