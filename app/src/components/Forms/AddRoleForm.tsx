@@ -88,10 +88,10 @@ export default function AddRoleForm({
                         }}
                     >
                         <Box sx={{ px: 5, pt: 3 }}>
-                            <Typography variant="h3" gutterBottom>
+                            <Typography variant="subtitle1" gutterBottom>
                                 Add New Role
                             </Typography>
-                            <Typography variant="body1">
+                            <Typography variant="body2">
                                 Add new roles with the permissions below
                             </Typography>
                         </Box>

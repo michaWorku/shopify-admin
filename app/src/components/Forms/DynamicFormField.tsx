@@ -427,8 +427,8 @@ const DynamicFormField: React.FC<any> = ({
                   }}
                 >
                   <Box sx={{ px: 5, pt: 5 }}>
-                    <Typography variant="h6">Add New Form Field</Typography>
-                    <Typography>Add a new Form Field</Typography>
+                    <Typography variant="subtitle1" gutterBottom>Add New Form Field</Typography>
+                    <Typography variant="body2">Add a new Form Field</Typography>
                   </Box>
 
                   <Box
