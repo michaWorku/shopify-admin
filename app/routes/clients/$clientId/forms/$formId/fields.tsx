@@ -320,7 +320,7 @@ const FormFields = () => {
     <Box m={2} >
       <CustomizedTable
         columns={columns}
-        data={loaderData?.data?.data}
+        data={loaderData}
         exportFileName="Fields"
         enableExport={false}
         loading={navigation.state === "loading" ? true : false}
@@ -329,7 +329,7 @@ const FormFields = () => {
             variant="add"
             onClick={() =>
               handleModal({
-                id: "",
+                id: "1",
                 name: "",
                 label: "",
                 type: "TEXT",
