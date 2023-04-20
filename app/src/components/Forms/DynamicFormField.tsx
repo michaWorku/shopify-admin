@@ -321,7 +321,6 @@ const DynamicFormField: React.FC<any> = ({
     reset,
     setValue,
   } = useForm<DynamicFormField>({
-    mode: "onChange",
     resolver: zodResolver(dynamicFormFieldSchema, undefined, {
       rawValues: true,
     }),
@@ -347,8 +346,7 @@ const DynamicFormField: React.FC<any> = ({
 
   const location = useLocation();
 
-  const onSubmit:SubmitHandler<DynamicFormFieldInput> = (data, e) => {
-    e?.preventDefault()
+  const onSubmit:SubmitHandler<DynamicFormFieldInput> = (data) => {
     // const test = {
     //   name: "",
     //   description: "",

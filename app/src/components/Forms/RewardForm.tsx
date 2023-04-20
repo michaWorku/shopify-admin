@@ -331,7 +331,6 @@ const RewardForm: React.FC<any> = ({
     reset,
     setValue,
   } = useForm<RewardFormInput>({
-    mode: "onChange",
     resolver: zodResolver(rewardSchema, undefined, {
       rawValues: true,
     }),
@@ -348,8 +347,7 @@ const RewardForm: React.FC<any> = ({
 
   const location = useLocation();
 
-  const onSubmit: SubmitHandler<RewardFormInput> = (data, e) => {
-    e?.preventDefault();
+  const onSubmit: SubmitHandler<RewardFormInput> = (data) => {
     // const test = {
     //   name: "",
     //   description: "",

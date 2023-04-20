@@ -425,7 +425,6 @@ const DynamicForm: React.FC<any> = ({
     setValue,
     
   } = useForm<DynamicForm>({
-    mode: "onChange",
     resolver: zodResolver(dynamicFormSchema, undefined, {
       rawValues: true,
     }),
@@ -463,8 +462,7 @@ const DynamicForm: React.FC<any> = ({
     });
   };
 
-  const onSubmit: SubmitHandler<DynamicFormInput> = (data, e) => {
-    e?.preventDefault()
+  const onSubmit: SubmitHandler<DynamicFormInput> = (data) => {
     // const test = {
     //   name: "",
     //   description: "",
@@ -553,7 +551,7 @@ const DynamicForm: React.FC<any> = ({
                 >
                   <Box sx={{ px: 5, pt: 5 }}>
                     <Typography variant="h6">Add New Form</Typography>
-                    <Typography>Add a new Form</Typography>
+                    <Typography variant="body1">Add a new Form</Typography>
                   </Box>
 
                   <Box
