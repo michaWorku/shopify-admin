@@ -252,7 +252,14 @@ export const getAllRoles = async (request: Request, userId: string) => {
       userCreated = {
         createdBy: userId,
       }
+    } else {
+      userCreated = {
+        createdBy: {
+          not: "system",
+        },
+      }
     }
+    console.log({ able, userCreated })
 
     const { sortType, sortField, skip, take, pageNo, search, filter } =
       getParams(request)
@@ -270,9 +277,6 @@ export const getAllRoles = async (request: Request, userId: string) => {
       ...filterParams,
       ...userCreated,
       deletedAt: null,
-      createdBy: {
-        not: "system",
-      },
       users: {
         every: {
           userId: {
@@ -491,7 +495,7 @@ export const editRole = async (userId: string, roleId: string, data: any) => {
  * @param {string[]} newPermissions - An array of the new permissions.
  * @returns {object} An object with the permissions to connect and disconnect.
  */
-export const permissionChange = (oldRoles: string[], newRoles: string[]) => {
+export const permissionChange = (oldRoles: any[], newRoles: string[]) => {
   const oldPermissionIds = oldRoles.map((permission) => permission?.id)
 
   const disconnect = oldPermissionIds.filter((id) => !newRoles.includes(id))
@@ -694,16 +698,12 @@ export const getSystemUserRoles = async (
     }
     let roles
     if (admin && client) {
+      console.log({ admin, client })
       roles = await db.role.findMany({
         where: {
           ..._where,
-          // createdBy: {
-          //   not: "system",
-          // },
-          users: {
-            none: {
-              userId: userId,
-            },
+          createdBy: {
+            not: "system",
           },
           permissions: {
             every: {
@@ -734,7 +734,6 @@ export const getSystemUserRoles = async (
           },
         },
       })
-      console.log({ admin, client, userId, roles })
     } else {
       roles = await db.role.findMany({
         where: {

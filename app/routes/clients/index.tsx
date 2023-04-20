@@ -1,51 +1,51 @@
-import { Box, Button, Typography } from "@mui/material";
-import type { Client } from "@prisma/client";
-import { Status } from "@prisma/client";
-import type { ActionFunction, LoaderFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
+import { Box, Button, Typography } from "@mui/material"
+import type { Client } from "@prisma/client"
+import { Status } from "@prisma/client"
+import type { ActionFunction, LoaderFunction } from "@remix-run/node"
+import { json } from "@remix-run/node"
 import {
   Link,
   useFetcher,
   useLoaderData,
   useNavigation,
-} from "@remix-run/react";
-import type { MRT_ColumnDef } from "material-react-table";
-import moment from "moment-timezone";
-import { useEffect, useMemo, useState } from "react";
-import customErr, { Response } from "~/utils/handler.server";
+} from "@remix-run/react"
+import type { MRT_ColumnDef } from "material-react-table"
+import moment from "moment-timezone"
+import { useEffect, useMemo, useState } from "react"
+import customErr, { Response } from "~/utils/handler.server"
 // import {
 //   createClient,
 //   deleteClient,
 //   getClients,
 //   updateClientById,
 // } from "..//services/Client/Client.server";
-import { authenticator } from "~/services/auth.server";
+import { authenticator } from "~/services/auth.server"
 import {
   CustomizedTable,
   RowActions,
   StatusUpdate,
-} from "~/src/components/Table";
-import FilterModes from "~/src/components/Table/CustomFilter";
-import DateFilter from "~/src/components/Table/DatePicker";
-import canUser from "~/utils/casl/ability";
-import { errorHandler } from "~/utils/handler.server";
+} from "~/src/components/Table"
+import FilterModes from "~/src/components/Table/CustomFilter"
+import DateFilter from "~/src/components/Table/DatePicker"
+import canUser from "~/utils/casl/ability"
+import { errorHandler } from "~/utils/handler.server"
 import {
   clientSchema,
   clientSchemaForUpdate,
-} from "~/utils/schema/clientSchema";
-import { ClientForm } from "~/src/components/Forms";
-import { formHandler } from "~/utils/formHandler";
-import { toast } from "react-toastify";
-import type { DeleteDialogType } from "~/src/components/DeleteAlert";
-import DeleteAlert from "~/src/components/DeleteAlert";
+} from "~/utils/schema/clientSchema"
+import { ClientForm } from "~/src/components/Forms"
+import { formHandler } from "~/utils/formHandler"
+import { toast } from "react-toastify"
+import type { DeleteDialogType } from "~/src/components/DeleteAlert"
+import DeleteAlert from "~/src/components/DeleteAlert"
 import {
   createClient,
   deleteClient,
   getClients,
   updateClientById,
-} from "~/services/Client/Client.server";
-import palette from "~/src/theme/palette";
-import Navbar from "~/src/components/Layout/Navbar";
+} from "~/services/Client/Client.server"
+import palette from "~/src/theme/palette"
+import Navbar from "~/src/components/Layout/Navbar"
 
 // import {
 //     createClient,
@@ -66,15 +66,15 @@ export const loader: LoaderFunction = async ({ request }) => {
     // Authenticate the user
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
+    })
 
-    console.log({ user });
+    console.log({ user })
     // Check if the user can create a client
-    const canCreate = (await canUser(user.id, "create", "Client", {})) as any;
+    const canCreate = (await canUser(user.id, "create", "Client", {})) as any
 
     // Get all clients
-    let clients;
-    clients = (await getClients(request, user.id)) as any;
+    let clients
+    clients = (await getClients(request, user.id)) as any
 
     // console.log({ before: clients });
 
@@ -93,9 +93,9 @@ export const loader: LoaderFunction = async ({ request }) => {
             },
           },
         })
-      );
+      )
     }
-    console.log({ clients });
+    console.log({ clients })
     return json(
       Response({
         data: {
@@ -104,13 +104,13 @@ export const loader: LoaderFunction = async ({ request }) => {
           user,
         },
       })
-    );
+    )
   } catch (error) {
-    console.log("Error occured loading clients");
-    console.dir(error, { depth: null });
-    return errorHandler(error);
+    console.log("Error occured loading clients")
+    console.dir(error, { depth: null })
+    return errorHandler(error)
   }
-};
+}
 
 /**
  * Action function perform a specific operation on a client.
@@ -124,47 +124,47 @@ export const action: ActionFunction = async ({ request }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
-    let response;
-    const url = new URL(request.url);
-    const clientId = url.searchParams.get("clientId") as string;
-    console.log({ clientId });
+    })
+    let response
+    const url = new URL(request.url)
+    const clientId = url.searchParams.get("clientId") as string
+    console.log({ clientId })
     switch (request.method) {
       case "POST":
-        const addClientData = (await formHandler(request, clientSchema)) as any;
+        const addClientData = (await formHandler(request, clientSchema)) as any
         if (!addClientData?.success) {
-          return addClientData;
+          return addClientData
         }
-        response = await createClient(addClientData?.data, user.id);
-        break;
+        response = await createClient(addClientData?.data, user.id)
+        break
       case "PATCH":
         const editClientData = (await formHandler(
           request,
           clientSchemaForUpdate
-        )) as any;
+        )) as any
         if (!editClientData?.success) {
-          return editClientData;
+          return editClientData
         }
         response = await updateClientById(
           clientId,
           editClientData?.data,
           user.id
-        );
-        break;
+        )
+        break
       case "DELETE":
-        response = await deleteClient(clientId, user.id);
-        break;
+        response = await deleteClient(clientId, user.id)
+        break
       default:
-        throw new customErr("Custom_Error", "Unsupported action!", 403);
+        throw new customErr("Custom_Error", "Unsupported action!", 403)
     }
-    console.log({ response });
-    return response;
+    console.log({ response })
+    return response
   } catch (error: any) {
-    console.error("error occured creating client");
-    console.dir(error, { depth: null });
-    return errorHandler(error);
+    console.error("error occured creating client")
+    console.dir(error, { depth: null })
+    return errorHandler(error)
   }
-};
+}
 
 const breadcrumbs = [
   <Typography
@@ -175,27 +175,27 @@ const breadcrumbs = [
   >
     Clients
   </Typography>,
-];
+]
 export const DefaultDialogInfo = {
   open: false,
   id: "",
   title: "Remove a Client",
   contentText: "Are you sure you want to remove this client?",
   action: "clients",
-};
+}
 /**
  * Renders the Clients component.
  * @returns {JSX.Element} JSX element containing the clients table.
  */
 const Clients = () => {
-  const loaderData = useLoaderData<typeof loader>();
-  const [actionData, setActionData] = useState(null);
+  const loaderData = useLoaderData<typeof loader>()
+  const [actionData, setActionData] = useState(null)
   const [deleteDialog, setDeleteDialog] =
-    useState<DeleteDialogType>(DefaultDialogInfo);
-  const [editData, setEditData] = useState({});
-  const fetcher = useFetcher();
-  const [openModal, setOpenModal] = useState(false);
-  const navigation = useNavigation();
+    useState<DeleteDialogType>(DefaultDialogInfo)
+  const [editData, setEditData] = useState({})
+  const fetcher = useFetcher()
+  const [openModal, setOpenModal] = useState(false)
+  const navigation = useNavigation()
   const columns = useMemo<MRT_ColumnDef<Client>[]>(
     () => [
       {
@@ -253,7 +253,7 @@ const Clients = () => {
           return {
             text: status,
             value: status,
-          };
+          }
         }),
         size: 220,
         Cell: ({ row }) => (
@@ -311,25 +311,25 @@ const Clients = () => {
       },
     ],
     []
-  );
+  )
 
   useEffect(() => {
     if (fetcher?.data?.error?.error?.message) {
-      toast.error(fetcher?.data?.error?.error?.message);
+      toast.error(fetcher?.data?.error?.error?.message)
     }
     if (fetcher?.data?.message) {
-      toast.success(fetcher?.data?.message);
-      setOpenModal(false);
-      setEditData({});
-      setDeleteDialog(DefaultDialogInfo);
+      toast.success(fetcher?.data?.message)
+      setOpenModal(false)
+      setEditData({})
+      setDeleteDialog(DefaultDialogInfo)
     }
-    if (fetcher?.data) setActionData(fetcher?.data);
-  }, [fetcher?.data]);
+    if (fetcher?.data) setActionData(fetcher?.data)
+  }, [fetcher?.data])
 
   const handleModal = (row: any) => {
-    setEditData(row);
-    setOpenModal(true);
-  };
+    setEditData(row)
+    setOpenModal(true)
+  }
 
   const handleDelete = (clientId: any) => {
     setDeleteDialog({
@@ -338,12 +338,12 @@ const Clients = () => {
       title: "Remove a Client",
       contentText: "Are you sure you want to remove this client?",
       action: `clients?clientId=${clientId}`,
-    });
-  };
+    })
+  }
 
   return (
     <>
-      <Navbar breadcrumbs={breadcrumbs} />
+      <Navbar breadcrumbs={breadcrumbs} loaderData={loaderData} />
       <Box m={2}>
         <CustomizedTable
           columns={columns}
@@ -372,7 +372,7 @@ const Clients = () => {
         />
       </Box>
     </>
-  );
-};
+  )
+}
 
-export default Clients;
+export default Clients

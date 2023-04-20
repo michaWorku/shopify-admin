@@ -125,7 +125,11 @@ const getAllSystemUsers = async (request: any, userId: string) => {
         skip,
         orderBy: [
           {
-            [sortField]: sortType,
+            ...(sortField !== "name"
+              ? { [sortField]: sortType }
+              : {
+                  updatedAt: sortType,
+                }),
           },
         ],
         where: _where,
@@ -176,8 +180,16 @@ const getAllClientSystemUsers = async (
   userId: string
 ) => {
   try {
-    const { sortType, sortField, skip, take, pageNo, search, filter } =
-      getParams(request)
+    const {
+      sortType,
+      sortField,
+      skip,
+      take,
+      pageNo,
+      search,
+      filter,
+      exportType,
+    } = getParams(request)
     const searchParams = searchCombinedColumn(
       search,
       ["firstName", "middleName", "lastName"],
@@ -208,11 +220,35 @@ const getAllClientSystemUsers = async (
         skip,
         orderBy: [
           {
-            [sortField]: sortType,
+            ...(sortField !== "name"
+              ? { [sortField]: sortType }
+              : {
+                  updatedAt: sortType,
+                }),
           },
         ],
         where: _where,
       })
+
+      let exportData
+      if (exportType === "page") {
+        exportData = users
+      } else if (exportType === "filtered") {
+        exportData = await db.user.findMany({
+          orderBy: [
+            {
+              ...(sortField !== "name"
+                ? { [sortField]: sortType }
+                : {
+                    updatedAt: sortType,
+                  }),
+            },
+          ],
+          where: _where,
+        })
+      } else {
+        exportData = await db.user.findMany({})
+      }
 
       return {
         data: users,
@@ -222,6 +258,8 @@ const getAllClientSystemUsers = async (
           sort: [sortField, sortType],
           searchVal: search,
           filter,
+          exportData,
+          exportType,
           total: userCount,
         },
       }
