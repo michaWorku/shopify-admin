@@ -332,7 +332,11 @@ const SubmissionForm: React.FC<any> = ({
   };
 
   return (
-    <Box>
+    <Box sx={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }}>
       <Form onSubmit={handleSubmit(onSubmit)}>
         <Typography variant="h6" my={1}>
           {loaderData?.client?.name
@@ -359,7 +363,7 @@ const SubmissionForm: React.FC<any> = ({
           {loaderData?.form?.fields
             ?.sort((a: any, b: any) => a.order - b.order)
             .map((field: any, index: number) => (
-              <Grid item xs={12} sm={6} md={4} key={field.name}>
+              <Grid item xs={12} sm={6}  key={field.name}>
                 <DynamicFormInput
                   field={field}
                   control={control}

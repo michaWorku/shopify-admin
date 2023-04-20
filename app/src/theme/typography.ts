@@ -73,6 +73,7 @@ const typography = {
     },
     body2: {
         lineHeight: 22 / 14,
+        fontWeight: 500,
         fontSize: pxToRem(14),
     },
     caption: {
