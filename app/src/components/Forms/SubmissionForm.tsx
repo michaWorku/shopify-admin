@@ -312,7 +312,6 @@ const SubmissionForm: React.FC<any> = ({
     reset,
     formState: { errors },
   } = useForm({
-    mode: "onChange",
   });
 
   const location = useLocation();

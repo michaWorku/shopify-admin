@@ -78,6 +78,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
                 data: systemUsers?.data,
                 canCreate: canCreate?.ok,
                 roles: roles,
+                user
             },
             metaData: systemUsers?.metaData,
         })
