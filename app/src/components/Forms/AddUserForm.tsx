@@ -85,10 +85,10 @@ export default function AddUserForm({ openModal, closeModal }: any) {
                                 }}
                             >
                                 <Box sx={{ px: 5, pt: 5 }}>
-                                    <Typography variant="h6">
+                                    <Typography variant="subtitle1" gutterBottom>
                                         Add New User
                                     </Typography>
-                                    <Typography>Add a new user</Typography>
+                                    <Typography variant='body2'>Add a new user</Typography>
                                 </Box>
                                 <Box
                                     sx={{
