@@ -19,7 +19,7 @@ export const status = ['ACTIVE', 'INACTIVE'] as const
 export const clientSchema = z.object({
     name: z.string().trim().min(2, { message: 'Too short' }),
     promotionText: z.string().trim().min(2, { message: 'Too short' }),
-    url: z.string().trim().url()?.optional(),
+    url:z.union([z.string().url().nullish(), z.literal("")]),
     phone: z
         .string({ required_error: 'Phone number is required' })
         .min(10, { message: 'Invalid number' }),
@@ -29,7 +29,7 @@ export const clientSchema = z.object({
 export const clientSchemaForUpdate = z.object({
     name: z.string().trim().min(2, { message: 'Too short' }).optional(),
     promotionText: z.string().trim().min(2, { message: 'Too short' }).optional(),
-    url: z.string().trim().url().optional(),
+    url: z.union([z.string().url().nullish(), z.literal("")]),
     phone: z
         .string({ required_error: 'Phone number is required' })
         .min(10, { message: 'Invalid number' }).optional(),

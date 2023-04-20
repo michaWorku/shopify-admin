@@ -55,7 +55,9 @@ const ClientForm = ({
     reset,
     setValue,
   } = useForm<clientInput>({
-    resolver: zodResolver(clientSchema),
+    resolver: zodResolver(clientSchema,  undefined, {
+      rawValues: true,
+    }),
   });
 
   useEffect(() => {
