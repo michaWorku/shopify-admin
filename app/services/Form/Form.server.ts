@@ -45,8 +45,8 @@ export const createForm = async (formData: DynamicForm, userId: string, clientId
                 },
                 fields: {
                     createMany: {
-                        data: formData?.fields?.map((field: any)=>{
-                            const {id, ...rest} = field
+                        data: formData?.fields?.map((field: any) => {
+                            const { id, ...rest } = field
                             return rest
                         })
                     }
@@ -298,14 +298,18 @@ export const updateDynamicFormField = async (
 
     try {
         const updatedDynamicFormField = await db.dynamicFormField.upsert({
-            update: {
-                ...data
-            },
             where: {
                 id: dynamicFormField?.id,
             },
+            update: {
+                ...data
+            },
             create: {
-                formId: formId,
+                dynamicFroms: {
+                    connect: {
+                        id: formId
+                    }
+                },
                 ...data
             }
         });
