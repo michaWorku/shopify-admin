@@ -3,7 +3,6 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
-  Link,
   useActionData,
   useFetcher,
   useLoaderData,
@@ -41,7 +40,6 @@ import {
 import { DeleteAlert } from "../src/components";
 import type { DeleteDialogType } from "../src/components/DeleteAlert";
 import DateFilter from "../src/components/Table/DatePicker";
-import React from "react";
 import palette from "~/src/theme/palette";
 import Navbar from "~/src/components/Layout/Navbar";
 
@@ -159,9 +157,9 @@ export const action: ActionFunction = async ({ request }) => {
 const breadcrumbs = [
   <Typography
     key={"1"}
-    variant="h6"
+    variant="subtitle1"
+    sx={{ color: "#828282", fontWeight: 700 }}
     color={palette.primary.main}
-    fontSize={"bold"}
   >
     Role
   </Typography>,
@@ -209,70 +207,70 @@ export default function ViewRole() {
     }
   }, [fetcher?.data]);
 
-    const handleDelete = (id: string) => {
-        console.log({ id })
-        setDeleteDialog({
-            open: true,
-            id: id,
-            title: 'Remove a Role',
-            contentText: 'Are you sure you want to remove this Role?',
-            action: `role/${id}`,
-        })
-    }
-    const columns = useMemo<MRT_ColumnDef<Role>[]>(
-        () => [
-            {
-                accessorKey: 'name',
-                header: 'Name',
-                renderColumnFilterModeMenuItems: FilterModes,
-            },
-            {
-                accessorFn: (originalRow) =>
-                    moment(originalRow.createdAt).format('lll'),
-                id: 'createdAt',
-                header: 'Created At',
-                filterVariant: 'date' as any,
-                size: 220,
-                Filter: (props) => <DateFilter {...props} />,
-                renderColumnFilterModeMenuItems: FilterModes,
-            },
-            {
-                accessorKey: 'status',
-                header: 'Status',
-                filterSelectOptions: Object.keys(Status).map((status) => {
-                    return {
-                        text: status,
-                        value: status,
-                    }
-                }),
-                renderColumnFilterModeMenuItems: FilterModes,
-                filterVariant: 'multi-select',
-                Cell: ({ row, table }) => (
-                    <StatusUpdate
-                        row={row}
-                        route={`/role/${row.original.id}?status=true`}
-                    />
-                ),
-            },
-            {
-                accessorKey: 'actions' as any,
-                header: 'Actions',
-                enableSorting: false,
-                flex: 1,
-                enableColumnFilter: false,
-                Cell: ({ row, table }) => (
-                    <RowActions
-                        row={row}
-                        page="role"
-                        handleEdit={() => handleEdit(row?.original?.id)}
-                        handleDelete={handleDelete}
-                        deleteCol={true}
-                    />
-                ),
-            },
-        ],
-        []
-    )
+  const handleDelete = (id: string) => {
+    console.log({ id });
+    setDeleteDialog({
+      open: true,
+      id: id,
+      title: "Remove a Role",
+      contentText: "Are you sure you want to remove this Role?",
+      action: `role/${id}`,
+    });
+  };
+  const columns = useMemo<MRT_ColumnDef<Role>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Name",
+        renderColumnFilterModeMenuItems: FilterModes,
+      },
+      {
+        accessorFn: (originalRow) =>
+          moment(originalRow.createdAt).format("lll"),
+        id: "createdAt",
+        header: "Created At",
+        filterVariant: "date" as any,
+        size: 220,
+        Filter: (props) => <DateFilter {...props} />,
+        renderColumnFilterModeMenuItems: FilterModes,
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        filterSelectOptions: Object.keys(Status).map((status) => {
+          return {
+            text: status,
+            value: status,
+          };
+        }),
+        renderColumnFilterModeMenuItems: FilterModes,
+        filterVariant: "multi-select",
+        Cell: ({ row, table }) => (
+          <StatusUpdate
+            row={row}
+            route={`/role/${row.original.id}?status=true`}
+          />
+        ),
+      },
+      {
+        accessorKey: "actions" as any,
+        header: "Actions",
+        enableSorting: false,
+        flex: 1,
+        enableColumnFilter: false,
+        Cell: ({ row, table }) => (
+          <RowActions
+            row={row}
+            page="role"
+            handleEdit={() => handleEdit(row?.original?.id)}
+            handleDelete={handleDelete}
+            deleteCol={true}
+          />
+        ),
+      },
+    ],
+    []
+  );
 
   useEffect(() => {
     if (actionData !== undefined) {
@@ -286,61 +284,62 @@ export default function ViewRole() {
     }
   }, [actionData]);
 
-    const handleOpenModal = () => {
-        setOpenModal(true)
-    }
-    const handleCloseModal = () => {
-        setOpenModal(false)
-    }
-    return (
-        <Box m={2}>
-            <CustomizedTable
-                columns={columns}
-                data={loaderData}
-                // openModal={handleOpenModal}
-                loading={
-                    loading || navigation.state === 'loading' ? true : false
-                }
-                customAction={(table: any) => (
-                    <Button
-                        onClick={handleOpenModal}
-                        variant="contained"
-                        // sx={{ color: "#FFF", px: 2, py: 0.5 }}
-                    >
-                        Add Role
-                    </Button>
-                )}
-            />
-            <Box>
-                <Modal
-                    open={openModal}
-                    onClose={handleCloseModal}
-                    closeAfterTransition
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+  return (
+    <>
+      <Navbar breadcrumbs={breadcrumbs} />
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          // openModal={handleOpenModal}
+          loading={loading || navigation.state === "loading" ? true : false}
+          customAction={(table: any) => (
+            <Button
+              onClick={handleOpenModal}
+              variant="contained"
+              // sx={{ color: "#FFF", px: 2, py: 0.5 }}
+            >
+              Add Role
+            </Button>
+          )}
+        />
+        <Box>
+          <Modal
+            open={openModal}
+            onClose={handleCloseModal}
+            closeAfterTransition
+          >
+            <Slide in={openModal} direction="left">
+              <Box sx={{ position: "relative", float: "right" }}>
+                <Card
+                  sx={{
+                    width: { xs: "100vw", md: 800 },
+                    height: "100vh",
+                  }}
                 >
-                    <Slide in={openModal} direction="left">
-                        <Box sx={{ position: 'relative', float: 'right' }}>
-                            <Card
-                                sx={{
-                                    width: { xs: '100vw', md: 800 },
-                                    height: '100vh',
-                                }}
-                            >
-                                <AddRoleForm
-                                    handleCloseModal={handleCloseModal}
-                                    loaderData={loaderData}
-                                    actionData={actionData}
-                                />
-                            </Card>
-                        </Box>
-                    </Slide>
-                </Modal>
-            </Box>
-            <DeleteAlert
-                deleteDialog={deleteDialog}
-                setDeleteDialog={setDeleteDialog}
-                fetcher={fetcher}
-            />
-            <Outlet />
+                  <AddRoleForm
+                    handleCloseModal={handleCloseModal}
+                    loaderData={loaderData}
+                    actionData={actionData}
+                  />
+                </Card>
+              </Box>
+            </Slide>
+          </Modal>
         </Box>
-    )
+        <DeleteAlert
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+          fetcher={fetcher}
+        />
+        <Outlet />
+      </Box>
+    </>
+  );
 }

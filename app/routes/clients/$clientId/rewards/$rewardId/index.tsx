@@ -8,6 +8,7 @@ import {
   useLoaderData,
   useLocation,
   useNavigation,
+  useParams,
 } from "@remix-run/react";
 import type { MRT_ColumnDef } from "material-react-table";
 import moment from "moment-timezone";
@@ -103,9 +104,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 const RewardUsers = () => {
   const loaderData = useLoaderData<typeof loader>();
   const navigation = useNavigation();
+  const params = useParams();
   const breadcrumbs = [
     <Link
-      underline="hover"
+      underline="none"
       key="2"
       variant="h6"
       color={palette.primary.main}
@@ -114,11 +116,11 @@ const RewardUsers = () => {
       {loaderData?.data?.client?.data?.name}
     </Link>,
     <Link
-      underline="hover"
+      underline="none"
       key="2"
       variant="h6"
       color={palette.primary.main}
-      href={`/clients/${loaderData?.data?.client?.data?.id}/rewards`}
+      href={`/clients/${params?.clientId}/rewards`}
     >
       {loaderData?.data?.reward?.data?.name}
     </Link>,
@@ -126,7 +128,7 @@ const RewardUsers = () => {
       key={"1"}
       variant="h6"
       color={palette.primary.main}
-      fontSize={"bold"}
+      sx={{ color: "#828282", fontWeight: 700 }}
     >
       Reward Users
     </Typography>,
@@ -196,16 +198,18 @@ const RewardUsers = () => {
   }, [loaderData]);
 
   return (
-    <Box m={2}>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="Rewards Users"
-        enableExport={true}
-        loading={navigation.state === "loading" ? true : false}
-      />
-    </Box>
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="Rewards Users"
+          enableExport={true}
+          loading={navigation.state === "loading" ? true : false}
+        />
+      </Box>
+    </>
   );
 };
 

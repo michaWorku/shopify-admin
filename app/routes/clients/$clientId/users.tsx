@@ -93,19 +93,21 @@ const ClientUsers = () => {
   const navigation = useNavigation();
   const breadcrumbs = [
     <Link
-      underline="hover"
+      underline="none"
       key="2"
-      variant="h6"
+      variant="subtitle1"
       color={palette.primary.main}
       href="/clients"
+      sx={{ color: "#828282", fontWeight: 700 }}
     >
       {loaderData?.data?.client?.data?.name}
     </Link>,
+
     <Typography
       key={"1"}
-      variant="h6"
+      variant="subtitle1"
+      sx={{ color: "#828282", fontWeight: 700 }}
       color={palette.primary.main}
-      fontSize={"bold"}
     >
       Users
     </Typography>,
@@ -174,17 +176,20 @@ const ClientUsers = () => {
   }, [loaderData]);
 
   return (
-    <Box m={2}>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="Client Users"
-        enableExport={true}
-        loading={navigation.state === "loading" ? true : false}
-      />
-    </Box>
+      <Box m={2}>
+        <Navbar breadcrumbs={breadcrumbs} />
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="Client Users"
+          enableExport={true}
+          loading={navigation.state === "loading" ? true : false}
+        />
+      </Box>
+    </>
   );
 };
 
-export default ClientUsers;;
+export default ClientUsers;

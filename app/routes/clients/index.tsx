@@ -171,7 +171,7 @@ const breadcrumbs = [
     key={"1"}
     variant="h6"
     color={palette.primary.main}
-    fontSize={"bold"}
+    sx={{ color: "#828282", fontWeight: 700 }}
   >
     Clients
   </Typography>,

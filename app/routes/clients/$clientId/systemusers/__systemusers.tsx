@@ -97,9 +97,9 @@ const SystemUsers = () => {
   const [loading, setLoading] = useState(false);
   const breadcrumbs = [
     <Link
-      underline="hover"
+      underline="none"
       key="2"
-      variant="h6"
+      variant="subtitle1"
       color={palette.primary.main}
       href="/clients"
     >
@@ -107,9 +107,9 @@ const SystemUsers = () => {
     </Link>,
     <Typography
       key={"1"}
-      variant="h6"
+      variant="subtitle1"
+      sx={{ color: "#828282", fontWeight: 700 }}
       color={palette.primary.main}
-      fontSize={"bold"}
     >
       System Users
     </Typography>,
@@ -223,27 +223,29 @@ const SystemUsers = () => {
   };
 
   return (
-    <Box>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="SystemUsers"
-        enableExport={true}
-        loading={loading || navigation.state === "loading" ? true : false}
-        customAction={(table: any) => (
-          <Button variant="add" onClick={handleOpenModal}>
-            Add User
-          </Button>
-        )}
-      />
-      <DeleteAlert
-        deleteDialog={deleteDialog}
-        setDeleteDialog={setDeleteDialog}
-        fetcher={fetcher}
-      />
-      <Outlet />
-    </Box>
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="SystemUsers"
+          enableExport={true}
+          loading={loading || navigation.state === "loading" ? true : false}
+          customAction={(table: any) => (
+            <Button variant="add" onClick={handleOpenModal}>
+              Add User
+            </Button>
+          )}
+        />
+        <DeleteAlert
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+          fetcher={fetcher}
+        />
+        <Outlet />
+      </Box>
+    </>
   );
 };
 

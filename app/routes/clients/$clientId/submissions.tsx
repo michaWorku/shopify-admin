@@ -92,20 +92,15 @@ const ClientSubmissions = () => {
   const navigation = useNavigation();
   const breadcrumbs = [
     <Link
-      underline="hover"
+      underline="none"
       key="2"
-      variant="h6"
+      variant="subtitle1"
       color={palette.primary.main}
       href="/clients"
     >
       {loaderData?.data?.client?.data?.name}
     </Link>,
-    <Typography
-      key={"1"}
-      variant="h6"
-      color={palette.primary.main}
-      fontSize={"bold"}
-    >
+    <Typography key={"1"} variant="subtitle1" color={palette.primary.main}>
       Submissions
     </Typography>,
   ];
@@ -124,15 +119,17 @@ const ClientSubmissions = () => {
         renderColumnFilterModeMenuItems: FilterModes,
       },
       {
-        accessorFn: (originalRow) =>
-          {
-            const submittedBy = (originalRow?.submittedBy?.firstName || " ") +
+        accessorFn: (originalRow) => {
+          const submittedBy =
+            (originalRow?.submittedBy?.firstName || " ") +
             " " +
             (originalRow?.submittedBy?.middleName || " ") +
             " " +
-            (originalRow?.submittedBy?.lastName || " ")
-            return !!submittedBy?.trim() ? submittedBy: originalRow?.submittedById
-          },
+            (originalRow?.submittedBy?.lastName || " ");
+          return !!submittedBy?.trim()
+            ? submittedBy
+            : originalRow?.submittedById;
+        },
         id: "submittedBy",
         header: "Submitted By",
         renderColumnFilterModeMenuItems: FilterModes,
@@ -194,25 +191,27 @@ const ClientSubmissions = () => {
   );
 
   useEffect(() => {
-    console.log({loaderData})
+    console.log({ loaderData });
     if (loaderData?.data?.error?.error?.message) {
       toast.error(loaderData?.data?.error?.error?.message);
     }
   }, [loaderData]);
 
   return (
-    <Box m={2}>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="Client Users"
-        enableExport={true}
-        loading={navigation.state === "loading" ? true : false}
-        enableDetailPanel={true}
-        enableSubDataExport={true}
-      />
-    </Box>
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="Client Users"
+          enableExport={true}
+          loading={navigation.state === "loading" ? true : false}
+          enableDetailPanel={true}
+          enableSubDataExport={true}
+        />
+      </Box>
+    </>
   );
 };
 

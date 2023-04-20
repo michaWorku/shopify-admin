@@ -94,28 +94,24 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 const RewardSubmissions = () => {
   const loaderData = useLoaderData<typeof loader>();
   const navigation = useNavigation();
+  const params = useParams();
   const breadcrumbs = [
-    <Link
-      underline="hover"
-      key="2"
-      color={palette.primary.main}
-      href="/clients"
-    >
+    <Link underline="none" key="2" color={palette.primary.main} href="/clients">
       {loaderData?.data?.client?.data?.name}
     </Link>,
     <Link
-      underline="hover"
+      underline="none"
       key="2"
       color={palette.primary.main}
-      href={`/clients/${loaderData?.data?.client?.data?.id}/rewards`}
+      href={`/clients/${params?.clientId}/rewards`}
     >
       {loaderData?.data?.reward?.data?.name}
     </Link>,
     <Typography
       key={"1"}
-      variant="h6"
+      variant="subtitle1"
+      sx={{ color: "#828282", fontWeight: 700 }}
       color={palette.primary.main}
-      fontSize={"bold"}
     >
       Reward Submissios
     </Typography>,
@@ -135,15 +131,17 @@ const RewardSubmissions = () => {
         renderColumnFilterModeMenuItems: FilterModes,
       },
       {
-        accessorFn: (originalRow) =>
-          {
-            const submittedBy = (originalRow?.submittedBy?.firstName || " ") +
+        accessorFn: (originalRow) => {
+          const submittedBy =
+            (originalRow?.submittedBy?.firstName || " ") +
             " " +
             (originalRow?.submittedBy?.middleName || " ") +
             " " +
-            (originalRow?.submittedBy?.lastName || " ")
-            return !!submittedBy?.trim() ? submittedBy: originalRow?.submittedById
-          },
+            (originalRow?.submittedBy?.lastName || " ");
+          return !!submittedBy?.trim()
+            ? submittedBy
+            : originalRow?.submittedById;
+        },
         id: "submittedBy",
         header: "Submitted By",
         renderColumnFilterModeMenuItems: FilterModes,
@@ -205,25 +203,27 @@ const RewardSubmissions = () => {
   );
 
   useEffect(() => {
-    console.log({loaderData})
+    console.log({ loaderData });
     if (loaderData?.data?.error?.error?.message) {
       toast.error(loaderData?.data?.error?.error?.message);
     }
   }, [loaderData]);
 
   return (
-    <Box m={2}>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="Reward Submissions"
-        enableExport={true}
-        loading={navigation.state === "loading" ? true : false}
-        enableDetailPanel={true}
-        enableSubDataExport={true}
-      />
-    </Box>
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="Reward Submissions"
+          enableExport={true}
+          loading={navigation.state === "loading" ? true : false}
+          enableDetailPanel={true}
+          enableSubDataExport={true}
+        />
+      </Box>
+    </>
   );
 };
 

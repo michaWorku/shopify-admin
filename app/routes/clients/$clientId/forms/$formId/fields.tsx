@@ -186,7 +186,7 @@ const FormFields = () => {
   const navigation = useNavigation();
   const breadcrumbs = [
     <Link
-      underline="hover"
+      underline="none"
       key="2"
       variant="h6"
       color={palette.primary.main}
@@ -195,7 +195,7 @@ const FormFields = () => {
       {loaderData?.data?.client?.data?.name}
     </Link>,
     <Link
-      underline="hover"
+      underline="none"
       key="2"
       variant="h6"
       color={palette.primary.main}
@@ -207,7 +207,7 @@ const FormFields = () => {
       key={"1"}
       variant="h6"
       color={palette.primary.main}
-      fontSize={"bold"}
+      sx={{ color: "#828282", fontWeight: 700 }}
     >
       Fields
     </Typography>,
@@ -352,51 +352,53 @@ const FormFields = () => {
   };
 
   return (
-    <Box m={2}>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData?.data?.data}
-        exportFileName="Fields"
-        enableExport={false}
-        loading={navigation.state === "loading" ? true : false}
-        customAction={(table: any) => (
-          <Button
-            variant="add"
-            onClick={() =>
-              handleModal({
-                id: "",
-                name: "",
-                label: "",
-                type: "TEXT",
-                defaultValue: "",
-                required: true,
-                placeholder: "",
-                description: "",
-                order: (loaderData?.data?.data.length + 1) as number,
-                options: [],
-              })
-            }
-          >
-            Add Field
-          </Button>
-        )}
-      />
-      <AddDynamicFormField
-        openModal={openModal}
-        actionData={actionData}
-        setActionData={setActionData}
-        editData={editData}
-        setEditData={setEditData}
-        setOpenModal={setOpenModal}
-        fetcher={fetcher}
-      />
-      <DeleteAlert
-        deleteDialog={deleteDialog}
-        setDeleteDialog={setDeleteDialog}
-        fetcher={fetcher}
-      />
-    </Box>
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData?.data?.data}
+          exportFileName="Fields"
+          enableExport={false}
+          loading={navigation.state === "loading" ? true : false}
+          customAction={(table: any) => (
+            <Button
+              variant="add"
+              onClick={() =>
+                handleModal({
+                  id: "",
+                  name: "",
+                  label: "",
+                  type: "TEXT",
+                  defaultValue: "",
+                  required: true,
+                  placeholder: "",
+                  description: "",
+                  order: (loaderData?.data?.data.length + 1) as number,
+                  options: [],
+                })
+              }
+            >
+              Add Field
+            </Button>
+          )}
+        />
+        <AddDynamicFormField
+          openModal={openModal}
+          actionData={actionData}
+          setActionData={setActionData}
+          editData={editData}
+          setEditData={setEditData}
+          setOpenModal={setOpenModal}
+          fetcher={fetcher}
+        />
+        <DeleteAlert
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+          fetcher={fetcher}
+        />
+      </Box>
+    </>
   );
 };
 

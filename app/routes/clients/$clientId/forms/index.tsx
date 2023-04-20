@@ -188,7 +188,6 @@ const Forms = () => {
   const loaderData = useLoaderData<typeof loader>();
   const location = useLocation();
   const [actionData, setActionData] = useState(null);
-  const parmas = useParams();
   const [deleteDialog, setDeleteDialog] =
     useState<DeleteDialogType>(DefaultDialogInfo);
   const [editData, setEditData] = useState<undefined | null>(null);
@@ -198,7 +197,7 @@ const Forms = () => {
 
   const breadcrumbs = [
     <Link
-      underline="hover"
+      underline="none"
       key="2"
       variant="subtitle1"
       color={palette.primary.main}
@@ -208,9 +207,9 @@ const Forms = () => {
     </Link>,
     <Typography
       key={"1"}
-      variant="h6"
+      variant="subtitle1"
+      sx={{ color: "#828282", fontWeight: 700 }}
       color={palette.primary.main}
-      fontSize={"bold"}
     >
       Forms
     </Typography>,

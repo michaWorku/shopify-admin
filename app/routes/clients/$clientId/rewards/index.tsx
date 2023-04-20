@@ -223,9 +223,9 @@ const Reward = () => {
   const navigation = useNavigation();
   const breadcrumbs = [
     <Link
-      underline="hover"
+      underline="none"
       key="2"
-      variant="h6"
+      variant="subtitle1"
       color={palette.primary.main}
       href="/clients"
     >
@@ -233,9 +233,9 @@ const Reward = () => {
     </Link>,
     <Typography
       key={"1"}
-      variant="h6"
+      variant="subtitle1"
+      sx={{ color: "#828282", fontWeight: 700 }}
       color={palette.primary.main}
-      fontSize={"bold"}
     >
       Rewards
     </Typography>,
@@ -384,36 +384,38 @@ const Reward = () => {
   };
 
   return (
-    <Box m={2}>
+    <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <CustomizedTable
-        columns={columns}
-        data={loaderData}
-        exportFileName="Rewards"
-        enableExport={true}
-        loading={navigation.state === "loading" ? true : false}
-        customAction={(table: any) => (
-          <Button variant="add" onClick={() => handleModal(undefined)}>
-            Add Reward
-          </Button>
-        )}
-      />
-      <RewardForm
-        openModal={openModal}
-        actionData={actionData}
-        setActionData={setActionData}
-        editData={editData}
-        setEditData={setEditData}
-        setOpenModal={setOpenModal}
-        fetcher={fetcher}
-        forms={loaderData?.data?.forms}
-      />
-      <DeleteAlert
-        deleteDialog={deleteDialog}
-        setDeleteDialog={setDeleteDialog}
-        fetcher={fetcher}
-      />
-    </Box>
+      <Box m={2}>
+        <CustomizedTable
+          columns={columns}
+          data={loaderData}
+          exportFileName="Rewards"
+          enableExport={true}
+          loading={navigation.state === "loading" ? true : false}
+          customAction={(table: any) => (
+            <Button variant="add" onClick={() => handleModal(undefined)}>
+              Add Reward
+            </Button>
+          )}
+        />
+        <RewardForm
+          openModal={openModal}
+          actionData={actionData}
+          setActionData={setActionData}
+          editData={editData}
+          setEditData={setEditData}
+          setOpenModal={setOpenModal}
+          fetcher={fetcher}
+          forms={loaderData?.data?.forms}
+        />
+        <DeleteAlert
+          deleteDialog={deleteDialog}
+          setDeleteDialog={setDeleteDialog}
+          fetcher={fetcher}
+        />
+      </Box>
+    </>
   );
 };
 

@@ -142,7 +142,7 @@ const SystemUsers = () => {
       key={"1"}
       variant="subtitle1"
       color={palette.primary.main}
-      fontSize={"bold"}
+      sx={{ color: "#828282", fontWeight: 700 }}
     >
       System User
     </Typography>,
@@ -273,7 +273,7 @@ const SystemUsers = () => {
   return (
     <>
       <Navbar breadcrumbs={breadcrumbs} />
-      <Box>
+      <Box m={2}>
         <CustomizedTable
           columns={columns}
           data={loaderData}
