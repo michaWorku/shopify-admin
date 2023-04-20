@@ -7,7 +7,7 @@ import {
   destroySession,
 } from '~/services/session.server'
 import { signinSchema } from '~/utils/validations'
-import { userLogin } from './User/users.server'
+import { userLogin } from './User/Users.server'
 
 export type SessionUser = Omit<User, 'hashedPassword'>
 export const authenticator = new Authenticator<SessionUser>({

@@ -65,7 +65,8 @@ const ClientForm = ({
     });
   }, [editData]);
 
-  const onSubmitHandler: SubmitHandler<clientInput> = (data) => {
+  const onSubmitHandler: SubmitHandler<clientInput> = (data, e) => {
+    e?.preventDefault()
     console.log({ data });
     fetcher.submit(
       { data: JSON.stringify(data) },

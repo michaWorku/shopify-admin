@@ -14,14 +14,14 @@ import {
   Button,
   CircularProgress,
   IconButton,
-} from "@mui/material";
-import { pink, blue } from "@mui/material/colors";
-import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime";
-import { json } from "@remix-run/server-runtime";
-import type { Dayjs } from "dayjs";
-import dayjs from "dayjs";
-import type { SyntheticEvent, ChangeEvent } from "react";
-import { useState, useEffect } from "react";
+} from "@mui/material"
+import { pink, blue } from "@mui/material/colors"
+import type { ActionFunction, LoaderFunction } from "@remix-run/server-runtime"
+import { json } from "@remix-run/server-runtime"
+import type { Dayjs } from "dayjs"
+import dayjs from "dayjs"
+import type { SyntheticEvent, ChangeEvent } from "react"
+import { useState, useEffect } from "react"
 import {
   Form,
   useActionData,
@@ -30,64 +30,64 @@ import {
   useNavigate,
   useNavigation,
   useSearchParams,
-} from "@remix-run/react";
-import Close from "@mui/icons-material/Close";
+} from "@remix-run/react"
+import Close from "@mui/icons-material/Close"
 import {
   deleteSystemUser,
   updateSystemUser,
-} from "~/services/User/systemuser.server";
-import { authenticator } from "~/services/auth.server";
-import { GenderValue } from "~/src/components/Forms/AddUserForm";
-import { Response, errorHandler } from "~/utils/handler.server";
-import { updateSystemUserSchema } from "~/utils/schema/systemUserSchema";
-import { validate } from "~/utils/validators/validate";
-import { getUserById } from "~/services/User/users.server";
-import { getUserCreatedRole } from "~/services/Role/role.server";
-import { DesktopDatePicker } from "@mui/x-date-pickers";
-import { toast } from "react-toastify";
-import { getUserEntities } from "~/services/Entities/entity.server";
-import ViewUserDetail from "~/src/components/ViewDetail";
+} from "~/services/User/systemuser.server"
+import { authenticator } from "~/services/auth.server"
+import { GenderValue } from "~/src/components/Forms/AddUserForm"
+import { Response, errorHandler } from "~/utils/handler.server"
+import { updateSystemUserSchema } from "~/utils/schema/systemUserSchema"
+import { validate } from "~/utils/validators/validate"
+import { getUserById } from "~/services/User/Users.server"
+import { getUserCreatedRole } from "~/services/Role/role.server"
+import { DesktopDatePicker } from "@mui/x-date-pickers"
+import { toast } from "react-toastify"
+import { getUserEntities } from "~/services/Entities/entity.server"
+import ViewUserDetail from "~/src/components/ViewDetail"
 // import { getUserEntities } from '~/services/Entities/entity.server'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
-    const userId = params?.userId as string;
-    const userData = (await getUserById(userId)) as any;
-    const { roles } = await getUserCreatedRole(user?.id);
-    userData.userRoles = roles;
+    })
+    const userId = params?.userId as string
+    const userData = (await getUserById(userId)) as any
+    const { roles } = await getUserCreatedRole(user?.id)
+    userData.userRoles = roles
     return json(
       Response({
         data: userData,
       })
-    );
+    )
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 
 export const action: ActionFunction = async ({ request, params }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
-    const clients = (await getUserEntities(user?.id)) as any;
+    })
+    const clients = (await getUserEntities(user?.id)) as any
     switch (request.method) {
       case "PATCH": {
-        const userId = params?.userId as any;
-        const formData = await request.formData();
-        const updatedData = Object.fromEntries(formData) as any;
+        const userId = params?.userId as any
+        const formData = await request.formData()
+        const updatedData = Object.fromEntries(formData) as any
         if (updatedData?.roleId) {
-          updatedData.roleId = JSON.parse(updatedData.roleId);
+          updatedData.roleId = JSON.parse(updatedData.roleId)
         }
-        updatedData.userId = userId;
+        updatedData.userId = userId
         const { success, data, ...fieldError } = await validate(
           updatedData,
           updateSystemUserSchema
-        );
-        console.log({ updatedData, data, success, fieldError });
+        )
+        console.log({ updatedData, data, success, fieldError })
         if (!success) {
           return json(
             Response({
@@ -97,88 +97,88 @@ export const action: ActionFunction = async ({ request, params }) => {
               },
             }),
             { status: 422 }
-          );
+          )
         }
         const updatedUser = await updateSystemUser(
           user?.id,
           userId,
           data,
           clients?.data?.id
-        );
-        return updatedUser;
+        )
+        return updatedUser
       }
       case "DELETE": {
-        const deletedUserId = params?.userId as string;
+        const deletedUserId = params?.userId as string
 
         const deletedUserInfo = await deleteSystemUser(
           user?.id,
           deletedUserId,
           clients?.data?.id
-        );
+        )
 
-        return deletedUserInfo;
+        return deletedUserInfo
       }
       default:
-        break;
+        break
     }
   } catch (error) {
-    console.log("INSIDE CATCH", { error });
-    return await errorHandler(error);
+    console.log("INSIDE CATCH", { error })
+    return await errorHandler(error)
   }
-};
+}
 
 const SystemUsers = () => {
-  const [searchParams] = useSearchParams();
-  const status = searchParams.get("status");
-  const view = searchParams.get("view");
+  const [searchParams] = useSearchParams()
+  const status = searchParams.get("status")
+  const view = searchParams.get("view")
 
-  const actionData = useActionData();
-  const loaderData = useLoaderData();
-  const navigate = useNavigate();
-  const transition = useNavigation();
-  const submit = useSubmit();
-  console.log({ loaderData });
+  const actionData = useActionData()
+  const loaderData = useLoaderData()
+  const navigate = useNavigate()
+  const transition = useNavigation()
+  const submit = useSubmit()
+  console.log({ loaderData })
   function onclose() {
-    navigate(-1);
+    navigate(-1)
   }
   useEffect(() => {
     if (actionData != undefined) {
       if (actionData?.error) {
-        toast.error(actionData?.error?.error?.message);
+        toast.error(actionData?.error?.error?.message)
       }
       if (actionData?.data?.message) {
         // toast.success(actionData?.data?.message)
-        navigate(-1);
+        navigate(-1)
       }
     }
-  }, [actionData]);
+  }, [actionData])
 
-  const [values, setValues] = useState({}) as any;
+  const [values, setValues] = useState({}) as any
   const handleRoleChange = (
     event: SyntheticEvent<Element, Event>,
     value: any
   ) => {
-    event.preventDefault();
-    const roleIds = value.map((item: any) => item.id);
-    values.roleId = JSON.stringify(roleIds);
-  };
+    event.preventDefault()
+    const roleIds = value.map((item: any) => item.id)
+    values.roleId = JSON.stringify(roleIds)
+  }
 
   const [birthDate, setBirthdate] = useState<Dayjs | null>(
     dayjs(loaderData?.data?.birthDate)
-  );
+  )
   const handleBirthDateChange = (value: any) => {
-    setBirthdate(value);
-    values.birthDate = value;
-  };
+    setBirthdate(value)
+    values.birthDate = value
+  }
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    setValues({ ...values, [event.target.name]: event.target.value });
-  };
+    event.preventDefault()
+    setValues({ ...values, [event.target.name]: event.target.value })
+  }
 
   function handleSubmit(event: any) {
-    event.preventDefault();
-    submit(values, { method: "patch" });
+    event.preventDefault()
+    submit(values, { method: "patch" })
   }
   if (!status && !view) {
     return (
@@ -489,11 +489,11 @@ const SystemUsers = () => {
           </Box>
         </Slide>
       </Modal>
-    );
+    )
   }
   if (view) {
-    return <ViewUserDetail />;
+    return <ViewUserDetail />
   }
-};
+}
 
-export default SystemUsers;
+export default SystemUsers

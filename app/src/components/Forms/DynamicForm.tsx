@@ -1,8 +1,8 @@
 import type { FC} from "react";
 import { useEffect, useState } from "react";
-import type { Control } from "react-hook-form";
+import type { Control, SubmitHandler } from "react-hook-form";
 import { useForm, useFieldArray } from "react-hook-form";
-import type { z } from "zod";
+import type { TypeOf, z } from "zod";
 import ClearIcon from "@mui/icons-material/Clear";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
@@ -30,9 +30,8 @@ import { Controller } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, useLocation } from "@remix-run/react";
-import type {
-  dynamicFormFieldSchema} from "~/utils/schema/dynamicFormSchema";
 import {
+  dynamicFormFieldSchema,
   dynamicFormSchema,
 } from "~/utils/schema/dynamicFormSchema";
 import { flattenErrors } from "~/utils/validators/validate";
@@ -59,6 +58,8 @@ type AddFieldProps = {
   actionData?: any;
   length: number;
 };
+type DynamicFormInput = TypeOf<typeof dynamicFormSchema>;
+
 /**
  * AddField component displays a form to add new field
  * @component AddField
@@ -422,6 +423,7 @@ const DynamicForm: React.FC<any> = ({
     formState: { errors },
     reset,
     setValue,
+    
   } = useForm<DynamicForm>({
     mode: "onChange",
     resolver: zodResolver(dynamicFormSchema, undefined, {
@@ -461,7 +463,8 @@ const DynamicForm: React.FC<any> = ({
     });
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit: SubmitHandler<DynamicFormInput> = (data, e) => {
+    e?.preventDefault()
     // const test = {
     //   name: "",
     //   description: "",
@@ -479,7 +482,7 @@ const DynamicForm: React.FC<any> = ({
     //     },
     //   ],
     // };
-    const formatedData = {
+    let formatedData = {
       name: data?.name,
       description: data?.description,
       fields: data?.fields.map((field: any) => ({

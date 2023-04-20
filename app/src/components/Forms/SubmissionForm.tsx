@@ -318,7 +318,8 @@ const SubmissionForm: React.FC<any> = ({
   const location = useLocation();
   const params = useParams();
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: any, e: any) => {
+    e?.preventDefault()
     console.log({ data, params });
     fetcher.submit(
       { data: JSON.stringify({ submitedData: data, phone: params?.phone }) },

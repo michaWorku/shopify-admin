@@ -1,8 +1,8 @@
 import type { FC} from "react";
 import { useEffect } from "react";
-import type { Control } from "react-hook-form";
+import type { Control, SubmitHandler } from "react-hook-form";
 import { useForm } from "react-hook-form";
-import type { z } from "zod";
+import type { TypeOf, z } from "zod";
 import SendIcon from "@mui/icons-material/Send";
 import ClearIcon from "@mui/icons-material/Clear";
 import CloseIcon from "@mui/icons-material/Close";
@@ -48,6 +48,9 @@ type FieldFormProps = {
   register: any;
   actionData?: any;
 };
+
+type DynamicFormFieldInput = TypeOf<typeof dynamicFormFieldSchema>;
+
 /**
  * Field component displays a create or update an edit field
  * @component FieldForm
@@ -344,7 +347,8 @@ const DynamicFormField: React.FC<any> = ({
 
   const location = useLocation();
 
-  const onSubmit = (data: any) => {
+  const onSubmit:SubmitHandler<DynamicFormFieldInput> = (data, e) => {
+    e?.preventDefault()
     // const test = {
     //   name: "",
     //   description: "",
