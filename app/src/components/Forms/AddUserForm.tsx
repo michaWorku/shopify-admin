@@ -84,7 +84,9 @@ export default function AddUserForm({ openModal, closeModal, data }: any) {
                 }}
               >
                 <Box sx={{ px: 5, pt: 5 }}>
-                  <Typography variant="subtitle1" gutterBottom>Add New User</Typography>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Add New User
+                  </Typography>
                   <Typography variant="body2">Add a new user</Typography>
                 </Box>
                 <Box
@@ -108,6 +110,16 @@ export default function AddUserForm({ openModal, closeModal, data }: any) {
                   },
                   height: "calc(100vh - 265px)",
                   px: 5,
+                  "& .MuiInputLabel-root ": {
+                    color: "primary.main",
+                    fontSize: "1rem",
+                    fontWeight: "400",
+                  },
+                  "& .MuiTypography-root": {
+                    color: "primary.main",
+                    fontSize: "1rem",
+                    fontWeight: "400",
+                  },
                 }}
               >
                 <TextField
