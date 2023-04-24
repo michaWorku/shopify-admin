@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "react"
 import {
   Links,
   LiveReload,
@@ -8,25 +8,26 @@ import {
   ScrollRestoration,
   useCatch,
   useLocation,
-} from "@remix-run/react";
-import { withEmotionCache } from "@emotion/react";
+} from "@remix-run/react"
+import { withEmotionCache } from "@emotion/react"
 import {
   CssBaseline,
   unstable_useEnhancedEffect as useEnhancedEffect,
-} from "@mui/material";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { LocalizationProvider } from "@mui/x-date-pickers";
+} from "@mui/material"
+import { ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+import { LocalizationProvider } from "@mui/x-date-pickers"
 
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import tostify from "react-toastify/dist/ReactToastify.css";
-import ClientStyleContext from "./src/context/ClientStyleContext";
-import ThemeConfig from "./src/theme";
-import GlobalStyles from "./src/theme/GlobalStyles";
-import { Layout } from "./src/components";
-import { LoaderFunction } from "@remix-run/server-runtime";
-import { authenticator } from "./services/auth.server";
-import { Response } from "./utils/handler.server";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
+import tostify from "react-toastify/dist/ReactToastify.css"
+import ClientStyleContext from "./src/context/ClientStyleContext"
+import ThemeConfig from "./src/theme"
+import GlobalStyles from "./src/theme/GlobalStyles"
+import { Layout } from "./src/components"
+import { LoaderFunction } from "@remix-run/server-runtime"
+import { authenticator } from "./services/auth.server"
+import { Response } from "./utils/handler.server"
+import { getLoggedInUserPermissions } from "./services/Role/Permissions/permission.server"
 
 export const links = () => {
   return [
@@ -34,32 +35,32 @@ export const links = () => {
       rel: "stylesheet",
       href: tostify,
     },
-  ];
-};
+  ]
+}
 interface DocumentProps {
-  children: React.ReactNode;
-  title?: string;
+  children: React.ReactNode
+  title?: string
 }
 
 const Document = withEmotionCache(
   ({ children, title }: DocumentProps, emotionCache) => {
-    const clientStyleData = React.useContext(ClientStyleContext);
+    const clientStyleData = React.useContext(ClientStyleContext)
 
     // Only executed on client
     useEnhancedEffect(() => {
       // re-link sheet container
-      emotionCache.sheet.container = document.head;
+      emotionCache.sheet.container = document.head
       // re-inject tags
-      const tags = emotionCache.sheet.tags;
-      emotionCache.sheet.flush();
+      const tags = emotionCache.sheet.tags
+      emotionCache.sheet.flush()
       tags.forEach((tag) => {
         // eslint-disable-next-line no-underscore-dangle
-        (emotionCache.sheet as any)._insertTag(tag);
-      });
+        ;(emotionCache.sheet as any)._insertTag(tag)
+      })
       // reset cache to reapply global styles
-      clientStyleData.reset();
+      clientStyleData.reset()
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [])
 
     return (
       <html lang="en">
@@ -92,20 +93,24 @@ const Document = withEmotionCache(
           {/* <ToastContainer/> */}
         </body>
       </html>
-    );
+    )
   }
-);
+)
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const user = await authenticator.isAuthenticated(request);
+  const user = (await authenticator.isAuthenticated(request)) as any
+  if (user) {
+    const permissions = await getLoggedInUserPermissions(user?.id)
+    user.permissions = permissions
+  }
   return Response({
     data: { user },
-  });
-};
+  })
+}
 // https://remix.run/api/conventions#default-export
 // https://remix.run/api/conventions#route-filenames
 export default function App() {
-  const location = useLocation();
+  const location = useLocation()
   return (
     <ThemeConfig>
       <GlobalStyles />
@@ -139,12 +144,12 @@ export default function App() {
         </Document>
       </LocalizationProvider>
     </ThemeConfig>
-  );
+  )
 }
 
 // https://remix.run/docs/en/v1/api/conventions#errorboundary
 export function ErrorBoundary({ error }: { error: Error }) {
-  console.error(error);
+  console.error(error)
 
   return (
     <ThemeConfig>
@@ -160,24 +165,24 @@ export function ErrorBoundary({ error }: { error: Error }) {
         {/* </Layout> */}
       </Document>
     </ThemeConfig>
-  );
+  )
 }
 
 // https://remix.run/docs/en/v1/api/conventions#catchboundary
 export function CatchBoundary() {
-  const caught = useCatch();
+  const caught = useCatch()
 
-  let message;
+  let message
   switch (caught.status) {
     case 401:
-      message = "Sorry, you don't have acces to visit the page.";
-      break;
+      message = "Sorry, you don't have acces to visit the page."
+      break
     case 404:
-      message = "Sorry, the page you were trying to reach doesn't exist.";
-      break;
+      message = "Sorry, the page you were trying to reach doesn't exist."
+      break
 
     default:
-      throw new Error(caught.data || caught.statusText);
+      throw new Error(caught.data || caught.statusText)
   }
 
   return (
@@ -193,5 +198,5 @@ export function CatchBoundary() {
         {/* </Layout> */}
       </Document>
     </ThemeConfig>
-  );
+  )
 }

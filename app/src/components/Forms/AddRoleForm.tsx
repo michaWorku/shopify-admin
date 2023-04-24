@@ -14,30 +14,30 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Form, useSubmit, useTransition } from "@remix-run/react";
-import { useState } from "react";
+} from "@mui/material"
+import CloseIcon from "@mui/icons-material/Close"
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+import { Form, useSubmit, useTransition } from "@remix-run/react"
+import { useState } from "react"
 
 export default function AddRoleForm({
   handleCloseModal,
   loaderData,
   actionData,
 }: any) {
-  const submit = useSubmit();
-  const transition = useTransition();
-  let transitionData: any;
+  const submit = useSubmit()
+  const transition = useTransition()
+  let transitionData: any
   transition?.submission?.formData
     ? (transitionData = Object.fromEntries(transition?.submission?.formData))
-    : (transitionData = "");
-  const [name, setName] = useState("");
-  const [permissionIds, setPermissionIds] = useState([]) as any;
+    : (transitionData = "")
+  const [name, setName] = useState("")
+  const [permissionIds, setPermissionIds] = useState([]) as any
 
-  const systemPermission = loaderData?.data?.systemPermissions?.data;
-  const clients = loaderData?.data?.entities?.clients?.entities?.data;
+  const systemPermission = loaderData?.data?.systemPermissions?.data
+  const clients = loaderData?.data?.entities?.clients?.entities?.data
   const entityPermissions =
-    loaderData?.data?.entities?.clients?.entityPermissions.data;
+    loaderData?.data?.entities?.clients?.entityPermissions.data
 
   function handleSubmit() {
     submit(
@@ -47,7 +47,7 @@ export default function AddRoleForm({
         clientId: clients?.id,
       },
       { method: "post" }
-    );
+    )
   }
 
   const categorizePermissions = (rawPermissions: []) => {
@@ -56,32 +56,32 @@ export default function AddRoleForm({
       permission: any
     ) {
       if (permission?.category in permissions) {
-        permissions[permission?.category]?.push(permission);
+        permissions[permission?.category]?.push(permission)
       } else {
-        permissions[permission?.category] = [permission];
+        permissions[permission?.category] = [permission]
       }
-      return permissions;
+      return permissions
     },
-    {});
-    return permissions;
-  };
+    {})
+    return permissions
+  }
 
   const systemPermissionsIds = systemPermission?.map(
     (permission: any) => permission?.id
-  );
+  )
   const clientPermissionsIds = entityPermissions?.map(
     (permission: any) => permission?.id
-  );
+  )
 
-  let systemPermissions: any;
+  let systemPermissions: any
   if (systemPermission) {
-    systemPermissions = categorizePermissions(systemPermission);
+    systemPermissions = categorizePermissions(systemPermission)
   }
-  let clientPermissions: any;
+  let clientPermissions: any
   if (entityPermissions) {
-    clientPermissions = categorizePermissions(entityPermissions);
+    clientPermissions = categorizePermissions(entityPermissions)
   }
-  console.log({ permissionIds });
+  console.log({ permissionIds })
 
   return (
     <Form>
@@ -115,7 +115,21 @@ export default function AddRoleForm({
         </Box>
         <Divider />
         <Box>
-          <Grid container>
+          <Grid
+            container
+            sx={{
+              "& .MuiInputLabel-root ": {
+                color: "primary.main",
+                fontSize: "1rem",
+                fontWeight: "400",
+              },
+              "& .MuiTypography-root": {
+                color: "primary.main",
+                fontSize: "1rem",
+                fontWeight: "400",
+              },
+            }}
+          >
             <Grid xs={12} sm={7} md={8} sx={{ p: 1 }}>
               <TextField
                 placeholder="Role Name"
@@ -146,9 +160,13 @@ export default function AddRoleForm({
                   height: "calc(100vh - 300px)",
                 }}
               >
-                {systemPermissions && <Typography>System</Typography>}
-                {systemPermissions && (
-                  <Accordion sx={{ mb: 2 }}>
+                {systemPermission?.length && systemPermissions ? (
+                  <Typography>System</Typography>
+                ) : (
+                  <></>
+                )}
+                {systemPermission?.length && systemPermissions ? (
+                  <Accordion sx={{ mb: 2 }} defaultExpanded={true}>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel1a-content"
@@ -166,20 +184,20 @@ export default function AddRoleForm({
                           >
                             <Checkbox
                               checked={systemPermission.every((item: any) => {
-                                return permissionIds.includes(item.id);
+                                return permissionIds.includes(item.id)
                               })}
                               onChange={() => {
-                                let systemPermissionIds: string[] = [];
+                                let systemPermissionIds: string[] = []
                                 Object.keys(systemPermissions)?.map((item) => {
                                   systemPermissions[item].map((elt: any) => {
-                                    systemPermissionIds.push(elt.id);
-                                    return systemPermissionIds;
-                                  });
-                                  return systemPermissionIds;
-                                });
+                                    systemPermissionIds.push(elt.id)
+                                    return systemPermissionIds
+                                  })
+                                  return systemPermissionIds
+                                })
                                 if (
                                   systemPermissionIds.every((element) => {
-                                    return permissionIds.includes(element);
+                                    return permissionIds.includes(element)
                                   })
                                 ) {
                                   setPermissionIds((state: any) => [
@@ -187,15 +205,15 @@ export default function AddRoleForm({
                                       (el: any) =>
                                         !systemPermissionIds.includes(el)
                                     ),
-                                  ]);
+                                  ])
                                 } else {
                                   const unselected = systemPermissionIds.filter(
                                     (e) => permissionIds.indexOf(e) < 0
-                                  );
+                                  )
                                   setPermissionIds((state: any) => [
                                     ...state,
                                     ...unselected,
-                                  ]);
+                                  ])
                                 }
                               }}
                             />
@@ -255,7 +273,7 @@ export default function AddRoleForm({
                                                         )
                                                     ),
                                                   ]
-                                                );
+                                                )
 
                                                 if (
                                                   permissionIds?.includes(
@@ -270,14 +288,14 @@ export default function AddRoleForm({
                                                           permission?.id
                                                       ),
                                                     ]
-                                                  );
+                                                  )
                                                 } else {
                                                   setPermissionIds(
                                                     (state: any) => [
                                                       ...state,
                                                       permission?.id,
                                                     ]
-                                                  );
+                                                  )
                                                 }
                                               }}
                                             />
@@ -287,22 +305,24 @@ export default function AddRoleForm({
                                           m: 1,
                                         }}
                                       />
-                                    );
+                                    )
                                   } else {
-                                    return <></>;
+                                    return <></>
                                   }
                                 }
                               )}
                             </Box>
                           </Box>
-                        );
+                        )
                       })}
                     </AccordionDetails>
                   </Accordion>
+                ) : (
+                  <></>
                 )}
 
                 {clientPermissions && (
-                  <Accordion sx={{ mb: 2 }}>
+                  <Accordion sx={{ mb: 2 }} defaultExpanded={true}>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel1a-content"
@@ -320,20 +340,20 @@ export default function AddRoleForm({
                           >
                             <Checkbox
                               checked={entityPermissions.every((item: any) => {
-                                return permissionIds.includes(item.id);
+                                return permissionIds.includes(item.id)
                               })}
                               onChange={() => {
-                                let clientPermissionIds: string[] = [];
+                                let clientPermissionIds: string[] = []
                                 Object.keys(clientPermissions)?.map((item) => {
                                   clientPermissions[item].map((elt: any) => {
-                                    clientPermissionIds.push(elt.id);
-                                    return clientPermissionIds;
-                                  });
-                                  return clientPermissionIds;
-                                });
+                                    clientPermissionIds.push(elt.id)
+                                    return clientPermissionIds
+                                  })
+                                  return clientPermissionIds
+                                })
                                 if (
                                   clientPermissionIds.every((element) => {
-                                    return permissionIds.includes(element);
+                                    return permissionIds.includes(element)
                                   })
                                 ) {
                                   setPermissionIds((state: any) => [
@@ -341,15 +361,15 @@ export default function AddRoleForm({
                                       (el: any) =>
                                         !clientPermissionIds.includes(el)
                                     ),
-                                  ]);
+                                  ])
                                 } else {
                                   const unselected = clientPermissionIds.filter(
                                     (e) => permissionIds.indexOf(e) < 0
-                                  );
+                                  )
                                   setPermissionIds((state: any) => [
                                     ...state,
                                     ...unselected,
-                                  ]);
+                                  ])
                                 }
                               }}
                             />
@@ -409,7 +429,7 @@ export default function AddRoleForm({
                                                         )
                                                     ),
                                                   ]
-                                                );
+                                                )
                                                 if (
                                                   permissionIds?.includes(
                                                     permission?.id
@@ -423,14 +443,14 @@ export default function AddRoleForm({
                                                           permission?.id
                                                       ),
                                                     ]
-                                                  );
+                                                  )
                                                 } else {
                                                   setPermissionIds(
                                                     (state: any) => [
                                                       ...state,
                                                       permission?.id,
                                                     ]
-                                                  );
+                                                  )
                                                 }
                                               }}
                                             />
@@ -440,15 +460,15 @@ export default function AddRoleForm({
                                           m: 1,
                                         }}
                                       />
-                                    );
+                                    )
                                   } else {
-                                    return <></>;
+                                    return <></>
                                   }
                                 }
                               )}
                             </Box>
                           </Box>
-                        );
+                        )
                       })}
                     </AccordionDetails>
                   </Accordion>
@@ -493,5 +513,5 @@ export default function AddRoleForm({
         </Box>
       </Box>
     </Form>
-  );
+  )
 }

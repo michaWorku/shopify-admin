@@ -1,4 +1,4 @@
-import { roleSchema } from "~/utils/schema/roleSchema";
+import { roleSchema } from "~/utils/schema/roleSchema"
 import {
   Box,
   Button,
@@ -17,26 +17,21 @@ import {
   Accordion,
   AccordionDetails,
   Tooltip,
-} from "@mui/material";
-import { Response, errorHandler } from "~/utils/handler.server";
-import { useNavigate, useNavigation, useSearchParams } from "@remix-run/react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import CloseIcon from "@mui/icons-material/Close";
-import type { ActionFunction, LoaderFunction } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useEffect, useRef, useState } from "react";
-import {
-  Form,
-  useActionData,
-  useSubmit,
-  useLoaderData,
-} from "@remix-run/react";
+} from "@mui/material"
+import { Response, errorHandler } from "~/utils/handler.server"
+import { useNavigate, useNavigation, useSearchParams } from "@remix-run/react"
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+import CloseIcon from "@mui/icons-material/Close"
+import type { ActionFunction, LoaderFunction } from "@remix-run/node"
+import { json } from "@remix-run/node"
+import { useEffect, useRef, useState } from "react"
+import { Form, useActionData, useSubmit, useLoaderData } from "@remix-run/react"
 
-import { validate } from "~/utils/validators/validate";
+import { validate } from "~/utils/validators/validate"
 
-import type { Permission } from "@prisma/client";
-import canUser from "~/utils/casl/ability";
-import { authenticator } from "~/services/auth.server";
+import type { Permission } from "@prisma/client"
+import canUser from "~/utils/casl/ability"
+import { authenticator } from "~/services/auth.server"
 import {
   deleteRole,
   editRole,
@@ -44,38 +39,38 @@ import {
   getRoleClientPermissions,
   getRolePermissions,
   getRoleSystemPermissions,
-} from "~/services/Role/role.server";
-import { toast } from "react-toastify";
-import { getEntities } from "~/services/Entities/entity.server";
-import { getUserEntities } from "~/services/Entities/entity.server";
+} from "~/services/Role/role.server"
+import { toast } from "react-toastify"
+import { getEntities } from "~/services/Entities/entity.server"
+import { getUserEntities } from "~/services/Entities/entity.server"
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
-    const { roleId } = params;
+    })
+    const { roleId } = params
 
     if (!roleId) {
-      throw errorHandler(new Error("Invalid role"));
+      throw errorHandler(new Error("Invalid role"))
     }
-    const role = await getRoleById(roleId);
+    const role = await getRoleById(roleId)
 
     if (role) {
-      const clients = await getEntities(user.id);
+      const clients = await getEntities(user.id)
       // Check if user is system user
-      const systemUserAbility = await canUser(user?.id, "update", "Role", {});
+      const systemUserAbility = await canUser(user?.id, "update", "Role", {})
       if (systemUserAbility.status === 200) {
         // Get role Permissions
 
         const systemPermissions = await getRoleSystemPermissions(
           user?.id,
           roleId
-        );
+        )
         const clientPermissions = await getRoleClientPermissions(
           user?.id,
           roleId
-        );
+        )
 
         return json(
           Response({
@@ -96,13 +91,13 @@ export const loader: LoaderFunction = async ({ request, params }) => {
           {
             status: 200,
           }
-        );
+        )
       } else if (!clients?.status && clients?.entities) {
         const clientUserAbility = await canUser(user?.id, "update", "Role", {
           clientId: clients?.entities?.data?.id,
-        });
+        })
         if (clientUserAbility.status === 200) {
-          const permissions = await getRolePermissions(user?.id, roleId);
+          const permissions = await getRolePermissions(user?.id, roleId)
           return json(
             Response({
               data: {
@@ -113,13 +108,13 @@ export const loader: LoaderFunction = async ({ request, params }) => {
             {
               status: 200,
             }
-          );
+          )
           // get role Permissions
         } else {
-          return clientUserAbility;
+          return clientUserAbility
         }
       } else {
-        return systemUserAbility;
+        return systemUserAbility
       }
     } else {
       return json(
@@ -133,22 +128,22 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         {
           status: 400,
         }
-      );
+      )
     }
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 
 export const action: ActionFunction = async ({ request, params }) => {
   try {
     const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
-    });
-    const form = await request.formData();
-    const { roleId } = params as any;
-    const formData = Object.fromEntries(form) as any;
-    const clients = (await getUserEntities(user?.id)) as any;
+    })
+    const form = await request.formData()
+    const { roleId } = params as any
+    const formData = Object.fromEntries(form) as any
+    const clients = (await getUserEntities(user?.id)) as any
 
     if (request.method === "PATCH") {
       const { success, data, ...fieldError } = await validate(
@@ -160,7 +155,7 @@ export const action: ActionFunction = async ({ request, params }) => {
           status: formData.status,
         },
         roleSchema
-      );
+      )
       if (!success) {
         return json(
           Response({
@@ -171,14 +166,14 @@ export const action: ActionFunction = async ({ request, params }) => {
               },
             },
           })
-        );
+        )
       }
 
       const response = await editRole(user?.id, roleId, {
         permissions: data?.permissions,
         name: data?.name,
         status: data?.status,
-      });
+      })
       if (response.status === 200) {
         return json(
           Response({
@@ -188,7 +183,7 @@ export const action: ActionFunction = async ({ request, params }) => {
                 : "Role successfully updated.",
             },
           })
-        );
+        )
       } else {
         return json(
           Response({
@@ -198,153 +193,153 @@ export const action: ActionFunction = async ({ request, params }) => {
               },
             },
           })
-        );
+        )
       }
     }
     if (request.method === "DELETE") {
-      const deletedRole = await deleteRole(roleId, user?.id, clients?.data?.id);
-      return deletedRole;
+      const deletedRole = await deleteRole(roleId, user?.id, clients?.data?.id)
+      return deletedRole
     }
   } catch (err) {
-    return errorHandler(err);
+    return errorHandler(err)
   }
-};
+}
 
 export default function PagePage() {
-  const [searchParams] = useSearchParams();
-  const status = searchParams.get("status");
-  const loaderData = useLoaderData();
-  const actionData = useActionData();
-  const transition = useNavigation();
-  const view = searchParams.get("view");
+  const [searchParams] = useSearchParams()
+  const status = searchParams.get("status")
+  const loaderData = useLoaderData()
+  const actionData = useActionData()
+  const transition = useNavigation()
+  const view = searchParams.get("view")
 
   const [currentRole, setCurrentRole] = useState<any>(
     loaderData?.data?.role ? loaderData?.data?.role : null
-  );
+  )
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(
     []
-  );
-  const formREF = useRef<any>();
-  const [openModal, setOpenModal] = useState(true);
-  const navigate = useNavigate();
-  const [clientPermissions, setClientPermissions] = useState("");
-  const [systemPermissions, setSystemPermissions] = useState("");
+  )
+  const formREF = useRef<any>()
+  const [openModal, setOpenModal] = useState(true)
+  const navigate = useNavigate()
+  const [clientPermissions, setClientPermissions] = useState("")
+  const [systemPermissions, setSystemPermissions] = useState("")
 
-  const submit = useSubmit();
+  const submit = useSubmit()
 
-  let transitionData: any;
+  let transitionData: any
   transition?.formData
     ? (transitionData = Object.fromEntries(transition?.formData))
-    : (transitionData = "");
+    : (transitionData = "")
 
   useEffect(() => {
     if (actionData != undefined) {
       if (actionData?.error) {
-        toast.error(actionData?.error?.error?.message);
+        toast.error(actionData?.error?.error?.message)
       }
       if (actionData?.data?.message) {
-        toast.success(actionData?.data?.message);
-        handleClose();
+        toast.success(actionData?.data?.message)
+        handleClose()
       }
     }
-  }, [actionData]);
+  }, [actionData])
 
   useEffect(() => {
     if (loaderData != undefined) {
       if (loaderData?.data?.role) {
-        setCurrentRole(loaderData?.data?.role);
+        setCurrentRole(loaderData?.data?.role)
       }
       if (loaderData?.data?.clientPermissions) {
-        setClientPermissions(loaderData?.data?.clientPermissions);
-        let newPermission = selectedPermissions;
+        setClientPermissions(loaderData?.data?.clientPermissions)
+        let newPermission = selectedPermissions
         loaderData?.data?.clientPermissions.map((e: any) => {
           if (
             e.selected &&
             !selectedPermissions?.filter((item) => item.id === e.id).length
           ) {
-            newPermission?.push(e);
+            newPermission?.push(e)
           }
-        });
-        setSelectedPermissions(newPermission);
+        })
+        setSelectedPermissions(newPermission)
       }
       if (loaderData?.data?.systemPermissions) {
-        setSystemPermissions(loaderData?.data?.systemPermissions);
-        let newPermission = selectedPermissions;
+        setSystemPermissions(loaderData?.data?.systemPermissions)
+        let newPermission = selectedPermissions
         loaderData.data.systemPermissions.map((e: any) => {
           if (
             e.selected &&
             !selectedPermissions?.filter((item) => item.id === e.id).length
           ) {
-            newPermission?.push(e);
+            newPermission?.push(e)
           }
-        });
-        setSelectedPermissions(newPermission);
+        })
+        setSelectedPermissions(newPermission)
       }
     }
-  }, []);
+  }, [])
 
-  let selectedSystem = [];
+  let selectedSystem = []
   loaderData?.data?.systemPermissions?.length &&
     loaderData?.data?.systemPermissions?.map((item: any) => {
       if (item?.selected) {
-        selectedSystem.push(item);
+        selectedSystem.push(item)
       }
-    });
+    })
 
   const handleClose = () => {
-    setOpenModal(false);
-    navigate("/role");
-  };
+    setOpenModal(false)
+    navigate("/role")
+  }
   const handlePermissionChange = (elt: Permission) => {
-    let newPermissions: any[];
+    let newPermissions: any[]
     if (selectedPermissions?.filter((e) => e.id === elt.id).length) {
-      newPermissions = selectedPermissions?.filter((e) => e.id != elt.id);
-      setSelectedPermissions(newPermissions);
+      newPermissions = selectedPermissions?.filter((e) => e.id != elt.id)
+      setSelectedPermissions(newPermissions)
     } else {
-      newPermissions = selectedPermissions;
-      newPermissions.push(elt);
-      setSelectedPermissions(newPermissions);
+      newPermissions = selectedPermissions
+      newPermissions.push(elt)
+      setSelectedPermissions(newPermissions)
     }
-  };
+  }
   const handleSubmit = (e: any) => {
-    e.preventDefault();
-    const formData = new FormData(formREF.current);
+    e.preventDefault()
+    const formData = new FormData(formREF.current)
     formData.set(
       "permissions",
       JSON.stringify(selectedPermissions?.map((e: any) => e.id))
-    );
+    )
     submit(formData, {
       method: "patch",
       action: `/role/${currentRole.id}`,
-    });
-  };
+    })
+  }
   const categorizePermissions = (rawPermissions: []) => {
     const permissions = rawPermissions?.reduce(function (
       permissions: any,
       permission: any
     ) {
       if (permission?.category in permissions) {
-        permissions[permission?.category]?.push(permission);
+        permissions[permission?.category]?.push(permission)
       } else {
-        permissions[permission?.category] = [permission];
+        permissions[permission?.category] = [permission]
       }
-      return permissions;
+      return permissions
     },
-    {});
-    return permissions;
-  };
+    {})
+    return permissions
+  }
   function PermissionList({ permissions }: any) {
-    let catagorizedPermissions: any;
+    let catagorizedPermissions: any
     if (permissions && permissions.length) {
-      catagorizedPermissions = categorizePermissions(permissions);
+      catagorizedPermissions = categorizePermissions(permissions)
     }
 
     let temp = selectedPermissions.map((item: Permission) => {
-      return item.id;
-    });
+      return item.id
+    })
     let temp2 = permissions?.map((item: Permission) => {
-      return item.id;
-    });
+      return item.id
+    })
     return (
       <Box>
         {!view && (
@@ -353,25 +348,25 @@ export default function PagePage() {
               <Tooltip arrow placement="bottom" title="Select All">
                 <Checkbox
                   checked={permissions?.every((e: any) => {
-                    return temp.includes(e.id);
+                    return temp.includes(e.id)
                   })}
                   onChange={() => {
                     if (
                       permissions?.every((e: any) => {
-                        return temp.includes(e.id);
+                        return temp.includes(e.id)
                       })
                     ) {
                       setSelectedPermissions((state) => [
                         ...state.filter((el: any) => !temp2.includes(el.id)),
-                      ]);
+                      ])
                     } else {
                       const unselected = permissions.filter(
                         (e: any) => temp.indexOf(e.id) < 0
-                      );
+                      )
                       setSelectedPermissions((state: any) => [
                         ...state,
                         ...unselected,
-                      ]);
+                      ])
                     }
                   }}
                 />
@@ -397,7 +392,7 @@ export default function PagePage() {
 
                   {catagorizedPermissions[cat].map((elt: any) => {
                     if (view && !elt.selected) {
-                      return;
+                      return
                     }
                     return (
                       <Tooltip
@@ -423,7 +418,7 @@ export default function PagePage() {
                                   value={JSON.stringify(selectedPermissions)}
                                   name={"permission"}
                                   onChange={() => {
-                                    let newPermissions: any[];
+                                    let newPermissions: any[]
                                     if (
                                       selectedPermissions?.filter(
                                         (e) => e.id === elt.id
@@ -432,13 +427,13 @@ export default function PagePage() {
                                       newPermissions =
                                         selectedPermissions?.filter(
                                           (e) => e.id != elt.id
-                                        );
-                                      setSelectedPermissions(newPermissions);
+                                        )
+                                      setSelectedPermissions(newPermissions)
                                     } else {
                                       setSelectedPermissions((state) => [
                                         ...state,
                                         elt,
-                                      ]);
+                                      ])
                                     }
                                   }}
                                   disabled={view ? true : false}
@@ -452,17 +447,17 @@ export default function PagePage() {
                           }}
                         />
                       </Tooltip>
-                    );
+                    )
                   })}
                 </Box>
-              );
+              )
             })
           ) : (
             <Typography> No Permissions</Typography>
           )}
         </Box>
       </Box>
-    );
+    )
   }
 
   if (!status) {
@@ -483,7 +478,6 @@ export default function PagePage() {
                   height: "100vh",
                 }}
               >
-                {" "}
                 <Box
                   sx={{
                     display: "flex",
@@ -558,7 +552,7 @@ export default function PagePage() {
 
                           <Box sx={{ my: 1 }}>
                             {systemPermissions && systemPermissions?.length ? (
-                              <Accordion>
+                              <Accordion defaultExpanded={true}>
                                 <AccordionSummary
                                   expandIcon={<ExpandMoreIcon />}
                                   aria-controls="panel1a-content"
@@ -579,7 +573,7 @@ export default function PagePage() {
                           </Box>
                           <Box sx={{ my: 1 }}>
                             {clientPermissions && clientPermissions?.length ? (
-                              <Accordion>
+                              <Accordion defaultExpanded={true}>
                                 <AccordionSummary
                                   expandIcon={<ExpandMoreIcon />}
                                   aria-controls="panel1a-content"
@@ -655,7 +649,7 @@ export default function PagePage() {
           </Slide>
         </Modal>
       </Box>
-    );
+    )
   }
-  return <></>;
+  return <></>
 }

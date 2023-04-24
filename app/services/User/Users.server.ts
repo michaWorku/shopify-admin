@@ -119,14 +119,15 @@ export const checkUserExists = async (fieldType: string, phone: string) => {
       })) > 0
     if (user) return user
     return null
-    // throw new Error('User not found')
   } catch (error) {
     throw error
   }
 }
 
 export const userLogin = async (email: string, password: string) => {
-  const user = await db.user.findFirst({ where: { email } })
+  const user = await db.user.findFirst({
+    where: { email },
+  })
   if (!user) {
     throw new Error("User not found")
   }

@@ -9,26 +9,31 @@ import {
   Slide,
   Avatar,
   Chip,
-} from "@mui/material";
-import { useLoaderData, useNavigate } from "@remix-run/react";
-import moment from "moment";
-import { Close } from "@mui/icons-material";
+} from "@mui/material"
+import { useLoaderData, useNavigate } from "@remix-run/react"
+import moment from "moment"
+import { Close } from "@mui/icons-material"
+import palette from "../theme/palette"
 export default function ViewUserDetail() {
-  const navigate = useNavigate();
-  const loaderData = useLoaderData();
+  const navigate = useNavigate()
+  const loaderData = useLoaderData()
 
   function onClose() {
-    navigate(-1);
+    navigate(-1)
   }
   function UserData({ title, value }: { title: string; value: any }) {
     return (
-      <Box sx={{ px: 2 }}>
-        <Typography variant="overline">{title}</Typography>
-        <Box sx={{ bgcolor: "#FAFAFA", py: 0.5, height: 32 }}>
-          <Typography sx={{ fontWeight: "bold", pl: 2 }}>{value}</Typography>
+      <Box sx={{ px: 2, py: 0.5, display: "flex" }}>
+        <Box sx={{}}>
+          <Typography>{title}</Typography>
+        </Box>
+        <Box sx={{ height: 32, borderRadius: "10px" }} border={"1px red bold"}>
+          <Typography sx={{ pl: 2 }} variant="subtitle1">
+            {value}
+          </Typography>
         </Box>
       </Box>
-    );
+    )
   }
   return (
     <Modal open={true} closeAfterTransition>
@@ -38,6 +43,7 @@ export default function ViewUserDetail() {
             position: "relative",
             float: "right",
           }}
+          color={palette.primary.main}
         >
           <Card
             sx={{
@@ -54,7 +60,11 @@ export default function ViewUserDetail() {
                 my: 2,
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              <Typography
+                variant="h6"
+                color={palette.primary.main}
+                sx={{ fontWeight: "bold" }}
+              >
                 User Detail
               </Typography>
               <IconButton onClick={onClose}>
@@ -72,66 +82,48 @@ export default function ViewUserDetail() {
                 },
               }}
             >
-              <Grid container sx={{ my: 2 }}>
-                <Grid item xs={6}>
-                  <UserData
-                    title="First Name"
-                    value={loaderData?.data?.firstName}
-                  />
-                  <UserData
-                    title="Last Name"
-                    value={loaderData?.data?.lastName}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container sx={{ my: 2 }}>
-                <Grid item xs={6}>
-                  <UserData title="Email" value={loaderData?.data?.email} />
-                </Grid>
-                <Grid item xs={6}>
-                  <UserData
-                    title="Phone Number"
-                    value={loaderData?.data?.phone}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container sx={{ my: 2 }}>
-                <Grid item xs={6}>
-                  <UserData title="Gender" value={loaderData?.data?.gender} />
-                </Grid>
-                <Grid item xs={6}>
-                  <UserData
-                    title="Birth Date"
-                    value={moment(loaderData?.data?.birthDate).format("ll")}
-                  />
-                </Grid>
-              </Grid>
-              <Divider />
-              <Grid container sx={{ my: 2 }}>
-                <Grid item xs={6}>
-                  <Box sx={{ px: 2 }}>
-                    <Typography variant="overline">Roles</Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 1,
-                      }}
-                    >
-                      {loaderData?.data?.roles?.map((item: any) => (
-                        <Chip label={item?.name} />
-                      ))}
-                    </Box>
+              <Box sx={{ my: 2, bgcolor: "#f2f2f2" }}>
+                <UserData
+                  title="First Name"
+                  value={loaderData?.data?.firstName}
+                />
+
+                <UserData
+                  title="Last Name"
+                  value={loaderData?.data?.lastName}
+                />
+
+                <UserData title="Email" value={loaderData?.data?.email} />
+
+                <UserData
+                  title="Phone Number"
+                  value={loaderData?.data?.phone}
+                />
+                <UserData title="Gender" value={loaderData?.data?.gender} />
+
+                <UserData
+                  title="Birth Date"
+                  value={moment(loaderData?.data?.birthDate).format("ll")}
+                />
+                <Box sx={{ px: 2 }}>
+                  <Typography>Roles</Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 1,
+                    }}
+                  >
+                    {loaderData?.data?.roles?.map((item: any) => (
+                      <Chip label={item?.name} />
+                    ))}
                   </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <UserData title="Status" value={loaderData?.data?.status} />
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
             </Box>
           </Card>
         </Box>
       </Slide>
     </Modal>
-  );
+  )
 }
