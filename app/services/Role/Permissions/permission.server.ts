@@ -1,8 +1,45 @@
-import { json } from '@remix-run/node'
-import canUser from '~/utils/casl/ability'
-import customErr, { Response, errorHandler } from '~/utils/handler.server'
-import type { Permission } from '@prisma/client'
-import { db } from '~/services/db.server'
+import { json } from "@remix-run/node"
+import canUser from "~/utils/casl/ability"
+import customErr, { Response, errorHandler } from "~/utils/handler.server"
+import type { Permission } from "@prisma/client"
+import { db } from "~/services/db.server"
+
+/**
+ * Get user permissions for which the role is active
+ * @async
+ * @function getUserPermissions
+ * @param {string} userId - The ID of the user
+ * @returns {Promise<Permission[]>}}
+ */
+
+export const getLoggedInUserPermissions = async (userId: string) => {
+  try {
+    const permissions = await db.permission.findMany({
+      where: {
+        roles: {
+          some: {
+            role: {
+              status: "ACTIVE",
+              users: {
+                some: {
+                  user: {
+                    id: userId,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    return permissions
+  } catch (err) {
+    console.error("Error occured getting user permissions")
+    console.dir(err, { depth: null })
+    return errorHandler(err)
+  }
+}
 
 /**
  * Get user permissions for which the role is active
@@ -12,58 +49,58 @@ import { db } from '~/services/db.server'
  * @returns {Promise<Permission[]>}}
  */
 export const getUserPermissions = async (
-    userId: string
+  userId: string
 ): Promise<Permission[]> => {
-    try {
-        const permissions = await db.permission.findMany({
-            where: {
-                roles: {
-                    some: {
-                        role: {
-                            status: 'ACTIVE',
-                            users: {
-                                some: {
-                                    user: {
-                                        id: userId,
-                                    },
-                                },
-                            },
-                        },
-                    },
+  try {
+    const permissions = await db.permission.findMany({
+      where: {
+        roles: {
+          some: {
+            role: {
+              status: "ACTIVE",
+              users: {
+                some: {
+                  user: {
+                    id: userId,
+                  },
                 },
+              },
             },
-        })
+          },
+        },
+      },
+    })
 
-        let filteredPermissions: any = []
-        permissions?.map((elt: any) => {
-            const filtered = Object.fromEntries(
-                Object.entries(elt).filter(([key, value]: any) => {
-                    if (
-                        (key.includes('action') && value) ||
-                        (key.includes('subject') && value) ||
-                        (key.includes('conditions') && value) ||
-                        (key.includes('fields') && value.length)
-                    ) {
-                        return { key: value }
-                    }
-                })
-            )
-            if (Object.keys(filtered).length) {
-                filteredPermissions.push(filtered)
-            }
+    let filteredPermissions: any = []
+    permissions?.map((elt: any) => {
+      const filtered = Object.fromEntries(
+        Object.entries(elt).filter(([key, value]: any) => {
+          if (
+            (key.includes("action") && value) ||
+            (key.includes("subject") && value) ||
+            (key.includes("conditions") && value) ||
+            (key.includes("fields") && value.length)
+          ) {
+            return { key: value }
+          }
         })
-        if (!filteredPermissions.length)
-            throw new customErr(
-                'casl_Bad_Request',
-                'User has got no permissions',
-                404
-            )
-        return filteredPermissions
-    } catch (err) {
-        console.error('Error occured getting user permissions')
-        console.dir(err, { depth: null })
-        return errorHandler(err)
-    }
+      )
+      if (Object.keys(filtered).length) {
+        filteredPermissions.push(filtered)
+      }
+    })
+    if (!filteredPermissions.length)
+      throw new customErr(
+        "casl_Bad_Request",
+        "User has got no permissions",
+        404
+      )
+    return filteredPermissions
+  } catch (err) {
+    console.error("Error occured getting user permissions")
+    console.dir(err, { depth: null })
+    return errorHandler(err)
+  }
 }
 
 /**
@@ -73,22 +110,22 @@ export const getUserPermissions = async (
  * @returns {Promise<object>} Object containing the permissions data
  */
 export const getAllPermissions = async () => {
-    try {
-        const permissions = await db.permission.findMany({
-            where: {
-                action: {
-                    not: 'manage',
-                },
-                subject: {
-                    not: 'all',
-                },
-            },
-        })
-        return Response({ data: permissions })
-    } catch (error: any) {
-        console.error(`Error in getAllPermissions: ${error.message}`)
-        throw error
-    }
+  try {
+    const permissions = await db.permission.findMany({
+      where: {
+        action: {
+          not: "manage",
+        },
+        subject: {
+          not: "all",
+        },
+      },
+    })
+    return Response({ data: permissions })
+  } catch (error: any) {
+    console.error(`Error in getAllPermissions: ${error.message}`)
+    throw error
+  }
 }
 
 /**
@@ -100,18 +137,18 @@ export const getAllPermissions = async () => {
  * @returns The permission, or null if no permission was found with the given ID.
  */
 export const getPermissionById = async (id: string) => {
-    try {
-        const permission = await db.permission.findUnique({
-            where: {
-                id,
-            },
-        })
+  try {
+    const permission = await db.permission.findUnique({
+      where: {
+        id,
+      },
+    })
 
-        return json(Response({ data: permission }), { status: 200 })
-    } catch (error) {
-        console.error(`Error getting permission with ID ${id}: ${error}`)
-        return errorHandler(error)
-    }
+    return json(Response({ data: permission }), { status: 200 })
+  } catch (error) {
+    console.error(`Error getting permission with ID ${id}: ${error}`)
+    return errorHandler(error)
+  }
 }
 
 /**
@@ -124,22 +161,22 @@ export const getPermissionById = async (id: string) => {
  * @throws An error if the provided entity key is invalid or if there's an error querying the database
  */
 export const getAllEntityPermissions = async () => {
-    try {
-        const permissions = await db.permission.findMany({
-            where: {
-                conditions: {
-                    not: {},
-                },
-            },
-        })
+  try {
+    const permissions = await db.permission.findMany({
+      where: {
+        conditions: {
+          not: {},
+        },
+      },
+    })
 
-        return Response({
-            data: permissions,
-        })
-    } catch (err) {
-        console.error(`Error getting permissions for entity  ${err}`)
-        return errorHandler(err)
-    }
+    return Response({
+      data: permissions,
+    })
+  } catch (err) {
+    console.error(`Error getting permissions for entity  ${err}`)
+    return errorHandler(err)
+  }
 }
 
 /**
@@ -152,39 +189,39 @@ export const getAllEntityPermissions = async () => {
  * @returns {Promise} A Promise object representing the permissions of the user for the entity
  */
 export const getUserEntityPermissions = async (userId: string) => {
-    try {
-        if (!userId) {
-            throw new Error(`Invalid userId: ${userId}`)
-        }
-        const permissions = await db.permission.findMany({
-            where: {
-                roles: {
-                    some: {
-                        role: {
-                            users: {
-                                some: {
-                                    user: {
-                                        id: userId,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                // conditions: {
-                //     path: ['clientId'],
-                //     // string_contains: ""
-                //     array_contains: ['${user.clientIds}']
-                // },
-            },
-        })
-
-        return Response({
-            data: permissions,
-        })
-    } catch (error) {
-        return errorHandler(error)
+  try {
+    if (!userId) {
+      throw new Error(`Invalid userId: ${userId}`)
     }
+    const permissions = await db.permission.findMany({
+      where: {
+        roles: {
+          some: {
+            role: {
+              users: {
+                some: {
+                  user: {
+                    id: userId,
+                  },
+                },
+              },
+            },
+          },
+        },
+        // conditions: {
+        //     path: ['clientId'],
+        //     // string_contains: ""
+        //     array_contains: ['${user.clientIds}']
+        // },
+      },
+    })
+
+    return Response({
+      data: permissions,
+    })
+  } catch (error) {
+    return errorHandler(error)
+  }
 }
 
 /**
@@ -194,20 +231,20 @@ export const getUserEntityPermissions = async (userId: string) => {
  * @returns {Promise<Array>} A Promise that resolves to an array of Permission objects.
  */
 export const getAllSystemPermissions = async () => {
-    try {
-        const permissions = await db.permission.findMany({
-            where: {
-                conditions: {
-                    equals: {},
-                },
-                action: { not: 'manage' },
-                subject: { not: 'all' },
-            },
-        })
-        return Response({ data: permissions })
-    } catch (err) {
-        return errorHandler(err)
-    }
+  try {
+    const permissions = await db.permission.findMany({
+      where: {
+        conditions: {
+          equals: {},
+        },
+        action: { not: "manage" },
+        subject: { not: "all" },
+      },
+    })
+    return Response({ data: permissions })
+  } catch (err) {
+    return errorHandler(err)
+  }
 }
 
 /**
@@ -219,38 +256,38 @@ export const getAllSystemPermissions = async () => {
  * @throws {Error} If an error occurs while retrieving the permissions.
  */
 export const getUserSystemPermissions = async (userId: string) => {
-    try {
-        const permissions = await db.permission.findMany({
-            where: {
-                roles: {
-                    some: {
-                        role: {
-                            users: {
-                                some: {
-                                    user: {
-                                        id: userId,
-                                    },
-                                },
-                            },
-                        },
-                    },
+  try {
+    const permissions = await db.permission.findMany({
+      where: {
+        roles: {
+          some: {
+            role: {
+              users: {
+                some: {
+                  user: {
+                    id: userId,
+                  },
                 },
-                conditions: {
-                    equals: {},
-                },
-                action: {
-                    not: 'manage',
-                },
-                subject: {
-                    not: 'all',
-                },
+              },
             },
-        })
+          },
+        },
+        conditions: {
+          equals: {},
+        },
+        action: {
+          not: "manage",
+        },
+        subject: {
+          not: "all",
+        },
+      },
+    })
 
-        return Response({ data: permissions })
-    } catch (err) {
-        return errorHandler(err)
-    }
+    return Response({ data: permissions })
+  } catch (err) {
+    return errorHandler(err)
+  }
 }
 
 /**
@@ -261,14 +298,14 @@ export const getUserSystemPermissions = async (userId: string) => {
  * @returns True if the entity key is valid, false otherwise
  */
 export const isValidEntityKey = (entityKey: string): boolean => {
-    // Check if the entity key is between 3 and 50 characters long
-    if (entityKey.length < 3 || entityKey.length > 50) {
-        return false
-    }
+  // Check if the entity key is between 3 and 50 characters long
+  if (entityKey.length < 3 || entityKey.length > 50) {
+    return false
+  }
 
-    // Check if the entity key only contains alphanumeric characters and underscores
-    const regex = /^[a-zA-Z0-9_]+$/
-    return regex.test(entityKey)
+  // Check if the entity key only contains alphanumeric characters and underscores
+  const regex = /^[a-zA-Z0-9_]+$/
+  return regex.test(entityKey)
 }
 
 /**
@@ -283,56 +320,56 @@ export const isValidEntityKey = (entityKey: string): boolean => {
  * @throws {Error} Throws an error if the operation fails.
  */
 export const getEntityPermissions = async (
-    userId: string,
-    entityKey: string,
-    entities: any
+  userId: string,
+  entityKey: string,
+  entities: any
 ) => {
-    try {
-        const iCanViewAll = await canUser(userId, 'read', 'Permission', {})
-        let permissions: any = {}
+  try {
+    const iCanViewAll = await canUser(userId, "read", "Permission", {})
+    let permissions: any = {}
 
-        const getPermissionByEntity = async (item: any) => {
-            const permission =
-                iCanViewAll?.status === 200
-                    ? await getAllEntityPermissions()
-                    : await getUserEntityPermissions(userId)
+    const getPermissionByEntity = async (item: any) => {
+      const permission =
+        iCanViewAll?.status === 200
+          ? await getAllEntityPermissions()
+          : await getUserEntityPermissions(userId)
 
-            return permission?.data?.length
-                ? { [item.name]: permission }
-                : { [item.name]: {} }
-        }
-
-        const promises = entities?.map(getPermissionByEntity)
-        permissions = Object.assign({}, ...(await Promise.all(promises)))
-
-        const canCreateRoleWithPermission = async (permission: any) => {
-            const canCreateRole = await canUser(
-                userId,
-                'create',
-                'Role',
-                permission.conditions
-            )
-            return canCreateRole?.status === 200
-        }
-
-        const setCanCreateFlag = async (permission: any) => {
-            permission.canCreate = await canCreateRoleWithPermission(permission)
-            return permission
-        }
-
-        const pro = Object.keys(permissions).map(async (entity: any) => {
-            if (permissions[entity]?.data) {
-                permissions[entity].data = await Promise.all(
-                    permissions[entity].data.map(setCanCreateFlag)
-                )
-            }
-        })
-
-        await Promise.all(pro)
-        return Response({ data: permissions })
-    } catch (e) {
-        return errorHandler(e)
+      return permission?.data?.length
+        ? { [item.name]: permission }
+        : { [item.name]: {} }
     }
+
+    const promises = entities?.map(getPermissionByEntity)
+    permissions = Object.assign({}, ...(await Promise.all(promises)))
+
+    const canCreateRoleWithPermission = async (permission: any) => {
+      const canCreateRole = await canUser(
+        userId,
+        "create",
+        "Role",
+        permission.conditions
+      )
+      return canCreateRole?.status === 200
+    }
+
+    const setCanCreateFlag = async (permission: any) => {
+      permission.canCreate = await canCreateRoleWithPermission(permission)
+      return permission
+    }
+
+    const pro = Object.keys(permissions).map(async (entity: any) => {
+      if (permissions[entity]?.data) {
+        permissions[entity].data = await Promise.all(
+          permissions[entity].data.map(setCanCreateFlag)
+        )
+      }
+    })
+
+    await Promise.all(pro)
+    return Response({ data: permissions })
+  } catch (e) {
+    return errorHandler(e)
+  }
 }
 
 /**
@@ -345,51 +382,51 @@ export const getEntityPermissions = async (
  * indicating whether the user can create roles with each permission.
  */
 export const getSystemPermissions = async (userId: string) => {
-    try {
-        // Check if the user can view all permissions or only their own
-        const iCanViewAll = await canUser(userId, 'read', 'Permission', {})
-        let permissionsData: any
+  try {
+    // Check if the user can view all permissions or only their own
+    const iCanViewAll = await canUser(userId, "read", "Permission", {})
+    let permissionsData: any
 
-        if (iCanViewAll?.status === 200) {
-            // Fetch all permissions if the user can view all
-            permissionsData = await getAllSystemPermissions()
-        } else if (iCanViewAll?.status === 403) {
-            // Otherwise, fetch the user's permissions
-            permissionsData = await getUserSystemPermissions(userId)
-        } else {
-            return iCanViewAll
-        }
-
-        // Check whether the user can create roles with each permission
-        const permissionPromises = permissionsData?.data?.map(
-            async (permission: any, index: number) => {
-                const canCreateRoleWithPermission = await canUser(
-                    userId,
-                    'create',
-                    'Role',
-                    permission.conditions
-                )
-
-                // Set the "canCreate" property for each permission based on whether the user can create a role
-                if (canCreateRoleWithPermission?.status === 200) {
-                    permissionsData.data[index] = {
-                        ...permissionsData.data[index],
-                        canCreate: true,
-                    }
-                } else {
-                    permissionsData.data[index] = {
-                        ...permissionsData.data[index],
-                        canCreate: false,
-                    }
-                }
-            }
-        )
-        await Promise.all(permissionPromises)
-
-        return Response({ data: permissionsData })
-    } catch (error) {
-        return errorHandler(error)
+    if (iCanViewAll?.status === 200) {
+      // Fetch all permissions if the user can view all
+      permissionsData = await getAllSystemPermissions()
+    } else if (iCanViewAll?.status === 403) {
+      // Otherwise, fetch the user's permissions
+      permissionsData = await getUserSystemPermissions(userId)
+    } else {
+      return iCanViewAll
     }
+
+    // Check whether the user can create roles with each permission
+    const permissionPromises = permissionsData?.data?.map(
+      async (permission: any, index: number) => {
+        const canCreateRoleWithPermission = await canUser(
+          userId,
+          "create",
+          "Role",
+          permission.conditions
+        )
+
+        // Set the "canCreate" property for each permission based on whether the user can create a role
+        if (canCreateRoleWithPermission?.status === 200) {
+          permissionsData.data[index] = {
+            ...permissionsData.data[index],
+            canCreate: true,
+          }
+        } else {
+          permissionsData.data[index] = {
+            ...permissionsData.data[index],
+            canCreate: false,
+          }
+        }
+      }
+    )
+    await Promise.all(permissionPromises)
+
+    return Response({ data: permissionsData })
+  } catch (error) {
+    return errorHandler(error)
+  }
 }
 
 /**
@@ -402,24 +439,19 @@ export const getSystemPermissions = async (userId: string) => {
  * @returns {boolean} - True if the user has permission, false otherwise
  */
 export const checkUserPermissions = async (
-    userId: string,
-    permissionIds: string[]
+  userId: string,
+  permissionIds: string[]
 ) => {
-    for (const permissionId of permissionIds) {
-        const permission = await db.permission.findUnique({
-            where: { id: permissionId },
-        })
-        if (permission) {
-            const can = await canUser(
-                userId,
-                'create',
-                'Role',
-                permission.conditions
-            )
-            if (can?.status !== 200) {
-                return false
-            }
-        }
+  for (const permissionId of permissionIds) {
+    const permission = await db.permission.findUnique({
+      where: { id: permissionId },
+    })
+    if (permission) {
+      const can = await canUser(userId, "create", "Role", permission.conditions)
+      if (can?.status !== 200) {
+        return false
+      }
     }
-    return true
+  }
+  return true
 }
