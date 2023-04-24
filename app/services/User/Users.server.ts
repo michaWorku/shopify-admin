@@ -126,7 +126,20 @@ export const checkUserExists = async (fieldType: string, phone: string) => {
 }
 
 export const userLogin = async (email: string, password: string) => {
-  const user = await db.user.findFirst({ where: { email } })
+  const user = await db.user.findFirst({
+    where: { email },
+    include: {
+      roles: {
+        include: {
+          role: {
+            include: {
+              permissions: true,
+            },
+          },
+        },
+      },
+    },
+  })
   if (!user) {
     throw new Error("User not found")
   }
