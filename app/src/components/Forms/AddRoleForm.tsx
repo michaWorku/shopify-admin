@@ -81,7 +81,7 @@ export default function AddRoleForm({
   if (entityPermissions) {
     clientPermissions = categorizePermissions(entityPermissions)
   }
-  console.log({ systemPermission })
+  console.log({ permissionIds })
 
   return (
     <Form>
@@ -160,9 +160,13 @@ export default function AddRoleForm({
                   height: "calc(100vh - 300px)",
                 }}
               >
-                {systemPermissions && <Typography>System</Typography>}
-                {systemPermissions && (
-                  <Accordion sx={{ mb: 2 }}>
+                {systemPermission?.length && systemPermissions ? (
+                  <Typography>System</Typography>
+                ) : (
+                  <></>
+                )}
+                {systemPermission?.length && systemPermissions ? (
+                  <Accordion sx={{ mb: 2 }} defaultExpanded={true}>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel1a-content"
@@ -313,10 +317,12 @@ export default function AddRoleForm({
                       })}
                     </AccordionDetails>
                   </Accordion>
+                ) : (
+                  <></>
                 )}
 
                 {clientPermissions && (
-                  <Accordion sx={{ mb: 2 }}>
+                  <Accordion sx={{ mb: 2 }} defaultExpanded={true}>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel1a-content"
