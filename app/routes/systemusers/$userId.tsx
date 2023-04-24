@@ -47,6 +47,7 @@ import { DesktopDatePicker } from "@mui/x-date-pickers"
 import { toast } from "react-toastify"
 import { getUserEntities } from "~/services/Entities/entity.server"
 import ViewUserDetail from "~/src/components/ViewDetail"
+import palette from "~/src/theme/palette"
 // import { getUserEntities } from '~/services/Entities/entity.server'
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -233,6 +234,16 @@ const SystemUsers = () => {
                     },
                     height: "calc(100vh - 265px)",
                     px: 5,
+                    "& .MuiInputLabel-root ": {
+                      color: "primary.main",
+                      fontSize: "1rem",
+                      fontWeight: "400",
+                    },
+                    "& .MuiTypography-root": {
+                      color: "primary.main",
+                      fontSize: "1rem",
+                      fontWeight: "400",
+                    },
                   }}
                 >
                   <TextField
