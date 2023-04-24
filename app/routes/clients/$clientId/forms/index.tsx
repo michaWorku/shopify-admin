@@ -51,12 +51,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
     console.log({ user, params })
     // Check if the user can create a dynamic form
-    const canCreate = (await canUser(
-      user?.id,
-      "create",
-      "DynamicForm",
-      {}
-    )) as any
+    const canCreate = (await canUser(user?.id, "create", "DynamicForm", {
+      clientId: params?.clientId,
+    })) as any
     const client = await getClientById(params?.clientId)
 
     // Get all dynamic forms
