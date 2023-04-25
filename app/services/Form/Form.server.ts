@@ -23,7 +23,7 @@ interface DynamicForm {
 */
 export const createForm = async (formData: DynamicForm, userId: string, clientId: string): Promise<any> => {
     try {
-        const canCreate = await canUser(userId, 'create', 'DynamicForm', {})
+        const canCreate = await canUser(userId, 'create', 'DynamicForm', {clientId})
         if (canCreate?.status !== 200) {
             return canCreate
         }
@@ -81,7 +81,7 @@ export const getAllClientDynamicForms = async (request: Request, clientId?: stri
     try {
         const { sortType, sortField, skip, take, pageNo, search, filter, exportType } = getParams(request);
 
-        const searchParams = searchFunction(search, 'DynamicForm', ['name', 'description']);
+        const searchParams = searchFunction(search, 'DynamicForm');
         const filterParams = filterFunction(filter, 'DynamicForm');
 
         const dynamicFormsWhere: Prisma.DynamicFormWhereInput = {
@@ -140,6 +140,51 @@ export const getAllClientDynamicForms = async (request: Request, clientId?: stri
     }
 };
 
+/**
+ * Retrieves all dynamic forms for the specified client.
+ * @async function getAllClientDynamicForms
+ * @param {string} userId - The ID of the user to retrieve dynamic forms for.
+ * @param {string} clientId - The ID of the client associated with the forms.
+ * @returns {Promise<Response>} - The HTTP response containing the dynamic forms and their metadata.
+ * @throws {customErr} - An error indicating that no dynamic forms were found.
+ * @throws {Error} - An error indicating that an unexpected error occurred.
+ */
+ export const getClientDynamicForms = async (userId: string, clientId?: string): Promise<any> => {
+    try {
+        const canViewDynamicForms = await canUser(userId, 'read', 'DynamicForm', {clientId});
+        if (canViewDynamicForms?.status !== 200) {
+            return canViewDynamicForms
+        }
+        const dynamicFormsWhere: Prisma.DynamicFormWhereInput = {
+            deletedAt: null,
+            clientId
+        };
+
+        const dynamicFormsCount = await db.dynamicForm.count({ where: dynamicFormsWhere });
+
+        if (dynamicFormsCount === 0) {
+            throw new customErr('Custom_Error', 'No dynamic forms found', 404);
+        }
+
+        const dynamicForms = await db.dynamicForm.findMany({
+            where: dynamicFormsWhere,
+            include: {
+                fields: true
+            }
+        });
+
+        return Response({
+            data: dynamicForms,
+            metaData: {
+                total: dynamicFormsCount
+            },
+        })
+    } catch (error) {
+        console.log('Error occurred loading dynamic forms.');
+        console.dir(error, { depth: null });
+        return errorHandler(error);
+    }
+};
 /**
  * Get a dynamic form by unique field.
  * @async
@@ -497,7 +542,7 @@ export const getAllFormFields = async (request: Request, formId: string): Promis
     try {
         const { sortType, sortField, skip, take, pageNo, search, filter, exportType } = getParams(request);
 
-        const searchParams = searchFunction(search, 'DynamicFormField', ['name', 'label', 'description']);
+        const searchParams = searchFunction(search, 'DynamicFormField');
         const filterParams = filterFunction(filter, 'DynamicFormField');
 
         const dynamicFormFieldsWhere: Prisma.DynamicFormFieldWhereInput = {

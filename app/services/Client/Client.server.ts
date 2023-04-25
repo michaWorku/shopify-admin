@@ -75,8 +75,8 @@ export const getAllClients = async (
       exportType,
     } = getParams(request)
 
-    const searchParams = searchFunction(search, "Client", ["name", "phone"]) // Adjust the search columns as necessary.
-    const filterParams = filterFunction(filter, "Client")
+        const searchParams = searchFunction(search, 'Client') // Adjust the search columns as necessary.
+        const filterParams = filterFunction(filter, 'Client')
 
     let _where: any = {
       deletedAt: null,

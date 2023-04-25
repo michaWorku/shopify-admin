@@ -26,49 +26,49 @@ export const searchCombinedColumn = (
             {
                 ...(searchArray.length === 1
                     ? {
-                          OR: columnNames?.map((columnName) => ({
-                              [columnName]: {
-                                  [operator]: searchArray[0],
-                                  mode: 'insensitive',
-                              },
-                          })),
-                      }
+                        OR: columnNames?.map((columnName) => ({
+                            [columnName]: {
+                                [operator]: searchArray[0],
+                                mode: 'insensitive',
+                            },
+                        })),
+                    }
                     : {}),
                 ...(searchArray.length === 2
                     ? {
-                          AND: [
-                              {
-                                  OR: columnNames
-                                      ?.slice(0, 2)
-                                      .map((columnName) => ({
-                                          [columnName]: {
-                                              [operator]: searchArray[0],
-                                              mode: 'insensitive',
-                                          },
-                                      })),
-                              },
-                              {
-                                  OR: columnNames
-                                      ?.slice(1)
-                                      .map((columnName) => ({
-                                          [columnName]: {
-                                              [operator]: searchArray[1],
-                                              mode: 'insensitive',
-                                          },
-                                      })),
-                              },
-                          ],
-                      }
+                        AND: [
+                            {
+                                OR: columnNames
+                                    ?.slice(0, 2)
+                                    .map((columnName) => ({
+                                        [columnName]: {
+                                            [operator]: searchArray[0],
+                                            mode: 'insensitive',
+                                        },
+                                    })),
+                            },
+                            {
+                                OR: columnNames
+                                    ?.slice(1)
+                                    .map((columnName) => ({
+                                        [columnName]: {
+                                            [operator]: searchArray[1],
+                                            mode: 'insensitive',
+                                        },
+                                    })),
+                            },
+                        ],
+                    }
                     : {}),
                 ...(searchArray.length === 3
                     ? {
-                          AND: columnNames?.map((columnName, index) => ({
-                              [columnName]: {
-                                  [operator]: searchArray[index],
-                                  mode: 'insensitive',
-                              },
-                          })),
-                      }
+                        AND: columnNames?.map((columnName, index) => ({
+                            [columnName]: {
+                                [operator]: searchArray[index],
+                                mode: 'insensitive',
+                            },
+                        })),
+                    }
                     : {}),
             },
         ],
@@ -107,11 +107,20 @@ export const searchFunction = (
                 console.log({
                     schema: modelSchema[item],
                     item,
-                    typeLength: modelSchema[item]?.type?.length,
                 })
+                const date = new Date(search)
+                 if (!isNaN(date.getTime()) && modelSchema[item]?.format === "date-time" && !!search) {
+                        return {
+                            [item]: {
+                                gte: date.toISOString()
+                            },
+                        };
 
-                if (
-                    modelSchema[item]?.type === 'string' &&
+                }
+                else if (
+                    isNaN(date.getTime())&&
+                    (modelSchema[item]?.type === 'string' ||
+                        modelSchema[item]?.type?.includes('string')) &&
                     modelSchema[item]?.format !== 'date-time' &&
                     !modelSchema[item]?.enum?.length
                 ) {
@@ -130,13 +139,15 @@ export const searchFunction = (
                     } else {
                         if (
                             search.split(' ').length > 1 &&
-                            !!searchColumns?.length
-                        )
+                            searchColumns?.length
+                        ) {
+                            console.log({ search, searchColumns })
                             return searchCombinedColumn(
                                 search,
                                 searchColumns,
                                 'search'
                             )
+                        }
                         return {
                             [item]: {
                                 contains: search,
@@ -145,21 +156,7 @@ export const searchFunction = (
                         }
                     }
                 }
-                // else if (modelSchema[item]?.format === "date-time" && !!search) {
-                //     const date = new Date(search)
-
-                //     if (!isNaN(date.getTime())) {
-                //         console.log({ date, search })
-                //         return {
-                //             [item]: {
-                //                 equals: date.toISOString()
-                //             },
-                //         };
-                //     }
-                //     return {}
-
-                // }
-                if (
+                else if (
                     modelSchema[item]?.enum?.length &&
                     !!search &&
                     Object.keys(Status)?.some((status) => status === search)
@@ -171,7 +168,7 @@ export const searchFunction = (
                 return {}
             }),
         }
-
+        console.dir(searchParams, { depth: null })
         return searchParams
     } else {
         return {}

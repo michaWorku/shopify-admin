@@ -27,7 +27,7 @@ import { formHandler } from "~/utils/formHandler"
 import { toast } from "react-toastify"
 import type { DeleteDialogType } from "~/src/components/DeleteAlert"
 import DeleteAlert from "~/src/components/DeleteAlert"
-import { getDynamicForms } from "~/services/Form/Form.server"
+import { getClientDynamicForms, getDynamicForms } from "~/services/Form/Form.server"
 import { RewardForm } from "~/src/components/Forms"
 import {
   createReward,
