@@ -3,7 +3,7 @@ import { db } from "../db.server"
 import customErr, { Response, errorHandler } from "~/utils/handler.server"
 import type { Permission, Role, Status } from "@prisma/client"
 import getParams from "~/utils/params/getParams.server"
-import { searchCombinedColumn } from "~/utils/params/search.server"
+import { searchCombinedColumn, searchFunction } from "~/utils/params/search.server"
 import { filterFunction } from "~/utils/params/filter.server"
 import canUser from "~/utils/casl/ability"
 import {
@@ -242,82 +242,84 @@ Retrieves all roles created by a specific user based on the given userId.
 */
 
 export const getAllRoles = async (request: Request, userId: string) => {
-  try {
-    if (!userId) {
-      throw new customErr("Custom_Error", "User ID is required", 404)
-    }
-    let userCreated = {}
-    const able = await canUser(userId, "manage", "all", {})
-    if (able?.status != 200) {
-      userCreated = {
-        createdBy: userId,
-      }
-    } else {
-      userCreated = {
-        createdBy: {
-          not: "system",
-        },
-      }
-    }
-    console.log({ able, userCreated })
+    try {
+        if (!userId) {
+            throw new customErr('Custom_Error', 'User ID is required', 404)
+        }
+        let userCreated = {}
+        const able = await canUser(userId, 'manage', 'all', {})
+        if (able?.status != 200) {
+            userCreated = {
+                createdBy: userId,
+            }
+        }
 
-    const { sortType, sortField, skip, take, pageNo, search, filter } =
-      getParams(request)
-    const searchParams = searchCombinedColumn(
-      search,
-      ["name", "createdBy", "description"],
-      "search"
-    )
-    const filterParams = filterFunction(filter, "Role")
+        const { sortType, sortField, skip, take, pageNo, search, filter } =
+            getParams(request)
+        const searchParams = searchFunction(
+            search,
+            'search'
+        )
+        const filterParams = filterFunction(filter, 'Role')
 
-    let roles = []
-
-    let _where: any = {
-      ...searchParams,
-      ...filterParams,
-      ...userCreated,
-      deletedAt: null,
-      users: {
-        every: {
-          userId: {
-            not: userId,
-          },
-        },
-      },
+        let roles = []
+        const roleCount = await db.role.count({
+            where: {
+                ...searchParams,
+                ...filterParams,
+                ...userCreated,
+                deletedAt: null,
+                users: {
+                    every: {
+                        userId: {
+                            not: userId,
+                        },
+                    },
+                },
+            },
+        })
+        if (roleCount) {
+            roles = await db.role.findMany({
+                take,
+                skip,
+                orderBy: [
+                    {
+                        [sortField]: sortType,
+                    },
+                ],
+                where: {
+                    ...userCreated,
+                    ...searchParams,
+                    ...filterParams,
+                    deletedAt: null,
+                    users: {
+                        every: {
+                            userId: {
+                                not: userId,
+                            },
+                        },
+                    },
+                },
+            })
+            roles?.map((e: any) => {
+                (e.canEdit = true), (e.canDelete = true)
+            })
+            return {
+                data: roles,
+                metaData: {
+                    page: pageNo,
+                    pageSize: take,
+                    sort: [sortField, sortType],
+                    searchVal: search,
+                    filter,
+                    total: roleCount,
+                },
+            }
+        }
+        throw new customErr('Custom_Error', 'Role not found', 404)
+    } catch (err) {
+        return errorHandler(err)
     }
-    const roleCount = await db.role.count({
-      where: _where,
-    })
-    if (roleCount) {
-      roles = await db.role.findMany({
-        take,
-        skip,
-        orderBy: [
-          {
-            [sortField]: sortType,
-          },
-        ],
-        where: _where,
-      })
-      roles?.map((e: any) => {
-        ;(e.canEdit = true), (e.canDelete = true)
-      })
-      return {
-        data: roles,
-        metaData: {
-          page: pageNo,
-          pageSize: take,
-          sort: [sortField, sortType],
-          searchVal: search,
-          filter,
-          total: roleCount,
-        },
-      }
-    }
-    throw new customErr("Custom_Error", "Role not found", 404)
-  } catch (err) {
-    return errorHandler(err)
-  }
 }
 
 /**
@@ -495,8 +497,8 @@ export const editRole = async (userId: string, roleId: string, data: any) => {
  * @param {string[]} newPermissions - An array of the new permissions.
  * @returns {object} An object with the permissions to connect and disconnect.
  */
-export const permissionChange = (oldRoles: any[], newRoles: string[]) => {
-  const oldPermissionIds = oldRoles.map((permission) => permission?.id)
+export const permissionChange = (oldRoles: string[], newRoles: string[]) => {
+    const oldPermissionIds = oldRoles.map((permission: any) => permission?.id)
 
   const disconnect = oldPermissionIds.filter((id) => !newRoles.includes(id))
 

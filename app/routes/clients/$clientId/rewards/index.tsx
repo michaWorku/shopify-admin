@@ -60,8 +60,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     const client = await getClientById(params?.clientId)
     // Get all dynamic forms and rewards
     let dynamicForms, rewards
-    dynamicForms = (await getDynamicForms(
-      request,
+    dynamicForms = (await getClientDynamicForms(
       user.id,
       params?.clientId as string
     )) as any

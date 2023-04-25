@@ -20,7 +20,7 @@ import { createOTP } from "../otp.server";
 */
 export const createReward = async (rewardData: Reward, userId: string, clientId: string): Promise<any> => {
     try {
-        const canCreate = await canUser(userId, 'create', 'Reward', {})
+        const canCreate = await canUser(userId, 'create', 'Reward', {clientId})
         if (canCreate?.status !== 200) {
             return canCreate
         }
@@ -74,7 +74,7 @@ export const getAllClientRewards = async (request: Request, clientId?: string): 
     try {
         const { sortType, sortField, skip, take, pageNo, search, filter, exportType } = getParams(request);
 
-        const searchParams = searchFunction(search, 'Reward', ['name', 'description']);
+        const searchParams = searchFunction(search, 'Reward');
         const filterParams = filterFunction(filter, 'Reward');
 
         const rewardsWhere: Prisma.RewardWhereInput = {
@@ -84,6 +84,7 @@ export const getAllClientRewards = async (request: Request, clientId?: string): 
             ...filterParams,
         };
 
+        console.dir(rewardsWhere);
         const rewardsCount = await db.reward.count({ where: rewardsWhere });
 
         if (rewardsCount === 0) {
@@ -143,7 +144,7 @@ export const getAllClientRewards = async (request: Request, clientId?: string): 
  */
 export const getRewards = async (request: Request, userId: string, clientId: string): Promise<Object> => {
     try {
-        const canViewRewards = await canUser(userId, 'read', 'Reward', {});
+        const canViewRewards = await canUser(userId, 'read', 'Reward', {clientId});
         if (canViewRewards?.status !== 200) {
             const canViewRewardsPartial = await canUser(userId, 'read', 'Reward', {}, AbilityType.PARTIAL);
             if (!canViewRewardsPartial?.ok) {

@@ -58,11 +58,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       user?.id,
       "create",
       "DynamicForm",
-      {}
-    )) as any
+      {clientId: params?.clientId}
+    )) as any;
 
     const client = await getClientById(params?.clientId)
-    const form = await getDynamicFormByField(params?.formId)
+    const form = await getDynamicFormByField(params?.formId as string)
     // Get dynamic form with formId
     let dynamicFormField
     dynamicFormField = (await getAllFormFields(

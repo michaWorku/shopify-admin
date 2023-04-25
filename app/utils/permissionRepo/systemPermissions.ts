@@ -264,7 +264,7 @@ export default function systemPermissions() {
         {
             action: 'read',
             subject: 'Reward',
-            conditions: { clientId: { $in: '${user.clientIds}' } },
+            conditions: {},
             fields: [],
             name: 'View reward',
             description: 'With this permission the client can view reward',
