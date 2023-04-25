@@ -104,10 +104,10 @@ export const searchFunction = (
     if (search) {
         const searchParams = {
             OR: Object.keys(modelSchema)?.map((item) => {
-                console.log({
-                    schema: modelSchema[item],
-                    item,
-                })
+                // console.log({
+                //     schema: modelSchema[item],
+                //     item,
+                // })
                 const date = new Date(search)
                  if (!isNaN(date.getTime()) && modelSchema[item]?.format === "date-time" && !!search) {
                         return {
