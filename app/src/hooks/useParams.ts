@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type {
     ColumnFiltersState,
     PaginationState,
@@ -6,7 +6,19 @@ import type {
 } from '@tanstack/react-table'
 import { useSearchParams, useSubmit } from '@remix-run/react'
 
-export default function useParams(columns: any) {
+/**
+ * @typedef {Object.<string, string>} InitialFilterFunction
+ */
+
+/**
+ * Custom React hook to manage table parameters from search query params.
+ * @param {Array} columns - Array of table columns configuration.
+ * @returns {Object} Object containing all necessary parameters to use in the table.
+ */
+const useParams = (columns: any) => {
+    /**
+   * @type {InitialFilterFunction}
+   */
     let initialFilterFunction = {}
 
     columns.map((item: any) => {
@@ -49,6 +61,11 @@ export default function useParams(columns: any) {
     })
     const [exportType, setExportType] = useState() as any
 
+    const currentPagination = useRef({
+        pageIndex: 0,
+        pageSize: 15,
+    })
+
     const [searchParams] = useSearchParams()
 
     let currentParams: any
@@ -59,8 +76,11 @@ export default function useParams(columns: any) {
     currentParams?.params
         ? (paramObject = JSON.parse(currentParams?.params))
         : undefined
-
-    function getFilterFunction() {
+    /**
+      * Function to get the filter function to use in the table.
+      * @returns {Object.<string, string>} Object containing filter functions for each column.
+      */
+    const getFilterFunction = () => {
         if (columnFilters && columnFilters.length) {
             const filterFnArray = columnFilters.map((item: any) => {
                 if (
@@ -103,37 +123,44 @@ export default function useParams(columns: any) {
     }
 
     useEffect(() => {
-        const params = {
-            ...paramObject,
-            ...(Object.entries(pagination).length ? { pagination } : null),
+        if (currentPagination?.current?.pageIndex !== pagination.pageIndex || currentPagination?.current?.pageSize !== pagination.pageSize) {
+            console.log({ pagination })
+            const params = {
+                ...paramObject,
+                ...(Object.entries(pagination).length ? { pagination } : null),
+            }
+            submit(
+                Object.keys(params).length
+                    ? {
+                        params: JSON.stringify(params),
+                    }
+                    : null
+            )
         }
-        submit(
-            Object.keys(params).length
-                ? {
-                      params: JSON.stringify(params),
-                  }
-                : null
-        )
+
     }, [pagination.pageIndex, pagination.pageSize, pagination])
 
     useEffect(() => {
-        const params = {
-            ...paramObject,
-            ...(columnFilters && columnFilters.length ? { columnFilters } : []),
-            ...(Object.entries(getFilterFunction()).length
-                ? { columnFilterFns: getFilterFunction() }
-                : {}),
-            ...(globalFilter ? { globalFilter } : {}),
-            ...(sorting && sorting.length ? { sorting } : null),
-            ...(exportType ? { exportType } : null),
+        if ((!!columnFilters && columnFilters.length) || (!!sorting && sorting.length) || !!globalFilter || !!exportType) {
+            console.log({ columnFilters, globalFilter, sorting, exportType, columnFilterFns })
+            const params = {
+                ...paramObject,
+                ...(columnFilters && columnFilters.length ? { columnFilters } : []),
+                ...(Object.entries(getFilterFunction()).length
+                    ? { columnFilterFns: getFilterFunction() }
+                    : {}),
+                ...(globalFilter ? { globalFilter } : {}),
+                ...(sorting && sorting.length ? { sorting } : null),
+                ...(exportType ? { exportType } : null),
+            }
+            submit(
+                Object.keys(params).length
+                    ? {
+                        params: JSON.stringify(params),
+                    }
+                    : null
+            )
         }
-        submit(
-            Object.keys(params).length
-                ? {
-                      params: JSON.stringify(params),
-                  }
-                : null
-        )
     }, [columnFilters, globalFilter, sorting, exportType, columnFilterFns])
 
     return {
@@ -151,3 +178,5 @@ export default function useParams(columns: any) {
         setExportType,
     }
 }
+
+export default useParams
