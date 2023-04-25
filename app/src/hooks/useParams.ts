@@ -11,7 +11,7 @@ import { useSearchParams, useSubmit } from '@remix-run/react'
  */
 
 /**
- * Custom React hook to manage table parameters from search query params.
+ * Custom hook to manage table parameters from search query params.
  * @param {Array} columns - Array of table columns configuration.
  * @returns {Object} Object containing all necessary parameters to use in the table.
  */
@@ -61,9 +61,9 @@ const useParams = (columns: any) => {
     })
     const [exportType, setExportType] = useState() as any
 
-    const currentPagination = useRef({
-        pageIndex: 0,
-        pageSize: 15,
+    const currentState = useRef({
+        pagination,
+        globalFilter
     })
 
     const [searchParams] = useSearchParams()
@@ -112,7 +112,7 @@ const useParams = (columns: any) => {
     if (paramObject?.columnFilters && columnFilters && !columnFilters.length) {
         delete paramObject.columnFilters
     }
-    if (paramObject?.globalFilter && globalFilter === '') {
+    if ((paramObject?.globalFilter && globalFilter === '') || !globalFilter ) {
         delete paramObject.globalFilter
     }
     if (paramObject?.sorting && sorting && !sorting.length) {
@@ -123,8 +123,8 @@ const useParams = (columns: any) => {
     }
 
     useEffect(() => {
-        if (currentPagination?.current?.pageIndex !== pagination.pageIndex || currentPagination?.current?.pageSize !== pagination.pageSize) {
-            console.log({ pagination })
+        if (currentState?.current?.pagination?.pageIndex !== pagination.pageIndex || currentState?.current?.pagination?.pageSize !== pagination.pageSize) {
+            currentState.current.pagination = pagination
             const params = {
                 ...paramObject,
                 ...(Object.entries(pagination).length ? { pagination } : null),
@@ -141,8 +141,8 @@ const useParams = (columns: any) => {
     }, [pagination.pageIndex, pagination.pageSize, pagination])
 
     useEffect(() => {
-        if ((!!columnFilters && columnFilters.length) || (!!sorting && sorting.length) || !!globalFilter || !!exportType) {
-            console.log({ columnFilters, globalFilter, sorting, exportType, columnFilterFns })
+        if ((!!columnFilters && columnFilters.length) || (!!sorting && sorting.length) || currentState?.current?.globalFilter !== globalFilter || !!exportType) {
+            currentState.current.globalFilter = globalFilter
             const params = {
                 ...paramObject,
                 ...(columnFilters && columnFilters.length ? { columnFilters } : []),
@@ -160,7 +160,7 @@ const useParams = (columns: any) => {
                     }
                     : null
             )
-        }
+        } 
     }, [columnFilters, globalFilter, sorting, exportType, columnFilterFns])
 
     return {

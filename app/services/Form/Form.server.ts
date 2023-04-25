@@ -483,9 +483,9 @@ export const deleteDynamicForm = async (formId: string, userId: string, clientId
  */
 export const getDynamicForms = async (request: Request, userId: string, clientId: string): Promise<Object> => {
     try {
-        const canViewDynamicForms = await canUser(userId, 'read', 'DynamicForm', {});
+        const canViewDynamicForms = await canUser(userId, 'read', 'DynamicForm', {clientId});
         if (canViewDynamicForms?.status !== 200) {
-            const canViewDynamicFormsPartial = await canUser(userId, 'read', 'DynamicForm', {}, AbilityType.PARTIAL);
+            const canViewDynamicFormsPartial = await canUser(userId, 'read', 'DynamicForm', {clientId}, AbilityType.PARTIAL);
             if (!canViewDynamicFormsPartial?.ok) {
                 return canViewDynamicFormsPartial;
             }

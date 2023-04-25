@@ -173,7 +173,7 @@ export const updateClientById = async (
   }
 
   const canUpdate = await canUser(userId, "update", "Client", {
-    clientId: clientId,
+    clientId
   })
   if (canUpdate?.status !== 200) {
     return canUpdate
@@ -293,7 +293,7 @@ export const deleteClient = async (
     }
 
     const canDelete = await canUser(userId, "delete", "Client", {
-      clientId: clientId,
+      clientId
     })
     if (canDelete?.status !== 200) {
       return canDelete

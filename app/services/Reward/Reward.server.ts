@@ -146,7 +146,7 @@ export const getRewards = async (request: Request, userId: string, clientId: str
     try {
         const canViewRewards = await canUser(userId, 'read', 'Reward', {clientId});
         if (canViewRewards?.status !== 200) {
-            const canViewRewardsPartial = await canUser(userId, 'read', 'Reward', {}, AbilityType.PARTIAL);
+            const canViewRewardsPartial = await canUser(userId, 'read', 'Reward', {clientId}, AbilityType.PARTIAL);
             if (!canViewRewardsPartial?.ok) {
                 return canViewRewardsPartial;
             }
@@ -206,7 +206,7 @@ export const updateRewardById = async (rewardId: string, data: any, clientId: st
     }
 
     const canUpdate = await canUser(userId, 'update', 'Reward', {
-        clientId: clientId
+        clientId
     })
     if (canUpdate?.status !== 200) {
         return canUpdate
